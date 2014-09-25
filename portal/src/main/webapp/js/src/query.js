@@ -75,7 +75,7 @@ function populateGenomicProfiles() {
         }
         altGroups[altTypes.indexOf(profiles[i].alteration_type)].push(profiles[i]);
     }
-    // go through and add them in sorted order
+    // go through and add them
     for (var i = 0; i < altGroups.length; i++) {
         if (altGroups[i].length === 0) {
             continue; //nothing to do
@@ -84,19 +84,37 @@ function populateGenomicProfiles() {
             var prof = altGroups[i][0];
             $("#genomic-profiles-select").append(genomicProfileCheckbox(prof.name, prof.id, prof.description));
         } else {
-
+            $("#genomic-profiles-select").append(genomicProfileCheckbox(altNames[i] + " data. Select one of the profiles below:", "PROFILE_" + altTypes[i], undefined, true));
+            for (var j = 0; j < altGroups[i].length; j++) {
+                $("#genomic-profiles-select").append(genomicProfileRadio(altGroups[i][j].name,
+                        altGroups[i][j].id, "PROFILE_" + altTypes[i], altGroups[i][j].description));
+            }
             // radio buttons needed
         }
     }
 }
 
-function genomicProfileCheckbox(name, id, helptext) {
-    var ret = '<div class="checkbox"><label><input type="checkbox"';
-    if (id !== -1) {
-        ret += ' id=' + id;
+function genomicProfileRadio(label, id, group, helptext) {
+    var ret = '<div class="radio"><label><input type="radio" name="' + group
+    ret += '" id="' + id + '" value="' + id + '">';
+    ret += label;
+    if (helptext !== undefined) {
+        ret += '  <img src="images/help.png" title="' + helptext + '">';
+    }
+    ret += '</label></div>';
+    return ret;
+}
+function genomicProfileCheckbox(name, id, helptext, disabled) {
+    var dis = (disabled === true);
+    var ret = '<div class="checkbox' + (dis ? ' disabled' : '') + '"><label><input type="checkbox"';
+    if (id !== undefined) {
+        ret += ' id="' + id + '"';
+    }
+    if (dis) {
+        ret += ' disabled';
     }
     ret += '>' + name
-    if (helptext !== -1) {
+    if (helptext !== undefined) {
         ret += '  <img src="images/help.png" title="' + helptext + '">';
     }
     ret += '</label></div>';
