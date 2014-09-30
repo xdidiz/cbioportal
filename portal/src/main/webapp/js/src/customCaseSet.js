@@ -52,7 +52,7 @@ function initCustomCaseSetUI()
  */
 function promptCustomCaseSetBuilder()
 {
-	var cancerStudyId = $("#select_cancer_type").val();
+	var cancerStudyId = $("#cancer_study_id_sel").val();
 	
 	// if the current cancer study id is equal to the previous one,
 	// no need to update the content of the dialog, just display it
