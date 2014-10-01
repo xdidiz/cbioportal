@@ -1,4 +1,4 @@
-var app = angular.module('query-page-module',[]);
+var app = angular.module('query-page-module',['ui.bootstrap']);
 app.factory('Global', ['$http', function($http) {
     var vars = {metaDataJson:-1, cancer_study_id:"all",case_set_id:"-1", case_sets:[], gene_set_id:"user-defined-list", oql_query:""};
     var _updateCaseSets = function() {

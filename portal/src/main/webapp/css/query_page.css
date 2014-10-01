@@ -1,0 +1,71 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Oct 1, 2014, 3:00:24 PM
+    Author     : Hongxin
+*/
+
+//Asked to change from http://angular-ui.github.io/bootstrap/
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+body { 
+	padding-top: 70px;
+	overflow-y: scroll;
+}
+
+.self-hide {
+	display: none;
+}
+.table thead tr{
+	background-color: lightgrey;
+}
+
+/*Overide bootstrap styles*/
+.navbar-brand {
+    font-weight: bold;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.navbar-inverse {
+  background-color: #fff;
+  border-bottom: 2px solid #2986e2; 
+}
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-brand:focus {
+  color: #777;
+  background-color: transparent;
+  cursor: default;
+}
+.navbar-inverse .navbar-nav > .active > a, 
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus{
+  color: #fff;
+  background-color: #2986e2;
+}
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+  color: #fff;
+  background-color: #2986e2;
+}
+.navbar-toggle {
+	background-color: #2986e2;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+	background-color: #080808;
+}
+.navbar-inverse .navbar-toggle:hover, 
+.navbar-inverse .navbar-toggle:focus {
+	background-color: #777;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  background-color: #2986e2;
+  border-color: #2986e2;
+}
