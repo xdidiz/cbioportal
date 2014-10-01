@@ -316,7 +316,7 @@ function submitMainQueryForm() {
             profile_ids.push($(obj).val());
         }
     });
-    return loadGeneticProfileData(profile_ids);
+    loadGeneticProfileData(profile_ids);
 }
 
 function loadGeneticProfileData(profile_ids) {
@@ -343,6 +343,7 @@ function loadGeneticProfileData(profile_ids) {
         $.get("/webservice.do?cmd=getProfileData&case_set_id="+$("#case_set_id_sel").val()+"&genetic_profile_id="+id+"&gene_list="+geneList.join(","),
                 function(data) {
                     var rows = data.split('\n');
+                    rows = $.map(rows, function(x,i) { return $.trim(x); });
                     var samples = rows[2].split(/\s/); // samples start at element index 2
                     for (var i=3; i<rows.length; i++) {
                         if (rows[i][0] === '#') {
@@ -418,7 +419,10 @@ function compileSamples(data) {
     }
     return samples;
 }
-
+function insertDefaults(query) {
+    // insert defaults into empty gene statements
+    
+}
 function displayGeneticProfileData(samples) {
     //IN: Compiled samples (output of compileSamples)
     var filteredData = oql.filter(oql.parseQuery($("#oql_query_txt").val()).return, samples);
