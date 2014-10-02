@@ -9,8 +9,11 @@
 <html ng-app="query-page-module" ng-controller="mainController">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
+        <link type="text/css" rel="stylesheet" href="css/query_page.css"/>
     </head>
     <body>
+        <jsp:include page="header.html" /> 
         <!-- STEP 1 -->
         <div>
             <h2>Select Cancer Study:</h2>
@@ -65,7 +68,8 @@
         <p>The selected cancer study is {{vars.cancer_study_id}}</p>
         <p ng-show="vars.cancer_study_id === 'all'">The selected data priority is {{vars.data_priority}}</p>
         <p>The selected case set is {{vars.case_set_id}}</p>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+        <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
+        <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/query_page.js"></script>
     </body>
 </html>
