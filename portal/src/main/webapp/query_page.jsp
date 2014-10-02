@@ -62,14 +62,23 @@
             </select>
             <textarea ng-model="vars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
         </div>
-        <button type="button">Submit</button>
-        <p ng-hide="vars.cancer_study_id === 'all'">The selected genomic profiles are {{vars.genomic_profiles}}</p>
+        <button type="button" ng-click="loadAndFilterSampleData()">Submit</button>
+        <button type="button" ng-click="updateUrl()">Update URL</button>
+        <p ng-show="vars.errorMsg.length > 0" style="color:red">{{vars.errorMsg}}</p>
+        <ul ng-repeat="samp in vars.filteredSamples">
+            {{samp.id}}:
+            <li ng-repeat="gene in samp.data">
+        </ul>
+        <!--<p ng-hide="vars.cancer_study_id === 'all'">The selected genomic profiles are {{vars.genomic_profiles}}</p>
         <br><br>
         <p>The selected cancer study is {{vars.cancer_study_id}}</p>
         <p ng-show="vars.cancer_study_id === 'all'">The selected data priority is {{vars.data_priority}}</p>
-        <p>The selected case set is {{vars.case_set_id}}</p>
+        <p>The selected case set is {{vars.case_set_id}}</p>-->
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
+        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+        <script type="text/javascript" src="js/lib/oql-parser.js"></script>
+        <script type="text/javascript" src="js/lib/oql.js"></script>
         <script type="text/javascript" src="js/src/query-page/query_page.js"></script>
     </body>
 </html>

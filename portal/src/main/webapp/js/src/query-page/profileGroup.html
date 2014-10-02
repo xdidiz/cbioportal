@@ -1,0 +1,24 @@
+<div>
+    <div ng-if="profgp.list.length > 0">
+        <div ng-if='profgp.list.length > 1'>
+            • {{profgp.description}} data. Select one below:
+            <div style="padding-left:3em">
+                <div ng-repeat="prof in profgp.list">
+                    <input type="radio" ng-model="vars.genomic_profiles[profgp.type]" ng-value="prof.id">{{prof.name}}    
+                    <img src='images/help.png' title='{{prof.description}}'>
+                </div>
+                <input type="radio" ng-model="vars.genomic_profiles[profgp.type]" ng-value="false">None
+            </div>
+        </div>
+        <div ng-if='profgp.list.length === 1'>
+            <input type="checkbox" ng-model="vars.genomic_profiles[profgp.type]" ng-true-value="{{profgp.list[0].id}}">{{profgp.list[0].name}}
+            <img src='images/help.png' title='{{profgp.list[0].description}}'>
+        </div>
+        <div ng-show="profgp.type === 'MRNA_EXPRESSION' && vars.genomic_profiles['MRNA_EXPRESSION'] !== false">
+            Enter a z-score threshold: &#177<input type="text" ng-model="vars.z_score_threshold">
+        </div>
+        <div ng-show="profgp.type === 'PROTEIN_ARRAY_PROTEIN_LEVEL' && vars.genomic_profiles['PROTEIN_ARRAY_PROTEIN_LEVEL'] !== false">
+            Enter a RPPA z-score threshold: &#177<input type="text" ng-model="vars.rppa_score_threshold">
+        </div>
+    </div>
+</div>
