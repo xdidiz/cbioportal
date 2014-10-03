@@ -6,6 +6,96 @@ app.directive('profileGroup', function () {
         templateUrl: '/js/src/query-page/profileGroup.html',
     };
 });
+app.factory('DataManager', ['$http', '$q', function ($http, $q) {
+        /* Variables (All private) */
+        var _genes = {};
+        var _genomicProfiles = {}; // [genomic profile id,gene] -> list (map? set?) of case ids which we've loaded the genomic profile of that gene for
+        var _typesOfCancer = {};
+        var _shortNames = {};
+        var _geneSets = {}; // gene set id -> gene set object
+        var _cancerStudies = {}; // study id -> study object
+        var _caseSets = {}; // case set id -> list of case ids
+        /* Initialization */
+        $http.get('/portal_meta_data.json?partial_studies=true&partial_genesets=true').success(function(json) {
+            angular.forEach(json.cancer_studies, function(value, key){
+                _cancerStudyMetaData[key]=value;
+            });
+            angular.forEach(json.gene_sets, function(value, key) {
+                _geneSets[key]=value;
+            });
+            angular.forEach(json.short_names, function(value, key) {
+                _shortNames[key]=value;
+            });
+            angular.forEach(json.type_of_cancers, function(value, key) {
+                _typesOfCancer[key]=value;
+            });
+        });
+        /* Private Functions */
+        /* Public Functions */
+        var study = function(id) {
+            var q = $q.defer();
+            if (_cancerStudies[id].partial === 'true') {
+                $http.get('/portal_meta_data.json?study_id=' + id).
+                        success(function (data, status, headers, config) {
+                            _cancerStudies[id] = data;
+                            q.resolve(_cancerStudies[id]);
+                        });
+            } else {
+                q.resolve(_cancerStudies[id]);
+            }
+            return q.promise;
+        };
+        var geneSet = function(id) {
+            var q = $q.defer();
+            if (_geneSets[id].gene_list === '') {
+                $http.get('/portal_meta_data.json?geneset_id=' + id).
+                        success(function (data, status, headers, config) {
+                            _geneSets[id].gene_list = data;
+                            q.resolve(_geneSets[id]);
+                        });
+            } else {
+                q.resolve(_geneSets[id]);
+            }
+            return q.promise;
+        };
+        var genomicProfiles = function(prof_ids, _genes, case_set_id, custom_case_set) {
+            // TODO: Custom case set
+            // standardize
+            var genes;
+            if (_genes instanceof Array) {
+                genes = _genes;
+            } else {
+                genes = [_genes];
+            }
+            // figure out which we still need to load
+            var toLoad = {}; //prof_id -> list of gene
+            angular.forEach(prof_ids, function(id) {
+                toLoad[id] = [];
+            });
+            angular.forEach(prof_ids, function(id) {
+                angular.forEach(genes, function(gene) {
+                    if (!(id in _genomicProfiles[gene])) {
+                        toLoad[id].push(gene);
+                    }
+                });
+            });
+            // make promise and load
+            var q = $q.defer();
+            // count how many we need to load
+            var numberToLoad = 0;
+            angular.forEach(toLoad, function(value, key) {
+                numberToLoad += value.length;
+            });
+            // load away
+            angular.forEach(toLoad, function(value, key) {
+                if (value.length > 0) {
+                    var url = '/webservice.do?cmd=getProfileData&case_set_id=' + case_set_id + '&genetic_profile_id=' + profile_ids[i] + "&gene_list=" + gene_list.join(",");
+                }
+            });
+        };
+
+    }]);
+
 app.factory('Global', ['$http', '$q', function ($http, $q) {
         var vars = {metaDataJson: -1, cancer_study_id: "all", case_set_id: "-1", genomic_profiles: {}, gene_set_id: "user-defined-list", oql_query: "",
             current_tab: "analysis", filteredSamples: {samples: {}, query: "", genes: [], categ: ["AMP", "GAIN", "HETLOSS", "HOMDEL", "MUT", "EXP", "PROT"]}, errorMsg: "", custom_case_list: []};
