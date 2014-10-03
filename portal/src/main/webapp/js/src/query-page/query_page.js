@@ -8,7 +8,7 @@ app.directive('profileGroup', function () {
 });
 app.factory('Global', ['$http', '$q', function ($http, $q) {
         var vars = {metaDataJson: -1, cancer_study_id: "all", case_set_id: "-1", genomic_profiles: {}, gene_set_id: "user-defined-list", oql_query: "",
-            current_tab: "analysis", filteredSamples: [], errorMsg: "", custom_case_list:[]};
+            current_tab: "analysis", filteredSamples: {samples: {}, query: "", genes: [], categ: ["AMP", "GAIN", "HETLOSS", "HOMDEL", "MUT", "EXP", "PROT"]}, errorMsg: "", custom_case_list: []};
 
         return {
             vars: function () {
@@ -62,7 +62,7 @@ app.filter('to_trusted', ['$sce', function ($sce) {
         };
     }]);
 
-app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location', function ($scope, Global, $http, $q, $location) {
+app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location', '$interval', function ($scope, Global, $http, $q, $location, $interval) {
         $scope.vars = Global.vars();
         $scope.dataPriorities = [{id: "pri_mutcna", label: "Mutation and CNA"}, {id: "pri_mut", label: "Only Mutation"}, {id: "pri_cna", label: "Only CNA"}];
         $scope.profileGroups = [];
@@ -74,20 +74,39 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
             //load metadata
             Global.metaDataJson().then(function () {
                 // do init stuff here
+                $scope.syncFromUrl();
+                $scope.$watch('vars.gene_set_id', function () {
+                    Global.geneList($scope.vars.gene_set_id).then(function (json) {
+                        if ($scope.vars.gene_set_id !== "user-defined-list") {
+                            $scope.vars.oql_query = $scope.vars.metaDataJson.gene_sets[$scope.vars.gene_set_id].gene_list;
+                        }
+                    });
+                });
+                $scope.$watch('vars.cancer_study_id', $scope.updateStudy);
+                $interval($scope.syncToUrl, 1000);
             });
         });
-        $scope.updateUrl = function() {
-
-            var newSlug = '#'+'cancer_study_id='+$scope.vars.cancer_study_id+
-                        '&case_set_id='+$scope.vars.case_set_id+
-                        '&custom_case_list='+$scope.vars.custom_case_list.join(",")+
-                        '&gene_set_id='+$scope.vars.gene_set_id+
-                        '&oql_query='+$scope.vars.oql_query+
-                        '&genomic_profiles='+JSON.stringify($scope.vars.genomic_profiles)+
-                        '&current_tab='+$scope.vars.current_tab;
-            newSlug = encodeURIComponent(newSlug);
-            console.log("updateUrl not implemented!");
-            //pseudocode: newUrl = oldUrl.split('#')[0] + newSlug
+        $scope.syncToUrl = function () {
+            var toEncode = {cancer_study_id: $scope.vars.cancer_study_id, case_set_id: $scope.vars.case_set_id, custom_case_list: $scope.vars.custom_case_list, gene_set_id: $scope.vars.gene_set_id,
+                oql_query: $scope.vars.oql_query, genomic_profiles: $scope.vars.genomic_profiles, current_tab: $scope.vars.current_tab};
+            $location.path(encodeURIComponent(JSON.stringify(toEncode)));
+        }
+        $scope.syncFromUrl = function () {
+            // get data from url
+            if ($location.path() !== "") {
+                try {
+                    var pathWithoutSlash = $location.path().substring(1);
+                    var decoded = JSON.parse(decodeURIComponent(pathWithoutSlash));
+                    $scope.vars.cancer_study_id = decoded.cancer_study_id;
+                    $scope.vars.case_set_id = decoded.case_set_id;
+                    $scope.vars.custom_case_list = decoded.custom_case_list;
+                    $scope.vars.gene_set_id = decoded.gene_set_id;
+                    $scope.vars.oql_query = decoded.oql_query;
+                    $scope.vars.genomic_profiles = decoded.genomic_profiles;
+                    $scope.vars.current_tab = decoded.current_tab;
+                } catch (err) {
+                }
+            }
         }
         $scope.updateStudy = function () {
             // load if necessary
@@ -138,17 +157,6 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
                 $scope.profileGroups = profsByAltType;
             });
         };
-        $scope.onChange = function () {
-            $scope.updateStudy();
-        };
-        $scope.updateOqlQuery = function () {
-            //load if necessary
-            Global.metaDataJson().then(function () {
-                Global.geneList($scope.vars.gene_set_id).then(function (json) {
-                    $scope.vars.oql_query = $scope.vars.metaDataJson.gene_sets[$scope.vars.gene_set_id].gene_list;
-                });
-            });
-        };
         $scope.loadAndFilterSampleData = function () {
             var gene_list = oql.getGeneList($scope.vars.oql_query);
             var profile_ids = Object.keys($scope.vars.genomic_profiles).
@@ -184,17 +192,20 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
             var done = 0;
 
             for (var i = 0; i < profile_ids.length; i++) {
-                var toLoad = $scope.profileHash[profile_ids[i]];
-                var type = typeCode[toLoad.alteration_type];
-                var url = '/webservice.do?cmd=getProfileData&case_set_id=' + $scope.vars.case_set_id + '&genetic_profile_id=' + profile_ids[i] + "&gene_list=" + gene_list.join(",");
+                (function () {
+                    var toLoad = $scope.profileHash[profile_ids[i]];
+                    var type = typeCode[toLoad.alteration_type];
+                    var url = '/webservice.do?cmd=getProfileData&case_set_id=' + $scope.vars.case_set_id + '&genetic_profile_id=' + profile_ids[i] + "&gene_list=" + gene_list.join(",");
 
-                $http({method: 'GET', url: url}).success(function (data) {
-                    allData.push({data: data, type: type});
-                    done++;
-                    if (done === profile_ids.length) {
-                        q.resolve(allData);
-                    }
-                });
+                    $http({method: 'GET', url: url}).success(function (data) {
+                        allData.push({data: data, type: type});
+                        done++;
+                        if (done === profile_ids.length) {
+                            q.resolve(allData);
+                        }
+                    });
+
+                })();
             }
             return q.promise;
         }
@@ -252,7 +263,9 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
             for (var i = 0; i < sampleIds.length; i++) {
                 if (!(sampleIds[i] in samples)) {
                     samples[sampleIds[i]] = {};
-                    for (var j = 0; j < gene_list.length; j++) {
+                }
+                for (var j = 0; j < gene_list.length; j++) {
+                    if (!(gene_list[j] in samples[sampleIds[i]])) {
                         samples[sampleIds[i]][gene_list[j]] = {};
                         samples[sampleIds[i]][gene_list[j]] = {};
                         samples[sampleIds[i]][gene_list[j]]["AMP"] = 0;
@@ -267,22 +280,33 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
             }
             for (var i = 0; i < dataPts.length; i++) {
                 var datum = dataPts[i];
-                if (datum.genotype.type === "CNA") {
-                    samples[datum.sample][datum.gene][datum.genotype.data] = 1;
-                } else if (datum.genotype.type === "EXP" || datum.genotype.type === "PROT") {
-                    samples[datum.sample][datum.gene][datum.genotype.type] = parseFloat(datum.genotype.data);
-                } else if (datum.genotype.type === "MUT") {
-                    samples[datum.sample][datum.gene]["MUT"].push({"name": datum.genotype.data, "class": datum.genotype.class});
+                try {
+                    if (datum.genotype.type === "CNA") {
+                        samples[datum.sample][datum.gene][datum.genotype.data] = 1;
+                    } else if (datum.genotype.type === "EXP" || datum.genotype.type === "PROT") {
+                        samples[datum.sample][datum.gene][datum.genotype.type] = parseFloat(datum.genotype.data);
+                    } else if (datum.genotype.type === "MUT") {
+                        samples[datum.sample][datum.gene]["MUT"].push({"name": datum.genotype.data, "class": datum.genotype.class});
+                    }
+                } catch (err) {
+                    console.log(samples[datum.sample])
+                    console.log(datum);
                 }
             }
         }
+        $scope.insertDefaults = function (query) {
+            //TODO: implement
+            return query;
+        }
         $scope.filterSamples = function () {
-            var parsedQuery = oql.parseQuery($scope.vars.oql_query);
+            var parsedQuery = oql.parseQuery($scope.insertDefaults($scope.vars.oql_query));
             if (parsedQuery.result === 0) {
                 $scope.vars.errorMsg = "";
-                $scope.vars.filteredSamples = oql.filter(parsedQuery.return, $scope.samples).map(function (x) {
+                $scope.vars.filteredSamples.samples = oql.filter(parsedQuery.return, $scope.samples).map(function (x) {
                     return {id: x, data: $scope.samples[x]};
                 });
+                $scope.vars.filteredSamples.query = $scope.vars.oql_query;
+                $scope.vars.filteredSamples.genes = oql.getGeneList($scope.vars.filteredSamples.query);
                 console.log($scope.vars.filteredSamples);
             } else {
                 $scope.vars.errorMsg = "Errors on lines " + parsedQuery.return.map(function (x) {
@@ -290,4 +314,10 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
                 }).join(", ");
             }
         }
+
+        // for the view
+        $scope.range = function (n) {
+            return new Array(n);
+        }
+        $scope.Math = window.Math;
     }]);

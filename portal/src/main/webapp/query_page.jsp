@@ -19,7 +19,6 @@
             <h2>Select Cancer Study:</h2>
             <select ng-model="vars.cancer_study_id" 
                     ng-options="csid as csobj.name group by vars.metaDataJson.type_of_cancers[csobj.type_of_cancer] for (csid, csobj) in vars.metaDataJson.cancer_studies"
-                    ng-change="onChange()"
                     >
             </select>
             <p ng-hide="vars.cancer_study_id === 'all'" ng-bind-html="vars.metaDataJson.cancer_studies[vars.cancer_study_id].description | to_trusted"></p>
@@ -57,18 +56,33 @@
             <a href="http://www.cbioportal.org/public-portal/onco_query_lang_desc.jsp">Advanced: Onco Query Language (OQL)</a>
             <select ng-model="vars.gene_set_id"
                     ng-options="id as gs.name for (id,gs) in vars.metaDataJson.gene_sets"
-                    ng-change="updateOqlQuery()"
                     >
             </select>
             <textarea ng-model="vars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
         </div>
         <button type="button" ng-click="loadAndFilterSampleData()">Submit</button>
-        <button type="button" ng-click="updateUrl()">Update URL</button>
+        <button type="button" ng-click="syncToUrl()">Update URL</button>
+        <button type="button" ng-click="syncFromUrl()">Get From URL</button>
         <p ng-show="vars.errorMsg.length > 0" style="color:red">{{vars.errorMsg}}</p>
-        <ul ng-repeat="samp in vars.filteredSamples">
-            {{samp.id}}:
-            <li ng-repeat="gene in samp.data">
-        </ul>
+        <table border="1" width="100%">
+            <tbody>
+                <tr>
+                    <td rowspan="2">Sample\ Gene</td>
+                    <td ng-repeat="gene in vars.filteredSamples.genes" colspan="7">{{gene}}</td>
+                </tr>
+                <tr>
+                    <td ng-repeat="i in range(7 * vars.filteredSamples.genes.length) track by $index">
+                        {{vars.filteredSamples.categ[$index % 7]}}
+                    </td>
+                </tr>
+                <tr ng-repeat="samp in vars.filteredSamples.samples">
+                    <td>{{samp.id}}</td>
+                    <td ng-repeat="i in range(7 * vars.filteredSamples.genes.length) track by $index">
+                        {{samp.data[vars.filteredSamples.genes[Math.floor($index / 7)]][vars.filteredSamples.categ[$index % 7]]}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <!--<p ng-hide="vars.cancer_study_id === 'all'">The selected genomic profiles are {{vars.genomic_profiles}}</p>
         <br><br>
         <p>The selected cancer study is {{vars.cancer_study_id}}</p>
