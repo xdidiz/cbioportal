@@ -20,7 +20,7 @@
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Cancer Study:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select chosen ng-model="vars.cancer_study_id" 
+                    <select ng-model="vars.cancer_study_id" 
                     ng-options="csid as csobj.name group by vars.metaDataJson.type_of_cancers[csobj.type_of_cancer] for (csid, csobj) in vars.metaDataJson.cancer_studies"
                     >
                     </select>
@@ -117,8 +117,8 @@
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
-        <script type="text/javascript" src="js/lib/chosen.jquery.js"></script>
-        <script type="text/javascript" src="js/lib/chosen-angular.js"></script>
+        <!--<script type="text/javascript" src="js/lib/chosen.jquery.js"></script>-->
+        <!--<script type="text/javascript" src="js/lib/chosen-angular.js"></script>-->
         
         <script type="text/javascript" src="js/lib/oql-parser.js"></script>
         <script type="text/javascript" src="js/lib/oql.js"></script>

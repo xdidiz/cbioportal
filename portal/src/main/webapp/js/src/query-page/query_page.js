@@ -1,4 +1,4 @@
-var app = angular.module('query-page-module', ['ui.bootstrap','localytics.directives']);
+var app = angular.module('query-page-module', ['ui.bootstrap']);
 app.directive('profileGroup', function () {
     return {
         restrict: 'A',
