@@ -114,10 +114,12 @@
         <p>The selected cancer study is {{vars.cancer_study_id}}</p>
         <p ng-show="vars.cancer_study_id === 'all'">The selected data priority is {{vars.data_priority}}</p>
         <p>The selected case set is {{vars.case_set_id}}</p>-->
+        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
-        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+        <script type="text/javascript" src="js/lib/chosen.jquery.js"></script>
         <script type="text/javascript" src="js/lib/chosen-angular.js"></script>
+        
         <script type="text/javascript" src="js/lib/oql-parser.js"></script>
         <script type="text/javascript" src="js/lib/oql.js"></script>
         <script type="text/javascript" src="js/src/query-page/query_page.js"></script>
