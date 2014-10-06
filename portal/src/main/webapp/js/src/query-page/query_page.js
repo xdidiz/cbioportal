@@ -9,7 +9,7 @@ app.directive('profileGroup', function () {
 app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /* Variables (All private) */
         var _genes = {};
-        var _genomicProfiles = {}; // [genomic profile id,gene] -> list (map? set?) of case ids which we've loaded the genomic profile of that gene for
+        var _genomicProfiles = {}; // [genomic profile id,gene] -> map(case id, genomic profile data)
         var _typesOfCancer = {};
         var _shortNames = {};
         var _geneSets = {}; // gene set id -> gene set object
@@ -58,7 +58,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             }
             return q.promise;
         };
-        var genomicProfiles = function(prof_ids, _genes, case_set_id, custom_case_set) {
+        var genomicProfiles = function(prof_ids, _genes, case_ids) {
             // TODO: Custom case set
             // standardize
             var genes;
