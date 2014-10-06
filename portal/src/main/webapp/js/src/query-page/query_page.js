@@ -404,7 +404,9 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
                 }).join(", ");
             }
         }
-
+        $scope.isEmpty = function (o) {
+            return Object.keys(o).length === 0;
+        };
         // for the view
         $scope.range = function (n) {
             return new Array(n);
