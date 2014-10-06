@@ -7,14 +7,19 @@ app.directive('profileGroup', function () {
     };
 });
 app.factory('DataManager', ['$http', '$q', function ($http, $q) {
+        /* "Public-facing" private variables */
         /* Variables (All private) */
-        var _genes = {};
         var _genomicProfiles = {}; // [genomic profile id,gene] -> map(case id, genomic profile data)
+        
         var _typesOfCancer = {};
         var _shortNames = {};
         var _geneSets = {}; // gene set id -> gene set object
         var _cancerStudies = {}; // study id -> study object
         var _caseSets = {}; // case set id -> list of case ids
+        
+        /* "Private-facing" private variables */
+        var _loadedGenomicProfiles = {} // [genomic profile id, gene] -> ([cancer study id, case id] -> genomic profile data)
+        
         /* Initialization */
         $http.get('/portal_meta_data.json?partial_studies=true&partial_genesets=true').success(function(json) {
             angular.forEach(json.cancer_studies, function(value, key){
@@ -30,9 +35,10 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                 _typesOfCancer[key]=value;
             });
         });
+        
         /* Private Functions */
         /* Public Functions */
-        var study = function(id) {
+        var cancerStudy = function(id) {
             var q = $q.defer();
             if (_cancerStudies[id].partial === 'true') {
                 $http.get('/portal_meta_data.json?study_id=' + id).
@@ -58,6 +64,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             }
             return q.promise;
         };
+            
         var genomicProfiles = function(prof_ids, _genes, case_ids) {
             // TODO: Custom case set
             // standardize
@@ -89,7 +96,9 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             // load away
             angular.forEach(toLoad, function(value, key) {
                 if (value.length > 0) {
-                    var url = '/webservice.do?cmd=getProfileData&case_set_id=' + case_set_id + '&genetic_profile_id=' + profile_ids[i] + "&gene_list=" + gene_list.join(",");
+                    var url = '/webservice.do?cmd=getProfileData&case_list=' + case_ids.join(",") +
+                            '&genetic_profile_id=' + profile_ids[i] + 
+                            "&gene_list=" + gene_list.join(",");
                 }
             });
         };
