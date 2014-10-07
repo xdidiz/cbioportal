@@ -106,3 +106,12 @@ select {
     background-color: #3071a9;
     border-color: #285e8e;
 }
+@media (max-width: 1200px) {
+  .navbar-nav > li > a {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  #mskcc_logo {
+      display: none
+  }
+}

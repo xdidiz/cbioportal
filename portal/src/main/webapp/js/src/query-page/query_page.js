@@ -413,3 +413,31 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
         }
         $scope.Math = window.Math;
     }]);
+
+app.directive('resize', function($window) {
+    return function (scope, element, attrs) {
+        var w = angular.element($window);
+        scope.getWindowDimensions = function () {
+            return {
+                'match': $window.matchMedia('(max-width: 1200px)').matches
+            };
+        };
+        scope.$watch(scope.getWindowDimensions, function (value) {
+            if(attrs.id === "cbioportal_logo") {
+                var link = "images/cbioportal_logo.png";
+                if(value.match) {
+                    link = "images/cbioportal_icon.png";
+                }else {
+                    link = "images/cbioportal_logo.png";
+                }
+                scope.link = function() {
+                    return link;
+                };
+            }
+        }, true);
+        
+        w.bind('resize', function () {
+            scope.$apply();
+        });
+    };
+});
