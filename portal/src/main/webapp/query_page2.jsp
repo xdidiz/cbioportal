@@ -55,7 +55,7 @@
             <div class="row"  ng-hide="vars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Patient/Case Set:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select ng-model="vars.case_set_id"
+                    <select chosen ng-model="vars.case_set_id"
                             ng-options="cs.id as cs.label for cs in caseSets"
                             >
                     </select>
@@ -67,9 +67,9 @@
             </div>
              STEP 4 
             <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span></div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span><br/><a target="_blank" href="http://www.cbioportal.org/public-portal/onco_query_lang_desc.jsp">Advanced: Onco Query Language (OQL)</a></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select ng-model="vars.gene_set_id"
+                    <select chosen ng-model="vars.gene_set_id"
                     ng-options="id as gs.name for (id,gs) in vars.metaDataJson.gene_sets"
                     >
                     </select>
@@ -88,7 +88,7 @@
                 <p ng-show="vars.errorMsg.length > 0" style="color:red">{{vars.errorMsg}}</p>
             </div>
             <div class="row">
-                <table class="table table-responsive table-striped">
+                <table ng-show="!isEmpty(vars.filteredSamples.samples)"  class="table table-responsive table-striped">
                     <tbody>
                         <tr>
                             <td rowspan="2">Sample\ Gene</td>
@@ -117,8 +117,8 @@
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
-        <!--<script type="text/javascript" src="js/lib/chosen.jquery.js"></script>-->
-        <!--<script type="text/javascript" src="js/lib/chosen-angular.js"></script>-->
+        <script type="text/javascript" src="js/lib/chosen.jquery.angular.js"></script>
+        <script type="text/javascript" src="js/lib/chosen-angular.js"></script>
         
         <script type="text/javascript" src="js/lib/oql-parser.js"></script>
         <script type="text/javascript" src="js/lib/oql.js"></script>

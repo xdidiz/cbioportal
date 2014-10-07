@@ -1,4 +1,4 @@
-var app = angular.module('query-page-module', ['ui.bootstrap']);
+var app = angular.module('query-page-module', ['ui.bootstrap','localytics.directives']);
 app.directive('profileGroup', function () {
     return {
         restrict: 'A',
@@ -633,10 +633,40 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
                 }).join(", ");
             }
         }
-
+        $scope.isEmpty = function (o) {
+            return Object.keys(o).length === 0;
+        };
         // for the view
         $scope.range = function (n) {
             return new Array(n);
         }
         $scope.Math = window.Math;
     }]);
+
+app.directive('resize', function($window) {
+    return function (scope, element, attrs) {
+        var w = angular.element($window);
+        scope.getWindowDimensions = function () {
+            return {
+                'match': $window.matchMedia('(max-width: 1200px)').matches
+            };
+        };
+        scope.$watch(scope.getWindowDimensions, function (value) {
+            if(attrs.id === "cbioportal_logo") {
+                var link = "images/cbioportal_logo.png";
+                if(value.match) {
+                    link = "images/cbioportal_icon.png";
+                }else {
+                    link = "images/cbioportal_logo.png";
+                }
+                scope.link = function() {
+                    return link;
+                };
+            }
+        }, true);
+        
+        w.bind('resize', function () {
+            scope.$apply();
+        });
+    };
+});
