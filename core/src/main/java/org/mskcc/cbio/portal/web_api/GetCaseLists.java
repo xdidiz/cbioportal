@@ -21,6 +21,7 @@ import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.CaseList;
 
 import java.util.ArrayList;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Web API for Getting Case Lists.
@@ -49,19 +50,12 @@ public class GetCaseLists {
         }
     }
 
-    public static String getCaseListAsTable(String caseListId) throws DaoException {
+    public static String getCaseList(String caseListId) throws DaoException {
         StringBuilder buf = new StringBuilder();
         DaoCaseList daoCaseList = new DaoCaseList();
         CaseList caseList = daoCaseList.getCaseListByStableId(caseListId);
-        buf.append("case_list_id\tcase_list_name\tcase_list_description\t"
-                + "cancer_study_id\t" + "case_ids\n");
-        buf.append(caseList.getStableId()).append("\t");
-        buf.append(caseList.getName()).append("\t");
-        buf.append(caseList.getDescription()).append("\t");
-        buf.append(caseList.getCancerStudyId()).append("\t");
-        for (String aCase : caseList.getCaseList()) {
-            buf.append(aCase).append(" ");
-        }
+        buf.append(caseListId + "\t");
+        buf.append(caseList.getCaseListAsString());
         buf.append("\n");
         return buf.toString();
     }

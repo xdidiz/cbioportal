@@ -347,7 +347,7 @@ public class WebService extends HttpServlet {
             throws DaoException {
 
         String caseListId = httpServletRequest.getParameter(WebService.CASE_SET_ID);
-        String out = GetCaseLists.getCaseListAsTable(caseListId);
+        String out = GetCaseLists.getCaseList(caseListId);
         writer.print(out);
     }
 

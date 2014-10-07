@@ -6,7 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html ng-app="query-page-module" ng-controller="mainController">
+<html ng-app="query-page-module" ng-controller="mainController2">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link type="text/css" rel="stylesheet" href="css/bootstrap-chosen.css"/>
@@ -20,38 +20,38 @@
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Cancer Study:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select ng-model="vars.cancer_study_id" 
-                    ng-options="csid as csobj.name group by vars.metaDataJson.type_of_cancers[csobj.type_of_cancer] for (csid, csobj) in vars.metaDataJson.cancer_studies"
+                    <select ng-model="formVars.cancer_study_id"
+                            ng-options="csId as csObj.name group by appVars.types_of_cancer[csObj.type_of_cancer] for (csId, csObj) in appVars.cancer_study_stubs"
                     >
                     </select>
                 </div>
             </div>
-            <div class="row hidden">
+            <div class="row hidden" ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <p class="leftFloat" ng-hide="vars.cancer_study_id === 'all'" ng-bind-html="vars.metaDataJson.cancer_studies[vars.cancer_study_id].description | to_trusted_html"></p>
+                    <p class="leftFloat" ng-bind-html="appVars.cancer_studies[formVars.cancer_study_id].description | to_trusted_html"></p>
                     <button class="btn btn-sm leftFloat">Study Summary</button>
                 </div>
             </div>
             <!-- STEP 2 (CROSS-STUDY) -->
-            <div class="row" ng-show="vars.cancer_study_id === 'all'">
+            <div class="row" ng-show="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Data Type Priority:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <label ng-repeat="datap in dataPriorities">
-                        <input type="radio" name="data_priority" ng-model="vars.data_priority" value="{{datap.id}}">{{datap.label}}
+                    <label ng-repeat="datap in appVars.data_priorities">
+                        <input type="radio" name="data_priority" ng-model="formVars.data_priority" value="{{datap.id}}">{{datap.label}}
                     </label>
                 </div>
             </div>
             <!-- STEP 2 (SINGLE STUDY) -->
-            <div class="row"  ng-hide="vars.cancer_study_id === 'all'">
+            <div class="row" ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Genomic Profiles:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <div  ng-repeat="profgp in profileGroups">
+                    <div  ng-repeat="profgp in appVars.ordered_profile_groups track by $index">
                         <div profile-group>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- STEP 3 -->
+<!--             STEP 3 
             <div class="row"  ng-hide="vars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Patient/Case Set:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -65,7 +65,7 @@
                 </div>
 
             </div>
-            <!-- STEP 4 -->
+             STEP 4 
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -107,7 +107,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </div>-->
         </div>
         <!--<p ng-hide="vars.cancer_study_id === 'all'">The selected genomic profiles are {{vars.genomic_profiles}}</p>
         <br><br>
