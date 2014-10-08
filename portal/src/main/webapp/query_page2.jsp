@@ -21,14 +21,14 @@
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Cancer Study:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
                     <select ng-model="formVars.cancer_study_id"
-                            ng-options="csId as csObj.name group by appVars.types_of_cancer[csObj.type_of_cancer] for (csId, csObj) in appVars.cancer_study_stubs"
+                            ng-options="csId as csObj.name group by appVars.vars.types_of_cancer[csObj.type_of_cancer] for (csId, csObj) in appVars.vars.cancer_study_stubs"
                     >
                     </select>
                 </div>
             </div>
             <div class="row hidden" ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <p class="leftFloat" ng-bind-html="appVars.cancer_studies[formVars.cancer_study_id].description | to_trusted_html"></p>
+                    <p class="leftFloat" ng-bind-html="appVars.vars.cancer_studies[formVars.cancer_study_id].description | to_trusted_html"></p>
                     <button class="btn btn-sm leftFloat">Study Summary</button>
                 </div>
             </div>
@@ -36,7 +36,7 @@
             <div class="row" ng-show="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Data Type Priority:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <label ng-repeat="datap in appVars.data_priorities">
+                    <label ng-repeat="datap in appVars.vars.data_priorities">
                         <input type="radio" name="data_priority" ng-model="formVars.data_priority" value="{{datap.id}}">{{datap.label}}
                     </label>
                 </div>
@@ -47,27 +47,25 @@
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
                     <!-- we have to do (index, profgp) instead of just track by index because otherwise angular doesnt register the change -->
                     <!-- , even though we don't actually use 'index' -->
-                    <div  ng-repeat="(index, profgp) in appVars.ordered_profile_groups">
+                    <div ng-repeat="(index, profgp) in appVars.vars.ordered_profile_groups">
                         <div profile-group>
                         </div>
                     </div>
                 </div>
             </div>
-<!--             STEP 3 
-            <div class="row"  ng-hide="vars.cancer_study_id === 'all'">
+            <div class="row"  ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Patient/Case Set:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select chosen ng-model="vars.case_set_id"
-                            ng-options="cs.id as cs.label for cs in caseSets"
+                    <select ng-model="formVars.case_set_id"
+                            ng-options="cs.id as cs.name for cs in appVars.vars.case_sets"
                             >
                     </select>
-                    <div ng-show="vars.case_set_id === '-1'">
-                        <textarea ng-model="vars.custom_case_list" rows="6" cols="80" placeholder="Enter case IDs"></textarea>
+                    <div ng-show="formVars.case_set_id === '-1'">
+                        <textarea ng-model="formVars.custom_case_list" rows="6" cols="80" placeholder="Enter case IDs"></textarea>
                     </div>
                 </div>
-
             </div>
-             STEP 4 
+<!--            STEP 4 
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span><br/><a target="_blank" href="http://www.cbioportal.org/public-portal/onco_query_lang_desc.jsp">Advanced: Onco Query Language (OQL)</a></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">

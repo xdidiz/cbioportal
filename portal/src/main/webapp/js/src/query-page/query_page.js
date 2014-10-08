@@ -6,6 +6,34 @@ app.directive('profileGroup', function () {
         templateUrl: '/js/src/query-page/profileGroup.html',
     };
 });
+app.directive('resize', function ($window) {
+    return function (scope, element, attrs) {
+        var w = angular.element($window);
+        scope.getWindowDimensions = function () {
+            return {
+                'match': $window.matchMedia('(max-width: 1200px)').matches
+            };
+        };
+        scope.$watch(scope.getWindowDimensions, function (value) {
+            if (attrs.id === "cbioportal_logo") {
+                var link = "images/cbioportal_logo.png";
+                if (value.match) {
+                    link = "images/cbioportal_icon.png";
+                } else {
+                    link = "images/cbioportal_logo.png";
+                }
+                scope.link = function () {
+                    return link;
+                };
+            }
+        }, true);
+
+        w.bind('resize', function () {
+            scope.$apply();
+        });
+    };
+});
+
 app.filter('to_trusted_html', ['$sce', function ($sce) {
         return function (text) {
             return $sce.trustAsHtml(text);
@@ -230,14 +258,29 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
         var alt_descriptions = ["Mutation", "Mutation", "Copy Number", "Protein Level", "mRNA Expression",
             "DNA Methylation", "DNA Methylation", "Protein/phosphoprotein level (by RPPA)"];
 
-        /* VARIABLES */
+        /* VARIABLES */      
         var cancer_studies = {};
         var cancer_study_stubs = {};
         var data_priorities = [{id: 'pri_mutcna', label: 'Mutation and CNA'}, {id: 'pri_mut', label: 'Only Mutation'}, {id: 'pri_cna', label: 'Only CNA'}];
         var types_of_cancer = [];
         var profile_groups = {};
-        var ordered_profile_groups = new Array(alt_types.length);
+        var ordered_profile_groups = [];
         var current_tab = 'analysis'; // 'analysis' or 'download'
+        var case_sets = [];
+        
+        var vars = {
+                alt_types: alt_types,
+                data_priorities: data_priorities,
+                profile_groups: profile_groups,
+                ordered_profile_groups: ordered_profile_groups,
+                gene_set_id: '',
+                error_msg: '',
+                filtered_samples: {samples: {}, genes: [], query: '', categ: ["AMP", "GAIN", "HETLOSS", "HOMDEL", "MUT", "EXP", "PROT"]},
+                types_of_cancer: types_of_cancer,
+                cancer_study_stubs: cancer_study_stubs,
+                cancer_studies: cancer_studies,
+                case_sets: case_sets
+        }
 
         /* FUNCTIONS */
         var updateStudyInfo = function (study_id) {
@@ -250,9 +293,10 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             var q = $q.defer();
             DataManager.cancerStudy(study_id).then(function (study) {
                 // Collect by type
+                ordered_profile_groups.splice(0,alt_types.length);
                 for (var i = 0; i < alt_types.length; i++) {
                     profile_groups[alt_types[i]] = {alt_type: alt_types[i], description: alt_descriptions[i], list: []};
-                    ordered_profile_groups[i] = profile_groups[alt_types[i]]; // copy reference
+                    ordered_profile_groups.push(profile_groups[alt_types[i]]); // copy reference
                 }
                 for (var i = 0; i < study.genomic_profiles.length; i++) {
                     if (study.genomic_profiles[i].show_in_analysis_tab === true || current_tab === 'download') {
@@ -263,21 +307,20 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             });
             return q.promise;
         };
-        
+
+        var updateCaseLists = function (study_id) {
+            DataManager.cancerStudy(study_id).then(function (study) {
+                vars.case_sets = study.case_sets.slice();
+                vars.case_sets.push({id:'-1', name:'User-defined case set'});
+            });
+        }
+
         return {
             updateStudyInfo: updateStudyInfo,
             updateProfileGroups: updateProfileGroups,
+            updateCaseLists: updateCaseLists,
             
-            alt_types: alt_types,
-            data_priorities: data_priorities,
-            profile_groups: profile_groups,
-            ordered_profile_groups: ordered_profile_groups,
-            gene_set_id: '',
-            error_msg: '',
-            filtered_samples: {samples: {}, genes: [], query: '', categ: ["AMP", "GAIN", "HETLOSS", "HOMDEL", "MUT", "EXP", "PROT"]},
-            types_of_cancer: types_of_cancer,
-            cancer_study_stubs: cancer_study_stubs,
-            cancer_studies: cancer_studies
+            vars: vars,
         };
     }]);
 
@@ -338,37 +381,39 @@ app.controller('mainController2', ['$scope', 'DataManager', 'FormVars', 'AppVars
             // wait for datamanager to initialize before doing anything
             DataManager.initPromise.then(function () {
                 DataManager.typesOfCancer().then(function (toc) {
-                    $scope.appVars.types_of_cancer = toc;
+                    $scope.appVars.vars.types_of_cancer = toc;
                 });
                 DataManager.cancerStudyStubs().then(function (ccs) {
-                    $scope.appVars.cancer_study_stubs = ccs;
+                    $scope.appVars.vars.cancer_study_stubs = ccs;
+                });
+                $scope.$watch('formVars.cancer_study_id', function () {
+                    var av = $scope.appVars.vars;
+                    $scope.appVars.updateStudyInfo($scope.formVars.cancer_study_id);
+                    $scope.appVars.updateProfileGroups($scope.formVars.cancer_study_id).then(function () {
+                        // clear selections
+
+                        for (var i = 0; i < av.alt_types.length; i++) {
+                            $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
+                        }
+                        // make default selections
+                        if (av.profile_groups["MUTATION"].list.length > 0) {
+                            $scope.formVars.genomic_profiles["MUTATION"] =
+                                    av.profile_groups["MUTATION"].list[0].id;
+                        }
+                        if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
+                            $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] =
+                                    av.profile_groups["MUTATION_EXTENDED"].list[0].id;
+                        }
+                        if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
+                            $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
+                                    av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
+                        }
+                    });
+                    $scope.appVars.updateCaseLists($scope.formVars.cancer_study_id);
                 });
             });
         });
-        $scope.$watch('formVars.cancer_study_id', function() {
-            var av = $scope.appVars;
-            av.updateStudyInfo($scope.formVars.cancer_study_id);
-            av.updateProfileGroups($scope.formVars.cancer_study_id).then(function () {
-                // clear selections
-            
-                for (var i = 0; i < av.alt_types.length; i++) {
-                    $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
-                }
-                // make default selections
-                if (av.profile_groups["MUTATION"].list.length > 0) {
-                    $scope.formVars.genomic_profiles["MUTATION"] =
-                            av.profile_groups["MUTATION"].list[0].id;
-                }
-                if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
-                    $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] =
-                            av.profile_groups["MUTATION_EXTENDED"].list[0].id;
-                }
-                if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
-                    $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
-                            av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
-                }
-            });
-        });
+
     }]);
 
 
@@ -639,30 +684,3 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
         $scope.Math = window.Math;
     }]);
 
-app.directive('resize', function ($window) {
-    return function (scope, element, attrs) {
-        var w = angular.element($window);
-        scope.getWindowDimensions = function () {
-            return {
-                'match': $window.matchMedia('(max-width: 1200px)').matches
-            };
-        };
-        scope.$watch(scope.getWindowDimensions, function (value) {
-            if (attrs.id === "cbioportal_logo") {
-                var link = "images/cbioportal_logo.png";
-                if (value.match) {
-                    link = "images/cbioportal_icon.png";
-                } else {
-                    link = "images/cbioportal_logo.png";
-                }
-                scope.link = function () {
-                    return link;
-                };
-            }
-        }, true);
-
-        w.bind('resize', function () {
-            scope.$apply();
-        });
-    };
-});
