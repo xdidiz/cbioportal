@@ -2,7 +2,7 @@
 oql = (function() {
     function getGeneList(query) {
         // isolate gene ids from query
-        var splitq = query.split(/[\n;]/);
+        var splitq = query.split(/[\n;]+/);
         var lines = [];
         for (var i in splitq) {
             if ($.trim(splitq[i]) !== "") {
@@ -118,31 +118,31 @@ oql = (function() {
             // OUT: a tree as described in 'reduceBooleanTree'
             //		in which each command is converted to the boolean
             //		value representing whether the given gene attributes complies with it
-            if (cmds.type == "AND" || cmds.type == "OR") {
+            if (cmds.type === "AND" || cmds.type === "OR") {
                     return {"type":cmds.type, "left":createFilterTree(cmds["left"], gene_attrs), "right":createFilterTree(cmds["right"], gene_attrs)};
-            } else if (cmds.type == "NOT") {
+            } else if (cmds.type === "NOT") {
                     return {"type":"NOT", "child":createFilterTree(cmds["child"], gene_attrs)};
             } else {
                     // non-logical type
                     var ret = false;
-                    if (cmds.type == "AMP" || cmds.type == "HOMDEL" || cmds.type == "GAIN" || cmds.type == "HETLOSS") {
-                            ret = gene_attrs[cmds.type] == 1;
-                    } else if (cmds.type == "EXP" || cmds.type == "PROT") {
-                            if (cmds.constrType == "<") {
-                                    ret = (gene_attrs[cmds.type] != false) && (gene_attrs[cmds.type] < cmds.constrVal);
-                            } else if (cmds.constrType == "<=") {
-                                    ret = (gene_attrs[cmds.type] != false) && (gene_attrs[cmds.type] <= cmds.constrVal);
-                            } else if (cmds.constrType == ">") {
-                                    ret = (gene_attrs[cmds.type] != false) && (gene_attrs[cmds.type] > cmds.constrVal);
-                            } else if (cmds.constrType == ">=") {
-                                    ret = (gene_attrs[cmds.type] != false) && (gene_attrs[cmds.type] >= cmds.constrVal);
+                    if (cmds.type === "AMP" || cmds.type === "HOMDEL" || cmds.type === "GAIN" || cmds.type === "HETLOSS") {
+                            ret = (gene_attrs[cmds.type] === true);
+                    } else if (cmds.type === "EXP" || cmds.type === "PROT") {
+                            if (cmds.constrType === "<") {
+                                    ret = (gene_attrs[cmds.type] !== false) && (gene_attrs[cmds.type] < cmds.constrVal);
+                            } else if (cmds.constrType === "<=") {
+                                    ret = (gene_attrs[cmds.type] !== false) && (gene_attrs[cmds.type] <= cmds.constrVal);
+                            } else if (cmds.constrType === ">") {
+                                    ret = (gene_attrs[cmds.type] !== false) && (gene_attrs[cmds.type] > cmds.constrVal);
+                            } else if (cmds.constrType === ">=") {
+                                    ret = (gene_attrs[cmds.type] !== false) && (gene_attrs[cmds.type] >= cmds.constrVal);
                             }
-                    } else if (cmds.type == "MUT") {
-                            if (cmds.constrType == "=") {
+                    } else if (cmds.type === "MUT") {
+                            if (cmds.constrType === "=") {
                                     ret = mutationMatch(cmds.constrVal, gene_attrs["MUT"]);
-                            } else if (cmds.constrType == "!=") {
-                                    ret = !mutationMatch(cmds.constrVal, gene_attrs["MUT"]);
-                            } else if (cmds.constrType == false) {
+                            } else if (cmds.constrType === "!=") {
+                                    ret = !(mutationMatch(cmds.constrVal, gene_attrs["MUT"]));
+                            } else if (cmds.constrType === false) {
                                     // match any mutation
                                     ret = (gene_attrs["MUT"].length > 0);
                             }

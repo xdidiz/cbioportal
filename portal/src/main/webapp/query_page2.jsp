@@ -20,7 +20,7 @@
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Cancer Study:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select ng-model="formVars.cancer_study_id"
+                    <select chosen ng-model="formVars.cancer_study_id"
                             ng-options="csId as csObj.name group by appVars.vars.types_of_cancer[csObj.type_of_cancer] for (csId, csObj) in appVars.vars.cancer_study_stubs"
                     >
                     </select>
@@ -56,8 +56,8 @@
             <div class="row"  ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Patient/Case Set:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select ng-model="formVars.case_set_id"
-                            ng-options="cs.id as cs.name for cs in appVars.vars.case_sets"
+                    <select chosen ng-model="formVars.case_set_id"
+                            ng-options="cs.id as cs.label for cs in appVars.vars.case_sets"
                             >
                     </select>
                     <div ng-show="formVars.case_set_id === '-1'">
@@ -65,29 +65,29 @@
                     </div>
                 </div>
             </div>
-<!--            STEP 4 
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span><br/><a target="_blank" href="http://www.cbioportal.org/public-portal/onco_query_lang_desc.jsp">Advanced: Onco Query Language (OQL)</a></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select chosen ng-model="vars.gene_set_id"
-                    ng-options="id as gs.name for (id,gs) in vars.metaDataJson.gene_sets"
+                    <select chosen ng-model="formVars.gene_set_id"
+                    ng-options="id as gs.name for (id,gs) in appVars.vars.gene_set_stubs"
+                    ng-change="insertGeneList()"
                     >
                     </select>
-                    <textarea ng-model="vars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
+                    <textarea ng-model="formVars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="loadAndFilterSampleData()">Submit</button>
-                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="syncToUrl()">Update URL</button>
-                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="syncFromUrl()">Get From URL</button>
+                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="submitForm()">Submit</button>
+                    <!--<button type="button" class="btn btn-mskcc btn-sm" ng-click="syncToUrl()">Update URL</button>
+                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="syncFromUrl()">Get From URL</button>-->
                 </div>
             </div>
             <div class="row">
-                <p ng-show="vars.errorMsg.length > 0" style="color:red">{{vars.errorMsg}}</p>
+                <p ng-show="appVars.vars.error_msg.length > 0" style="color:red">{{appVars.vars.error_msg}}</p>
             </div>
-            <div class="row">
+            <!--<div class="row">
                 <table ng-show="!isEmpty(vars.filteredSamples.samples)"  class="table table-responsive table-striped">
                     <tbody>
                         <tr>
