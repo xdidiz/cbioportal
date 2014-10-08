@@ -1,4 +1,4 @@
-var app = angular.module('query-page-module', ['ui.bootstrap','localytics.directives']);
+var app = angular.module('query-page-module', ['ui.bootstrap', 'localytics.directives']);
 app.directive('profileGroup', function () {
     return {
         restrict: 'A',
@@ -217,13 +217,13 @@ app.factory('FormVars', function () {
         case_set_id: '-1',
         custom_case_list: '',
         oql_query: '',
-        genomic_profiles:{},
-        z_score_threshold:'',
-        rppa_score_threshold:'',
+        genomic_profiles: {},
+        z_score_threshold: '',
+        rppa_score_threshold: '',
     };
 });
 
-app.factory('AppVars', ['DataManager', '$q', function (DataManager, $q) {
+app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function ($rootScope, FormVars, DataManager, $q) {
         /* CONSTANTS */
         var alt_types = ["MUTATION", "MUTATION_EXTENDED", "COPY_NUMBER_ALTERATION", "PROTEIN_LEVEL",
             "MRNA_EXPRESSION", "METHYLATION", "METHYLATION_BINARY", "PROTEIN_ARRAY_PROTEIN_LEVEL"];
@@ -251,7 +251,7 @@ app.factory('AppVars', ['DataManager', '$q', function (DataManager, $q) {
             DataManager.cancerStudy(study_id).then(function (study) {
                 // Collect by type
                 for (var i = 0; i < alt_types.length; i++) {
-                    profile_groups[alt_types[i]] = {alt_type:alt_types[i], description: alt_descriptions[i], list: []};
+                    profile_groups[alt_types[i]] = {alt_type: alt_types[i], description: alt_descriptions[i], list: []};
                     ordered_profile_groups[i] = profile_groups[alt_types[i]]; // copy reference
                 }
                 for (var i = 0; i < study.genomic_profiles.length; i++) {
@@ -263,6 +263,7 @@ app.factory('AppVars', ['DataManager', '$q', function (DataManager, $q) {
             });
             return q.promise;
         };
+        
         return {
             updateStudyInfo: updateStudyInfo,
             updateProfileGroups: updateProfileGroups,
@@ -342,36 +343,31 @@ app.controller('mainController2', ['$scope', 'DataManager', 'FormVars', 'AppVars
                 DataManager.cancerStudyStubs().then(function (ccs) {
                     $scope.appVars.cancer_study_stubs = ccs;
                 });
-                $scope.$watch('formVars.cancer_study_id', function () {
-                    var av = $scope.appVars;
-                    av.updateStudyInfo($scope.formVars.cancer_study_id);
-                    av.updateProfileGroups($scope.formVars.cancer_study_id).then(function() {
-                        // clear selections
-                        console.log($scope.formVars.genomic_profiles);
-                        for (var i=0; i<av.alt_types.length; i++) {
-                            $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
-                        }
-                        console.log($scope.formVars.genomic_profiles);
-                        // make default selections
-                        if(av.profile_groups["MUTATION"].list.length > 0) {
-                            console.log("checking mutation");
-                            $scope.formVars.genomic_profiles["MUTATION"] = 
-                                    av.profile_groups["MUTATION"].list[0].id;
-                        }
-                        if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
-                            console.log("checking mutation extended");
-                            $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] = 
-                                    av.profile_groups["MUTATION_EXTENDED"].list[0].id;
-                        }
-                        if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
-                            console.log("checking copy number alteration");
-                            $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] = 
-                                    av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
-                        }
-                    });
-                });
             });
-
+        });
+        $scope.$watch('formVars.cancer_study_id', function() {
+            var av = $scope.appVars;
+            av.updateStudyInfo($scope.formVars.cancer_study_id);
+            av.updateProfileGroups($scope.formVars.cancer_study_id).then(function () {
+                // clear selections
+            
+                for (var i = 0; i < av.alt_types.length; i++) {
+                    $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
+                }
+                // make default selections
+                if (av.profile_groups["MUTATION"].list.length > 0) {
+                    $scope.formVars.genomic_profiles["MUTATION"] =
+                            av.profile_groups["MUTATION"].list[0].id;
+                }
+                if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
+                    $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] =
+                            av.profile_groups["MUTATION_EXTENDED"].list[0].id;
+                }
+                if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
+                    $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
+                            av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
+                }
+            });
         });
     }]);
 
@@ -643,7 +639,7 @@ app.controller('mainController', ['$scope', 'Global', '$http', '$q', '$location'
         $scope.Math = window.Math;
     }]);
 
-app.directive('resize', function($window) {
+app.directive('resize', function ($window) {
     return function (scope, element, attrs) {
         var w = angular.element($window);
         scope.getWindowDimensions = function () {
@@ -652,19 +648,19 @@ app.directive('resize', function($window) {
             };
         };
         scope.$watch(scope.getWindowDimensions, function (value) {
-            if(attrs.id === "cbioportal_logo") {
+            if (attrs.id === "cbioportal_logo") {
                 var link = "images/cbioportal_logo.png";
-                if(value.match) {
+                if (value.match) {
                     link = "images/cbioportal_icon.png";
-                }else {
+                } else {
                     link = "images/cbioportal_logo.png";
                 }
-                scope.link = function() {
+                scope.link = function () {
                     return link;
                 };
             }
         }, true);
-        
+
         w.bind('resize', function () {
             scope.$apply();
         });

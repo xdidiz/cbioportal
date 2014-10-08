@@ -45,7 +45,9 @@
             <div class="row" ng-hide="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Genomic Profiles:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <div  ng-repeat="profgp in appVars.ordered_profile_groups track by $index">
+                    <!-- we have to do (index, profgp) instead of just track by index because otherwise angular doesnt register the change -->
+                    <!-- , even though we don't actually use 'index' -->
+                    <div  ng-repeat="(index, profgp) in appVars.ordered_profile_groups">
                         <div profile-group>
                         </div>
                     </div>

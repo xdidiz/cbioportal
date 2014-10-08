@@ -11,7 +11,7 @@
             </div>
         </div>
         <div ng-if='profgp.list.length === 1'>
-            <input type="checkbox" ng-model="formVars.genomic_profiles[profgp.alt_type]" ng-true-value="{{profgp.list[0].id}}">{{profgp.list[0].id}}<!--{{profgp.list[0].name}}-->
+            <input type="checkbox" ng-model="formVars.genomic_profiles[profgp.alt_type]" ng-true-value="{{profgp.list[0].id}}">{{profgp.list[0].name}}
             <img src='images/help.png' title='{{profgp.list[0].description}}'>
         </div>
         <div ng-show="profgp.alt_type === 'MRNA_EXPRESSION' && formVars.genomic_profiles['MRNA_EXPRESSION'] !== false">
