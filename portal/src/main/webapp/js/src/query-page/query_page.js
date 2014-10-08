@@ -424,6 +424,10 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
 app.controller('mainController2', ['$q', '$scope', 'DataManager', 'FormVars', 'AppVars', function ($q, $scope, DataManager, FormVars, AppVars) {
         $scope.formVars = FormVars;
         $scope.appVars = AppVars;
+        $scope.range = function(n) {
+            return new Array(n);
+        }
+        $scope.Math = Math;
          $scope.syncToUrl = function () {
             var toEncode = {cancer_study_id: $scope.vars.cancer_study_id, case_set_id: $scope.vars.case_set_id, custom_case_list: $scope.vars.custom_case_list, gene_set_id: $scope.vars.gene_set_id,
                 oql_query: $scope.vars.oql_query, genomic_profiles: $scope.vars.genomic_profiles, current_tab: $scope.vars.current_tab};
@@ -530,8 +534,6 @@ app.controller('mainController2', ['$q', '$scope', 'DataManager', 'FormVars', 'A
                         // desired cases and the desired gene-profile data. It may
                         // (probably will) contain more as well.
                         // Run that sucker through the oql filter
-                        console.log(cases);
-                        console.log(parsedOql.return);
                         var qr = $scope.appVars.vars.query_result;
                         qr.query = $scope.formVars.oql_query
                         qr.genes = genes;

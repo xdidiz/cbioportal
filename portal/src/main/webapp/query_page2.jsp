@@ -87,33 +87,29 @@
             <div class="row">
                 <p ng-show="appVars.vars.error_msg.length > 0" style="color:red">{{appVars.vars.error_msg}}</p>
             </div>
-            <!--<div class="row">
-                <table ng-show="!isEmpty(vars.filteredSamples.samples)"  class="table table-responsive table-striped">
+            <div class="row">
+                <table ng-show="!isEmpty(appVars.vars.query_result.samples)"  class="table table-responsive table-striped">
                     <tbody>
                         <tr>
                             <td rowspan="2">Sample\ Gene</td>
-                            <td ng-repeat="gene in vars.filteredSamples.genes" colspan="7">{{gene}}</td>
+                            <td ng-repeat="gene in appVars.vars.query_result.genes" colspan="7">{{gene}}</td>
                         </tr>
                         <tr>
-                            <td ng-repeat="i in range(7 * vars.filteredSamples.genes.length) track by $index">
-                                {{vars.filteredSamples.categ[$index % 7]}}
+                            <!-- 7 is magic number: the number of event types (AMP, GAIN, HOMDEL, HETLOSS, MUT, EXP, PROT) -->
+                            <td ng-repeat="i in range(7 * appVars.vars.query_result.genes.length) track by $index">
+                                {{appVars.vars.event_types[$index % 7]}}
                             </td>
                         </tr>
-                        <tr ng-repeat="samp in vars.filteredSamples.samples">
-                            <td>{{samp.id}}</td>
-                            <td ng-repeat="i in range(7 * vars.filteredSamples.genes.length) track by $index">
-                                {{samp.data[vars.filteredSamples.genes[Math.floor($index / 7)]][vars.filteredSamples.categ[$index % 7]]}}
+                        <tr ng-repeat="(id, samp) in appVars.vars.query_result.samples">
+                            <td>{{id}}</td>
+                            <td ng-repeat="i in range(7 * appVars.vars.query_result.genes.length) track by $index">
+                                {{samp[appVars.vars.query_result.genes[Math.floor($index / 7)]][appVars.vars.event_types[$index % 7]]}}
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>-->
+            </div>
         </div>
-        <!--<p ng-hide="vars.cancer_study_id === 'all'">The selected genomic profiles are {{vars.genomic_profiles}}</p>
-        <br><br>
-        <p>The selected cancer study is {{vars.cancer_study_id}}</p>
-        <p ng-show="vars.cancer_study_id === 'all'">The selected data priority is {{vars.data_priority}}</p>
-        <p>The selected case set is {{vars.case_set_id}}</p>-->
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
