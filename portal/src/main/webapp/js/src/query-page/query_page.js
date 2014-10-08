@@ -117,7 +117,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             });
             return ret;
         };
-        
+
         var genomicProfileData = function (prof_ids, genes, case_ids) {
             // helper function for caseData
             // return: a list of newly loaded data points
@@ -147,7 +147,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                 toLoad[id].genelist = Object.keys(toLoad[id].genelist);
                 toLoad[id].caselist = Object.keys(toLoad[id].caselist);
             });
-            
+
             var newPts = [];
             // make promise and load
             var q = $q.defer();
@@ -209,8 +209,8 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             }
             return q.promise;
         };
-        
-        var newSampleGeneRecord = function() {
+
+        var newSampleGeneRecord = function () {
             return {
                 AMP: false,
                 GAIN: false,
@@ -223,13 +223,13 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         }
 
         /* Public Functions */
-        var caseData = function(prof_ids, genes, case_ids) {
+        var caseData = function (prof_ids, genes, case_ids) {
             // Returns an object that's guaranteed to contain
             //  the desired cases and gene-profile data. It probably
             //  contains other data as well.
             var q = $q.defer();
-            genomicProfileData(prof_ids, genes, case_ids).then(function(newDataPts) {
-                angular.forEach(newDataPts, function(datum) {
+            genomicProfileData(prof_ids, genes, case_ids).then(function (newDataPts) {
+                angular.forEach(newDataPts, function (datum) {
                     _samples[datum.sample] = _samples[datum.sample] || {};
                     _samples[datum.sample][datum.gene] = _samples[datum.sample][datum.gene] || newSampleGeneRecord();
                     switch (datum.genotype.type) {
@@ -249,7 +249,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             });
             return q.promise;
         }
-        
+
         var caseSet = function (case_set_id) {
             var q = $q.defer();
             if (case_set_id in _caseSets) {
@@ -326,6 +326,18 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
     }]);
 
 app.factory('FormVars', function () {
+    var defaults = {
+        cancer_study_id: 'all',
+        data_priority: 'pri_mutcna',
+        case_set_id: '-1',
+        custom_case_list: '',
+        oql_query: '',
+        gene_set_id: 'user-defined-list',
+        genomic_profiles: {},
+        z_score_threshold: '',
+        rppa_score_threshold: '',
+    }
+    
     return {
         cancer_study_id: 'all',
         data_priority: 'pri_mutcna',
@@ -336,6 +348,12 @@ app.factory('FormVars', function () {
         genomic_profiles: {},
         z_score_threshold: '',
         rppa_score_threshold: '',
+        
+        clear: function() {
+            for(var member in defaults) {
+                this[member] = defaults[member];
+            }
+        }
     };
 });
 
@@ -359,13 +377,13 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
 
         var vars = {
             alt_types: alt_types,
-            event_types: ["AMP","GAIN","HETLOSS","HOMDEL","MUT","EXP","PROT"],
+            event_types: ["AMP", "GAIN", "HETLOSS", "HOMDEL", "MUT", "EXP", "PROT"],
             data_priorities: data_priorities,
             profile_groups: profile_groups,
             ordered_profile_groups: ordered_profile_groups,
             gene_set_id: '',
             error_msg: '',
-            query_result: {samples:{}, genes: [], query: ''},
+            query_result: {samples: {}, genes: [], query: ''},
             types_of_cancer: types_of_cancer,
             cancer_study_stubs: cancer_study_stubs,
             cancer_studies: cancer_studies,
@@ -421,38 +439,33 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
         };
     }]);
 
-app.controller('mainController2', ['$q', '$scope', 'DataManager', 'FormVars', 'AppVars', function ($q, $scope, DataManager, FormVars, AppVars) {
+app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'DataManager', 'FormVars', 'AppVars', 
+                                    function ($location, $interval, $q, $scope, DataManager, FormVars, AppVars) {
         $scope.formVars = FormVars;
         $scope.appVars = AppVars;
-        $scope.range = function(n) {
+        $scope.range = function (n) {
             return new Array(n);
         }
         $scope.Math = Math;
-         $scope.syncToUrl = function () {
-            var toEncode = {cancer_study_id: $scope.vars.cancer_study_id, case_set_id: $scope.vars.case_set_id, custom_case_list: $scope.vars.custom_case_list, gene_set_id: $scope.vars.gene_set_id,
-                oql_query: $scope.vars.oql_query, genomic_profiles: $scope.vars.genomic_profiles, current_tab: $scope.vars.current_tab};
-            $location.path(encodeURIComponent(JSON.stringify(toEncode)));
+        $scope.syncToUrl = function () {
+            $location.path(encodeURIComponent(JSON.stringify($scope.formVars)));
         }
         $scope.syncFromUrl = function () {
             // get data from url
             if ($location.path() !== "") {
-                try {
-                    var pathWithoutSlash = $location.path().substring(1);
-                    var decoded = JSON.parse(decodeURIComponent(pathWithoutSlash));
-                    $scope.vars.cancer_study_id = decoded.cancer_study_id;
-                    $scope.vars.case_set_id = decoded.case_set_id;
-                    $scope.vars.custom_case_list = decoded.custom_case_list;
-                    $scope.vars.gene_set_id = decoded.gene_set_id;
-                    $scope.vars.oql_query = decoded.oql_query;
-                    $scope.vars.genomic_profiles = decoded.genomic_profiles;
-                    $scope.vars.current_tab = decoded.current_tab;
-                } catch (err) {
+                var pathWithoutSlash = $location.path().substring(1);
+                var decoded = JSON.parse(decodeURIComponent(pathWithoutSlash));
+                console.log(decoded);
+                for (var member in decoded) {
+                    $scope.formVars[member] = decoded[member];
                 }
             }
         }
         angular.element(document).ready(function () {
             // wait for datamanager to initialize before doing anything
             DataManager.initPromise.then(function () {
+                $scope.syncFromUrl();
+                $interval($scope.syncToUrl, 1000);
                 DataManager.typesOfCancer().then(function (toc) {
                     $scope.appVars.vars.types_of_cancer = toc;
                 });
@@ -508,8 +521,8 @@ app.controller('mainController2', ['$q', '$scope', 'DataManager', 'FormVars', 'A
                 var parsedOql = oql.parseQuery($scope.formVars.oql_query);
                 if (parsedOql.result === 1) {
                     $scope.appVars.vars.error_msg = '';
-                    angular.forEach(parsedOql.return, function(err) {
-                        $scope.appVars.vars.error_msg += err.line+': '+err.msg+'\n';
+                    angular.forEach(parsedOql.return, function (err) {
+                        $scope.appVars.vars.error_msg += err.line + ': ' + err.msg + '\n';
                     });
                     return;
                 }
@@ -539,8 +552,8 @@ app.controller('mainController2', ['$q', '$scope', 'DataManager', 'FormVars', 'A
                         qr.genes = genes;
                         qr.samples = {};
                         var filteredIds = oql.filter(parsedOql.return, cases);
-                        angular.forEach(filteredIds, function(id) {
-                                qr.samples[id] = cases[id];
+                        angular.forEach(filteredIds, function (id) {
+                            qr.samples[id] = cases[id];
                         });
                     });
 

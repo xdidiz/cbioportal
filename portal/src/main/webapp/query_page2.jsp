@@ -36,9 +36,9 @@
             <div class="row" ng-show="formVars.cancer_study_id === 'all'">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Select Data Type Priority:</span></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <label ng-repeat="datap in appVars.vars.data_priorities">
+                    <div ng-repeat="datap in appVars.vars.data_priorities">
                         <input type="radio" name="data_priority" ng-model="formVars.data_priority" value="{{datap.id}}">{{datap.label}}
-                    </label>
+                    </div>
                 </div>
             </div>
             <!-- STEP 2 (SINGLE STUDY) -->
@@ -80,6 +80,8 @@
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
                     <button type="button" class="btn btn-mskcc btn-sm" ng-click="submitForm()">Submit</button>
+                    &nbsp;&nbsp;
+                    <button type="button" class="btn btn-mskcc btn-sm" ng-click="formVars.clear()">Clear</button>
                     <!--<button type="button" class="btn btn-mskcc btn-sm" ng-click="syncToUrl()">Update URL</button>
                     <button type="button" class="btn btn-mskcc btn-sm" ng-click="syncFromUrl()">Get From URL</button>-->
                 </div>
