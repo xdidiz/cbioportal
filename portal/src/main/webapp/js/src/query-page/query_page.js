@@ -282,9 +282,9 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         var geneSet = function (id) {
             var q = $q.defer();
             if (_geneSets[id].gene_list === '') {
-                $http.get('/portal_meta_data.json?geneset_id=' + id).
+                $http.get('/portal_meta_data.json?geneset_id=' + id.replace(/\//g,'')).
                         success(function (data, status, headers, config) {
-                            _geneSets[id].gene_list = data;
+                            _geneSets[id].gene_list = data.list;
                             q.resolve(_geneSets[id]);
                         });
             } else {
@@ -344,7 +344,6 @@ app.factory('FormVars', function () {
         case_set_id: '-1',
         custom_case_list: '',
         oql_query: '',
-        gene_set_id: 'user-defined-list',
         genomic_profiles: {},
         z_score_threshold: '',
         rppa_score_threshold: '',
@@ -381,7 +380,7 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             data_priorities: data_priorities,
             profile_groups: profile_groups,
             ordered_profile_groups: ordered_profile_groups,
-            gene_set_id: '',
+            gene_set_id: 'user-defined-list',
             error_msg: '',
             query_result: {samples: {}, genes: [], query: ''},
             types_of_cancer: types_of_cancer,
@@ -510,6 +509,13 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                     });
                     $scope.appVars.updateCaseLists($scope.formVars.cancer_study_id);
                 });
+                $scope.$watch('appVars.vars.gene_set_id', function() {
+                    if($scope.appVars.vars.gene_set_id !== 'user-defined-list') {
+                        DataManager.geneSet($scope.appVars.vars.gene_set_id).then(function(data) {
+                            $scope.formVars.oql_query = data.gene_list.split(/\s+/).join("; ");
+                        });
+                    }
+                });
             });
         });
         $scope.getCaseList = function () {
@@ -528,7 +534,7 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
             var lines = query.split(/[;\n]+/);
             var retlines = [];
             for (var i=0; i<lines.length; i++) {
-                var line = lines[i];
+                var line = $.trim(lines[i]);
                 var fullMatch = line.search(/^([^:\s]+)\s*(:)\s*([^\s]+).*$/);
                 if (fullMatch > -1) {
                     retlines.push(line);

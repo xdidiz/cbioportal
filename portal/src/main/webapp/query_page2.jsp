@@ -68,7 +68,7 @@
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 leftColumn"><span>Enter Gene Set:</span><br/><a target="_blank" href="http://www.cbioportal.org/public-portal/onco_query_lang_desc.jsp">Advanced: Onco Query Language (OQL)</a></div>
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-                    <select chosen ng-model="formVars.gene_set_id"
+                    <select chosen ng-model="appVars.vars.gene_set_id"
                     ng-options="id as gs.name for (id,gs) in appVars.vars.gene_set_stubs"
                     ng-change="insertGeneList()"
                     >
