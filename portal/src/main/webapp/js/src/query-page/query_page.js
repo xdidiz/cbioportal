@@ -443,6 +443,7 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                                     function ($location, $interval, $q, $scope, DataManager, FormVars, AppVars) {
         $scope.formVars = FormVars;
         $scope.appVars = AppVars;
+        $scope.syncedFromUrl = false;
         $scope.range = function (n) {
             return new Array(n);
         }
@@ -453,18 +454,25 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
         $scope.syncFromUrl = function () {
             // get data from url
             if ($location.path() !== "") {
-                var pathWithoutSlash = $location.path().substring(1);
-                var decoded = JSON.parse(decodeURIComponent(pathWithoutSlash));
-                console.log(decoded);
-                for (var member in decoded) {
-                    $scope.formVars[member] = decoded[member];
-                }
+                try {
+                    var pathWithoutSlash = $location.path().substring(1);
+                    var decoded = JSON.parse(decodeURIComponent(pathWithoutSlash));
+                    console.log(decoded);
+                    for (var member in decoded) {
+                        $scope.formVars[member] = decoded[member];
+                    }
+                    return true;
+                } catch (err) {
+                    return false;
+                }        
+            } else {
+                return false;
             }
         }
         angular.element(document).ready(function () {
             // wait for datamanager to initialize before doing anything
             DataManager.initPromise.then(function () {
-                $scope.syncFromUrl();
+                $scope.syncedFromUrl = $scope.syncFromUrl();
                 $interval($scope.syncToUrl, 1000);
                 DataManager.typesOfCancer().then(function (toc) {
                     $scope.appVars.vars.types_of_cancer = toc;
@@ -481,22 +489,24 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                     $scope.appVars.updateProfileGroups($scope.formVars.cancer_study_id).then(function () {
                         // clear selections
 
-                        for (var i = 0; i < av.alt_types.length; i++) {
-                            $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
-                        }
-                        // make default selections
-                        if (av.profile_groups["MUTATION"].list.length > 0) {
-                            $scope.formVars.genomic_profiles["MUTATION"] =
-                                    av.profile_groups["MUTATION"].list[0].id;
-                        }
-                        if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
-                            $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] =
-                                    av.profile_groups["MUTATION_EXTENDED"].list[0].id;
-                        }
-                        if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
-                            $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
-                                    av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
-                        }
+                        if (!$scope.syncedFromUrl) {
+                            for (var i = 0; i < av.alt_types.length; i++) {
+                                $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
+                            }
+                            // make default selections
+                            if (av.profile_groups["MUTATION"].list.length > 0) {
+                                $scope.formVars.genomic_profiles["MUTATION"] =
+                                        av.profile_groups["MUTATION"].list[0].id;
+                            }
+                            if (av.profile_groups["MUTATION_EXTENDED"].list.length > 0) {
+                                $scope.formVars.genomic_profiles["MUTATION_EXTENDED"] =
+                                        av.profile_groups["MUTATION_EXTENDED"].list[0].id;
+                            }
+                            if (av.profile_groups["COPY_NUMBER_ALTERATION"].list.length > 0) {
+                                $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
+                                        av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
+                            }
+                    }
                     });
                     $scope.appVars.updateCaseLists($scope.formVars.cancer_study_id);
                 });
@@ -514,11 +524,57 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
             return q.promise;
         }
 
+        $scope.oqlInsertDefaults = function (query) {
+            var lines = query.split(/[;\n]+/);
+            var retlines = [];
+            for (var i=0; i<lines.length; i++) {
+                var line = lines[i];
+                var fullMatch = line.search(/^([^:\s]+)\s*(:)\s*([^\s]+).*$/);
+                if (fullMatch > -1) {
+                    retlines.push(line);
+                } else {
+                    var smallMatch = line.search(/^([^:\s]+)\s*([:]?)$/);
+                    if (smallMatch > -1) {
+                        // ^^ if not then we'll just throw this line out
+                        var gene = RegExp.$1;
+                        var specs = ""; // to be built up
+                        // make a new line with the defaults
+                        var defaultsToInsert = {
+                            'MUT':false, 'CNA':false, 
+                            'EXP':false, 'PROT': false
+                        };
+                        defaultsToInsert['MUT'] = ($scope.formVars.genomic_profiles['MUTATION']!==false
+                                                || $scope.formVars.genomic_profiles['MUTATION_EXTENDED']!==false);
+                        defaultsToInsert['CNA'] = ($scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"]!==false);
+                        defaultsToInsert['EXP'] = $scope.formVars.genomic_profiles["MRNA_EXPRESSION"]!==false;
+                        defaultsToInsert['PROT'] = $scope.formVars.genomic_profiles["PROTEIN_ARRAY_PROTEIN_LEVEL"]!==false;
+                        if (defaultsToInsert['MUT']) {
+                            specs += ' MUT ';
+                        }
+                        if (defaultsToInsert['CNA']) {
+                            specs += ' AMP GAIN HOMDEL HETLOSS';
+                        }
+                        if (defaultsToInsert['EXP']) {
+                            var thresh = parseFloat($scope.formVars.z_score_threshold) || 2;
+                            specs += ' EXP >= '+thresh+' EXP <= -'+thresh;
+                        }
+                        if (defaultsToInsert['PROT']) {
+                            var thresh = parseFloat($scope.formVars.rppa_score_threshold) || 2;
+                            specs += ' PROT >= '+thresh+' PROT <= -'+thresh;
+                        }
+                        retlines.push(gene+":"+specs);
+                    }
+                }
+            }
+            return retlines.join(";");
+        }
+        
         $scope.submitForm = function () {
             // definitely don't do anything until datamanager has initialized
             DataManager.initPromise.then(function () {
                 // Before anything, ensure we have valid OQL
-                var parsedOql = oql.parseQuery($scope.formVars.oql_query);
+                console.log($scope.oqlInsertDefaults($scope.formVars.oql_query));
+                var parsedOql = oql.parseQuery($scope.oqlInsertDefaults($scope.formVars.oql_query));
                 if (parsedOql.result === 1) {
                     $scope.appVars.vars.error_msg = '';
                     angular.forEach(parsedOql.return, function (err) {

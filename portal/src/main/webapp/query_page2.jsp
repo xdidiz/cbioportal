@@ -61,7 +61,7 @@
                             >
                     </select>
                     <div ng-show="formVars.case_set_id === '-1'">
-                        <textarea ng-model="formVars.custom_case_list" rows="6" cols="80" placeholder="Enter case IDs"></textarea>
+                        <textarea class="form-control" ng-model="formVars.custom_case_list" rows="6" cols="80" placeholder="Enter case IDs"></textarea>
                     </div>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                     ng-change="insertGeneList()"
                     >
                     </select>
-                    <textarea ng-model="formVars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
+                    <textarea class="form-control" ng-model="formVars.oql_query" rows="6" cols="80" placeholder="Enter HUGO Gene Symbols or Gene Aliases"></textarea>
                 </div>
             </div>
             <div class="row">
