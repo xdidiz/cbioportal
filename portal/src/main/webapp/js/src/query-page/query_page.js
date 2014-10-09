@@ -512,7 +512,7 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                 $scope.$watch('appVars.vars.gene_set_id', function() {
                     if($scope.appVars.vars.gene_set_id !== 'user-defined-list') {
                         DataManager.geneSet($scope.appVars.vars.gene_set_id).then(function(data) {
-                            $scope.formVars.oql_query = data.gene_list.split(/\s+/).join("; ");
+                            $scope.formVars.oql_query = data.gene_list.split(/\s+/).join("; ")+";";
                         });
                     }
                 });
@@ -617,6 +617,7 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                         angular.forEach(filteredIds, function (id) {
                             qr.samples[id] = cases[id];
                         });
+                        console.log(qr);
                     });
 
                 });
