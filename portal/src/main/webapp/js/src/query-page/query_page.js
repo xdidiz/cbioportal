@@ -211,7 +211,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         };
 
         var newSampleGeneRecord = function () {
-            return {
+            /*return {
                 AMP: false,
                 GAIN: false,
                 HOMDEL: false,
@@ -219,7 +219,8 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                 EXP: false,
                 PROT: false,
                 MUT: []
-            };
+            };*/
+            return {};
         }
 
         /* Public Functions */
@@ -233,6 +234,8 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                     _samples[datum.sample] = _samples[datum.sample] || {};
                     _samples[datum.sample][datum.gene] = _samples[datum.sample][datum.gene] || newSampleGeneRecord();
                     switch (datum.genotype.type) {
+                        case "MUT":
+                            _samples[datum.sample][datum.gene]['MUT'] = datum.genotype.data;
                         case "CNA":
                             _samples[datum.sample][datum.gene][datum.genotype.data] = true;
                             break;
@@ -382,7 +385,7 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             ordered_profile_groups: ordered_profile_groups,
             gene_set_id: 'user-defined-list',
             error_msg: '',
-            query_result: {samples: {}, genes: [], query: ''},
+            query_result: {samples: {}, genes: [], query: '', cases:[]},
             types_of_cancer: types_of_cancer,
             cancer_study_stubs: cancer_study_stubs,
             cancer_studies: cancer_studies,
@@ -505,7 +508,8 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                                 $scope.formVars.genomic_profiles["COPY_NUMBER_ALTERATION"] =
                                         av.profile_groups["COPY_NUMBER_ALTERATION"].list[0].id;
                             }
-                    }
+                        }
+                        $scope.syncedFromUrl = false;
                     });
                     $scope.appVars.updateCaseLists($scope.formVars.cancer_study_id);
                 });
@@ -613,7 +617,8 @@ app.controller('mainController2', ['$location', '$interval', '$q', '$scope', 'Da
                         qr.query = $scope.formVars.oql_query
                         qr.genes = genes;
                         qr.samples = {};
-                        var filteredIds = oql.filter(parsedOql.return, cases);
+                        qr.cases = case_list;
+                        var filteredIds = oql.filter(parsedOql.return, cases, case_list);
                         angular.forEach(filteredIds, function (id) {
                             qr.samples[id] = cases[id];
                         });
