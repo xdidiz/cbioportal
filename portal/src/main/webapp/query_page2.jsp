@@ -6,7 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html ng-app="query-page-module" ng-controller="mainController2">
+<html ng-app="query-page-module" ng-controller="mainController">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link type="text/css" rel="stylesheet" href="css/bootstrap-chosen.css"/>
@@ -48,7 +48,7 @@
                     <!-- we have to do (index, profgp) instead of just track by index because otherwise angular doesnt register the change -->
                     <!-- , even though we don't actually use 'index' -->
                     <div ng-repeat="(index, profgp) in appVars.vars.ordered_profile_groups">
-                        <div profile-group>
+                        <div ng-include="'/js/src/query-page/profileGroup.html'">
                         </div>
                     </div>
                 </div>

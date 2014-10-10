@@ -1,7 +1,34 @@
-// NOTE: Documentation can be generated from these annotations with jsdoc (http://usejsdoc.org/)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/query-page/query_page.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/query-page/query_page.js</h1>
+
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// NOTE: Documentation can be generated from these annotations with jsdoc (http://usejsdoc.org/)
 /**
  * @fileOverview Main javascript file for the query page, including the main angular module and the data manager.
- * @author <a href="mailto:adama@cbio.mskcc.org">Adam Abeshouse</a>
+ * @author &lt;a href="mailto:adama@cbio.mskcc.org">Adam Abeshouse&lt;/a>
  * @namespace angular
  */
 
@@ -24,10 +51,10 @@ var app = angular.module('query-page-module', ['ui.bootstrap', 'localytics.direc
  * 
  * Is very specific, should really only be used in one context.
  * @example
- * <div ng-repeat="(index, profgp) in appVars.vars.ordered_profile_groups">
- <div profile-group>
- </div>
- </div>
+ * &lt;div ng-repeat="(index, profgp) in appVars.vars.ordered_profile_groups">
+ &lt;div profile-group>
+ &lt;/div>
+ &lt;/div>
  */
 app.directive('profileGroup', function () {
     return {
@@ -83,7 +110,7 @@ app.directive('resize', function ($window) {
  * links.
  * 
  * @example 
- * <p ng-bind-html="vars.sanitizedHtml | to_trusted_html"></p>
+ * &lt;p ng-bind-html="vars.sanitizedHtml | to_trusted_html">&lt;/p>
  * 
  * 
  */
@@ -147,7 +174,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         var initPromise = $q.defer();
 
         /* Initialization */
-        $http.get('/portal_meta_data.json?partial_studies=true&partial_genesets=true').success(function (json) {
+        $http.get('/portal_meta_data.json?partial_studies=true&amp;partial_genesets=true').success(function (json) {
             angular.forEach(json.cancer_studies, function (value, key) {
                 _cancerStudies[key] = value;
                 _cancerStudyStubs[key] = value;
@@ -172,10 +199,10 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
          * @description Helper function for genomicProfileData (not to be called anywhere else!). Creates data points that
          * represent the data stored on the specified case ids regarding the specified
          * genes and genetic profiles.
-         * @param {Array.<string>} prof_ids Identifiers of the desired genomic profiles
-         * @param {Array.<string>} genes Identifiers of the desired genes
-         * @param {Array.<string>} case_ids Identifiers of the desired cases
-         * @returns {Array.<Object>} - A list of data points of the form 
+         * @param {Array.&lt;string>} prof_ids Identifiers of the desired genomic profiles
+         * @param {Array.&lt;string>} genes Identifiers of the desired genes
+         * @param {Array.&lt;string>} case_ids Identifiers of the desired cases
+         * @returns {Array.&lt;Object>} - A list of data points of the form 
          * {sample: 'TCG-0002',  gene: 'PTEN', genotype: {type: 'AMP', data: false [, class: 'MISSENSE']}}
          * where genotype.class is only defined if genotype.type is 'MUT'
          */
@@ -188,21 +215,21 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                         var elt = _genomicProfiles[prof_id][gene][case_id];
                         switch (elt.alteration_type) {
                             case "MUT":
-                                if (elt.datum !== "NaN" && elt.datum !== "") {
+                                if (elt.datum !== "NaN" &amp;&amp; elt.datum !== "") {
                                     var mutations = elt.datum.split(',');
-                                    for (var i = 0; i < mutations.length; i++) {
+                                    for (var i = 0; i &lt; mutations.length; i++) {
                                         ret.push({sample: case_id, gene: gene, genotype: {type: "MUT", data: mutations[i], class: "PLACEHOLDER"}});
                                     }
                                 }
                                 break;
                             case "CNA":
-                                if (elt.datum !== "NaN" && elt.datum !== "" && elt.datum !== "0") {
+                                if (elt.datum !== "NaN" &amp;&amp; elt.datum !== "" &amp;&amp; elt.datum !== "0") {
                                     ret.push({sample: case_id, gene: gene, genotype: {type: "CNA", data: elt.datum}});
                                 }
                                 break;
                             case "EXP":
                             case "PROT":
-                                if (elt.datum !== "NaN" && elt.datum !== "") {
+                                if (elt.datum !== "NaN" &amp;&amp; elt.datum !== "") {
                                     ret.push({sample: case_id, gene: gene, genotype: {type: elt.alteration_type, data: elt.datum}});
                                 }
                                 break;
@@ -216,14 +243,14 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /**
          * 
          * @memberOf angular.query-page-module.DataManager
-         * @param {Array.<string>} prof_ids Identifiers of the desired genomic profiles
-         * @param {Array.<string>} genes Identifiers of the desired genes
-         * @param {Array.<string>} case_ids Identifiers of the desired cases
+         * @param {Array.&lt;string>} prof_ids Identifiers of the desired genomic profiles
+         * @param {Array.&lt;string>} genes Identifiers of the desired genes
+         * @param {Array.&lt;string>} case_ids Identifiers of the desired cases
          * @description Helper function for caseData. Of the requested data, loads the data that is not already loaded
          * and returns a list of data points (made by makeProfileDataPoints) made of 
          * the NEWLY loaded data.
          * 
-         * @returns {Promise<Array.<Object>>} A promise that resolves to the data points made from newly loaded data in makeProfileDataPoints.
+         * @returns {Promise&lt;Array.&lt;Object>>} A promise that resolves to the data points made from newly loaded data in makeProfileDataPoints.
          */
         var genomicProfileData = function (prof_ids, genes, case_ids) {
             var q = $q.defer();
@@ -265,21 +292,21 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                 angular.forEach(toLoad, function (obj, profile_id) {
                     if (obj.genelist.length > 0) {
                         console.log("LOADING!");
-                        var url = '/webservice.do?cmd=getProfileData&case_list=' + obj.caselist.join(",") +
-                                '&genetic_profile_id=' + profile_id +
-                                "&gene_list=" + obj.genelist.join(",");
+                        var url = '/webservice.do?cmd=getProfileData&amp;case_list=' + obj.caselist.join(",") +
+                                '&amp;genetic_profile_id=' + profile_id +
+                                "&amp;gene_list=" + obj.genelist.join(",");
                         $http.get(url).success(function (data, status, headers, config) {
                             var splitData = data.split('\n');
                             var sampleIds = splitData[2].split(/[\s]+/); // begin at index 2
                             var altType = typeCode[splitData[1].split(/[\s]+/)[2]];
-                            for (var i = 3; i < splitData.length; i++) {
+                            for (var i = 3; i &lt; splitData.length; i++) {
                                 var row = splitData[i];
                                 var cells = row.split('\t');
                                 var gene = cells[1];
-                                for (var j = 2; j < cells.length; j++) {
+                                for (var j = 2; j &lt; cells.length; j++) {
                                     var sample = sampleIds[j];
                                     var datum = cells[j];
-                                    if (altType === "CNA" && (datum in cnaEventCode)) {
+                                    if (altType === "CNA" &amp;&amp; (datum in cnaEventCode)) {
                                         datum = cnaEventCode[datum];
                                     }
                                     _genomicProfiles[profile_id][gene][sample] = {alteration_type: altType, datum: datum}; // to be passed into makeProfileDataPoints
@@ -320,10 +347,10 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /* Public Functions */
         /**
          * @memberOf angular.query-page-module.DataManager
-         * @param {Array.<string>} prof_ids
-         * @param {Array.<string>} genes
-         * @param {Array.<string>} case_ids
-         * @returns {Promise<Object.<string,Object>>} A promise that resolves into an object that maps
+         * @param {Array.&lt;string>} prof_ids
+         * @param {Array.&lt;string>} genes
+         * @param {Array.&lt;string>} case_ids
+         * @returns {Promise&lt;Object.&lt;string,Object>>} A promise that resolves into an object that maps
          * case ids to genomic data loaded from the profiles. This object is guaranteed
          * to contain the desired data, but also probably contains other data as well.
          * @see _samples
@@ -357,7 +384,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /**
          * @memberOf angular.query-page-module.DataManager
          * @param {string} case_set_id The stable identifier of a case set
-         * @returns {Promise<Array.<string>>} A promise that resolves into an array
+         * @returns {Promise&lt;Array.&lt;string>>} A promise that resolves into an array
          * containing the case ids in the specified case set.
          */
         var caseSet = function (case_set_id) {
@@ -366,7 +393,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
                 if (case_set_id in _caseSets) {
                     q.resolve(_caseSets[case_set_id]);
                 } else {
-                    $http.get('/webservice.do?cmd=getCaseList&case_set_id=' + case_set_id).
+                    $http.get('/webservice.do?cmd=getCaseList&amp;case_set_id=' + case_set_id).
                             success(function (data, status, headers, config) {
                                 data = $.trim(data);
                                 var id = data.split(/[\s]+/)[0];
@@ -382,7 +409,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /**
          * @memberOf angular.query-page-module.DataManager
          * @param {string} id The identifier of a cancer study
-         * @returns {Promise<Object>} A promise that resolves into the data
+         * @returns {Promise&lt;Object>} A promise that resolves into the data
          * corresponding to a cancer study.
          */
         var cancerStudy = function (id) {
@@ -404,7 +431,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
         /**
          * @memberOf angular.query-page-module.DataManager
          * @param {string} id The identifier of a gene set
-         * @returns {Promise<string>} A promise that resolves into a string containing
+         * @returns {Promise&lt;string>} A promise that resolves into a string containing
          * whitespace-separated genes in the specified gene list.
          */
         var geneSet = function (id) {
@@ -432,7 +459,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             /* Functions */
             /**
             * @memberOf angular.query-page-module.DataManager
-            * @returns {Promise<Array.<string>>} A promise that resolves into a list
+            * @returns {Promise&lt;Array.&lt;string>>} A promise that resolves into a list
             * of cancer type identifiers.
             */
             typesOfCancer: function () {
@@ -444,7 +471,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             },
             /**
             * @memberOf angular.query-page-module.DataManager
-            * @returns {Promise<Object.<string, Object>>} A promise that resolve
+            * @returns {Promise&lt;Object.&lt;string, Object>>} A promise that resolve
             * to an object that maps cancer study ids to study "stubs", which
             * just contain the name and type of cancer.
             */
@@ -457,7 +484,7 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
             },
             /**
             * @memberOf angular.query-page-module.DataManager
-            * @returns {Promise<Object.<string, Object>>} A promise that resolve
+            * @returns {Promise&lt;Object.&lt;string, Object>>} A promise that resolve
             * to an object that maps gene set ids to gene set "stubs", which
             * just contain the name of the gene set.
             */
@@ -577,11 +604,11 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             DataManager.cancerStudy(study_id).then(function (study) {
                 // Collect by type
                 ordered_profile_groups.splice(0, alt_types.length);
-                for (var i = 0; i < alt_types.length; i++) {
+                for (var i = 0; i &lt; alt_types.length; i++) {
                     profile_groups[alt_types[i]] = {alt_type: alt_types[i], description: alt_descriptions[i], list: []};
                     ordered_profile_groups.push(profile_groups[alt_types[i]]); // copy reference
                 }
-                for (var i = 0; i < study.genomic_profiles.length; i++) {
+                for (var i = 0; i &lt; study.genomic_profiles.length; i++) {
                     if (study.genomic_profiles[i].show_in_analysis_tab === true || current_tab === 'download') {
                         profile_groups[study.genomic_profiles[i].alteration_type].list.push(study.genomic_profiles[i]);
                     }
@@ -600,7 +627,7 @@ app.factory('AppVars', ['$rootScope', 'FormVars', 'DataManager', '$q', function 
             DataManager.cancerStudy(study_id).then(function (study) {
                 vars.case_sets = study.case_sets.slice();
                 vars.case_sets.push({id: '-1', name: 'User-defined case set'});
-                for (var i = 0; i < vars.case_sets.length; i++) {
+                for (var i = 0; i &lt; vars.case_sets.length; i++) {
                     if (vars.case_sets[i].id === '-1') {
                         vars.case_sets[i].label = vars.case_sets[i].name;
                     } else {
@@ -685,7 +712,7 @@ app.controller('mainController', ['$location', '$interval', '$q', '$scope', 'Dat
                         // clear selections
 
                         if (!$scope.syncedFromUrl) {
-                            for (var i = 0; i < av.alt_types.length; i++) {
+                            for (var i = 0; i &lt; av.alt_types.length; i++) {
                                 $scope.formVars.genomic_profiles[av.alt_types[i]] = false;
                             }
                             // make default selections
@@ -742,7 +769,7 @@ app.controller('mainController', ['$location', '$interval', '$q', '$scope', 'Dat
         $scope.oqlInsertDefaults = function (query) {
             var lines = query.split(/[;\n]+/);
             var retlines = [];
-            for (var i = 0; i < lines.length; i++) {
+            for (var i = 0; i &lt; lines.length; i++) {
                 var line = $.trim(lines[i]);
                 var fullMatch = line.search(/^([^:\s]+)\s*(:)\s*([^\s]+).*$/);
                 if (fullMatch > -1) {
@@ -837,4 +864,26 @@ app.controller('mainController', ['$location', '$interval', '$q', '$scope', 'Dat
                 });
             });
         }
-    }]);
+    }]);</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="angular.query-page-module.html">query-page-module</a></li><li><a href="angular.query-page-module.AppVars.html">AppVars</a></li><li><a href="angular.query-page-module.DataManager.html">DataManager</a></li><li><a href="angular.query-page-module.FormVars.html">FormVars</a></li><li><a href="angular.query-page-module.mainController.html">mainController</a></li><li><a href="angular.query-page-module.profileGroup.html">profileGroup</a></li><li><a href="angular.query-page-module.resize.html">resize</a></li><li><a href="angular.query-page-module.to_trusted_html.html">to_trusted_html</a></li></ul><h3>Namespaces</h3><ul><li><a href="angular.html">angular</a></li><li><a href="oql.html">oql</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Oct 10 2014 15:57:24 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

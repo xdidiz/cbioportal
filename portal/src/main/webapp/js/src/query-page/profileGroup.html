@@ -15,10 +15,20 @@
             <img src='images/help.png' title='{{profgp.list[0].description}}'>
         </div>
         <div ng-show="profgp.alt_type === 'MRNA_EXPRESSION' && formVars.genomic_profiles['MRNA_EXPRESSION'] !== false">
-            Enter a z-score threshold: &#177<input type="text" ng-model="formVars.z_score_threshold">
+            Enter a z-score threshold: 
+            <select chosen ng-model="formVars.z_score_threshold_type"
+                    ng-options="x for x in ['<=','>=']"
+                    style="width:60px"
+            ></select>
+            <input type="text" ng-model="formVars.z_score_threshold">
         </div>
         <div ng-show="profgp.alt_type === 'PROTEIN_ARRAY_PROTEIN_LEVEL' && formVars.genomic_profiles['PROTEIN_ARRAY_PROTEIN_LEVEL'] !== false">
-            Enter a RPPA z-score threshold: &#177<input type="text" ng-model="formVars.rppa_score_threshold">
+            Enter a RPPA z-score threshold:
+            <select chosen ng-model="formVars.rppa_score_threshold_type"
+                    ng-options="x for x in ['<=','>=']"
+                    style="width:60px"
+            ></select>
+            <input type="text" ng-model="formVars.rppa_score_threshold">
         </div>
     </div>
 </div>
