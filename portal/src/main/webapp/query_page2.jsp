@@ -48,7 +48,7 @@
                     <!-- we have to do (index, profgp) instead of just track by index because otherwise angular doesnt register the change -->
                     <!-- , even though we don't actually use 'index' -->
                     <div ng-repeat="(index, profgp) in appVars.vars.ordered_profile_groups">
-                        <div ng-include="'/js/src/query-page/profileGroup.html'">
+                        <div profile-group>
                         </div>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
         </div>
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/src/query-page/angular.min.js"></script>
-        <script type="text/javascript" src="js/src/query-page/ui-bootstrap-0.11.2.min.js"></script>
+        <script type="text/javascript" src="js/src/query-page/ui-bootstrap-tpls-0.11.2.min.js"></script>
         <script type="text/javascript" src="js/lib/chosen.jquery.angular.js"></script>
         <script type="text/javascript" src="js/lib/chosen-angular.js"></script>
         

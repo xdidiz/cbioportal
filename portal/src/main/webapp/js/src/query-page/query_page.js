@@ -813,7 +813,7 @@ app.controller('mainController', ['$location', '$interval', '$q', '$scope', 'Dat
                     var profiles = [];
                     for (var member in $scope.formVars.genomic_profiles) {
                         var val = $scope.formVars.genomic_profiles[member];
-                        if (val !== false) {
+                        if (val !== false && val!==null) {
                             profiles.push(val);
                         }
                     }
