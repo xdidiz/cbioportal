@@ -1,9 +1,9 @@
-<div style="padding-top:3px; padding-bottom:3px;">
-    <div ng-if="profgp.list.length > 0">
+<div style="width:400px">
+    <div class="well well-sm" ng-if="profgp.list.length > 0">
         <div ng-if='profgp.list.length > 1'>
-            <div class="btn-group-vertical">
+            <div>
                 <div ng-repeat="prof in profgp.list">
-                    <label class="btn btn-info" ng-model="formVars.genomic_profiles[profgp.alt_type]" btn-radio="prof.id" uncheckable>
+                    <label class="btn btn-mskcc btn-block" ng-model="formVars.genomic_profiles[profgp.alt_type]" btn-radio="prof.id" uncheckable>
                         {{formVars.genomic_profiles[profgp.alt_type] === prof.id?'&#9679;':'&#9675;'}} {{prof.name}}
                     </label>
                 </div>
@@ -18,7 +18,7 @@
             </div>-->
         </div>
         <div ng-if='profgp.list.length === 1'>
-            <button type="button" class="btn btn-info" 
+            <button type="button" class="btn btn-mskcc btn-block" 
                     ng-model="formVars.genomic_profiles[profgp.alt_type]" 
                     btn-checkbox btn-checkbox-true="'{{profgp.list[0].id}}'" btn-checkbox-false="false"
                     tooltip='{{profgp.list[0].description}}'
@@ -34,7 +34,7 @@
                 <label class="btn btn-default" ng-model="formVars.z_score_threshold_type" btn-radio="'<='"><=</label>
                 <label class="btn btn-default" ng-model="formVars.z_score_threshold_type" btn-radio="'>='">>=</label>
             </div>-->
-            <button type="button" class="btn btn-info" ng-model="formVars.z_score_threshold_type" btn-checkbox btn-checkbox-true="'>='" btn-checkbox-false="'<='">{{formVars.z_score_threshold_type}}</button>
+            <button type="button" class="btn btn-mskcc" ng-model="formVars.z_score_threshold_type" btn-checkbox btn-checkbox-true="'>='" btn-checkbox-false="'<='">{{formVars.z_score_threshold_type}}</button>
             <!--<select chosen disable-search="true"
                     ng-model="formVars.z_score_threshold_type"
                     ng-options="x for x in ['<=','>=']"
@@ -49,7 +49,7 @@
                     ng-options="x for x in ['<=','>=']"
                     style="width:60px"
             ></select>-->
-            <button type="button" class="btn btn-info" ng-model="formVars.rppa_score_threshold_type" btn-checkbox btn-checkbox-true="'>='" btn-checkbox-false="'<='">{{formVars.z_score_threshold_type}}</button>
+            <button type="button" class="btn btn-mskcc" ng-model="formVars.rppa_score_threshold_type" btn-checkbox btn-checkbox-true="'>='" btn-checkbox-false="'<='">{{formVars.z_score_threshold_type}}</button>
             <input type="text" ng-model="formVars.rppa_score_threshold">
         </div>
     </div>
