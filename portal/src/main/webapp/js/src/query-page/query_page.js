@@ -144,10 +144,11 @@ app.factory('DataManager', ['$http', '$q', function ($http, $q) {
          * { AMP: bool, HOMDEL: bool, HETLOSS: bool, GAIN: bool, MUT: [mutation1, mutation2, ...], EXP: float, PROT: float }
          */
         var _samples = {};
+        var _mutationTypes = {};
         var initPromise = $q.defer();
 
         /* Initialization */
-        $http.get('/portal_meta_data.json?partial_studies=true&partial_genesets=true').success(function (json) {
+        $http.get('portal_meta_data.json?partial_studies=true&partial_genesets=true').success(function (json) {
             angular.forEach(json.cancer_studies, function (value, key) {
                 _cancerStudies[key] = value;
                 _cancerStudyStubs[key] = value;
@@ -504,6 +505,8 @@ app.factory('FormVars', function () {
         genomic_profiles: {},
         z_score_threshold: '',
         rppa_score_threshold: '',
+        z_score_threshold_type: '>=',
+        rppa_score_threshold_type: '<=',
         clear: function () {
             for (var member in defaults) {
                 this[member] = defaults[member];
