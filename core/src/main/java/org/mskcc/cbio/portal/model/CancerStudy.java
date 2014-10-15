@@ -28,11 +28,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoCaseProfile;
 import org.mskcc.cbio.portal.dao.DaoClinicalData;
 import org.mskcc.cbio.portal.dao.DaoCopyNumberSegment;
-import static org.mskcc.cbio.portal.servlet.QueryBuilder.HAS_SURVIVAL_DATA;
 
 /**
  * This represents a cancer study, with a set of cases and some data sets.
@@ -411,6 +412,23 @@ public class CancerStudy {
                 + ", typeOfCancerId=" + typeOfCancerId + ", publicStudy=" + publicStudy + "]";
     }
 
+    public JSONObject toJSONObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", this.getCancerStudyStableId());
+        obj.put("type_of_cancer", this.getTypeOfCancerId());
+        obj.put("name", this.getName());
+        obj.put("short_name", this.getShortName());
+        obj.put("description", this.getDescription());
+        obj.put("pmid", this.getPmid());
+        obj.put("citation", this.getCitation());
+        JSONArray groups = new JSONArray();
+        for (String s : this.getGroups()) {
+            groups.add(s);
+        }
+        obj.put("groups", groups);
+        return obj;
+    }
+    
     public boolean hasMutSigData() throws DaoException {
         return !DaoMutSig.hasMutsig(this);
     }

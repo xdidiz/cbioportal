@@ -17,6 +17,8 @@
 
 package org.mskcc.cbio.portal.model;
 
+import org.json.simple.JSONObject;
+
 /**
  * A TypeOfCancer is a clinical cancer type, such as Glioblastoma, Ovarian, etc.
  * Eventually, we'll have ontology problems with this, but initially the dbms will
@@ -68,5 +70,13 @@ public class TypeOfCancer {
 
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+    
+    public JSONObject toJSONObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", this.getTypeOfCancerId());
+        obj.put("name", this.getName());
+        obj.put("color", this.getDedicatedColor());
+        return obj;
     }
 }
