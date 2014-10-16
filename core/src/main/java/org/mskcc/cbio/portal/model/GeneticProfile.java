@@ -18,6 +18,7 @@
 package org.mskcc.cbio.portal.model;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.json.simple.JSONObject;
 
 /**
  * Class for genetic profile
@@ -124,6 +125,17 @@ public class GeneticProfile {
     @Override
     public String toString() {
        return ToStringBuilder.reflectionToString(this);
+    }
+    
+    public JSONObject toJSONObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", this.getGeneticProfileId());
+        obj.put("name", this.getProfileName());
+        obj.put("description", this.getProfileDescription());
+        obj.put("cancer_study_id", this.getCancerStudyId());
+        obj.put("genetic_alteration_type", this.getGeneticAlterationType());
+        obj.put("show_profile_in_analysis_tab", this.showProfileInAnalysisTab());
+        return obj;
     }
     
 }

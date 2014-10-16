@@ -20,6 +20,8 @@ package org.mskcc.cbio.portal.model;
 
 // imports
 import java.util.ArrayList;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  * Class to store information of case list.
@@ -123,6 +125,20 @@ public class CaseList {
                 + "}";
     }
 
+    
+    public JSONObject toJSONObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("id", this.getStableId());
+        obj.put("name", this.getName());
+        obj.put("description", this.getDescription());
+        obj.put("cancer_study_id", this.getCancerStudyId());
+        JSONArray case_ids = new JSONArray();
+        for(String s: this.getCaseList()) {
+            case_ids.add(s);
+        }
+        obj.put("case_ids", case_ids);
+        return obj;
+    }
 
     /**
      * Gets list of all case IDs in the set as one string.

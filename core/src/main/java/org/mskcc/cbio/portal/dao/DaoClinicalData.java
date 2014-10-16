@@ -148,6 +148,36 @@ public final class DaoClinicalData {
         }
     }
 
+    public static List<ClinicalData> getDataByCaseId(String caseId) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+		List<ClinicalData> clinicals = new ArrayList<ClinicalData>();
+
+        try {
+            con = JdbcUtil.getDbConnection(DaoClinicalData.class);
+
+            pstmt = con.prepareStatement("SELECT * FROM clinical WHERE CASE_ID=? ");
+
+            pstmt.setString(1, caseId);
+
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                clinicals.add(extract(rs));
+			}
+		}
+		catch (SQLException e) {
+			throw new DaoException(String.format("clincial not found for (%s)",
+										caseId));
+		}
+		finally {
+			JdbcUtil.closeAll(DaoClinicalData.class, con, pstmt, rs);
+		}
+
+		return clinicals;
+    }
     public static List<ClinicalData> getDataByCaseId(int cancerStudyId, String caseId)
             throws DaoException {
 
