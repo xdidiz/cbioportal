@@ -32,6 +32,7 @@ public class TypeOfCancer {
    private String clinicalTrialKeywords = ""; // Separated by commas
    private String dedicatedColor = "white";
    private String shortName = "";
+   private String parentTypeOfCancerId;
 
    public String getName() {
       return name;
@@ -68,5 +69,13 @@ public class TypeOfCancer {
 
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+    
+    public String getParent() {
+        return parentTypeOfCancerId;
+    }
+    
+    public void setParent(String p) {
+        this.parentTypeOfCancerId = p;
     }
 }
