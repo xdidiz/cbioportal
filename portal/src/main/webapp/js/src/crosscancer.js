@@ -621,6 +621,7 @@
 
                             var redrawHistogram = function() {
                                 histData = filterAndSortData(histDataOrg);
+                                window.selectedStudies = histData.map(function(x) { return x.studyId; });
 
                                 studyLocIncrements = (width - (paddingLeft + paddingRight)) / histData.length;
                                 studyWidth = studyLocIncrements * .75;
@@ -944,9 +945,10 @@
                                 setTimeout(redrawHistogram, 3000);
 			    }
 
-                            // Let's load the mutation details as well
+                            // Let's load the mutation details 0as well
                             var servletParams = {
-                                data_priority: priority
+                                data_priority: priority,
+                                selected_studies: window.selectedStudies
                             };
                             var servletName = "crosscancermutation.json";
                             // init mutation data proxy with the data servlet config

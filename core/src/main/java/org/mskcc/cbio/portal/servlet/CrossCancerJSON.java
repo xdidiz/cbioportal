@@ -90,12 +90,29 @@ public class CrossCancerJSON extends HttpServlet {
             } catch (NumberFormatException e) {
                 dataTypePriority = 0;
             }
+            
+            String[] selected_studies;
+            try {
+                selected_studies
+                        = request.getParameter(QueryBuilder.SELECTED_STUDIES).split(",");
+            } catch (Exception e) {
+                selected_studies = null;
+            }
+                
 
             //  Cancer All Cancer Studies
             List<CancerStudy> cancerStudiesList = accessControl.getCancerStudies();
+            Set<String> selectedStudySet = new HashSet<>();
+            if (selected_studies != null) {
+                for (String s: selected_studies) {
+                    selectedStudySet.add(s);
+                }
+            }
             for (CancerStudy cancerStudy : cancerStudiesList) {
                 String cancerStudyId = cancerStudy.getCancerStudyStableId();
                 if(cancerStudyId.equalsIgnoreCase("all"))
+                    continue;
+                if(selected_studies != null && !selectedStudySet.contains(cancerStudyId))
                     continue;
 
                 Map cancerMap = new LinkedHashMap();

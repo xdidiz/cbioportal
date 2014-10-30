@@ -102,6 +102,7 @@ public class QueryBuilder extends HttpServlet {
     public static final String INDEX_PAGE = "index.do";
     public static final String INTERNAL_EXTENDED_MUTATION_LIST = "INTERNAL_EXTENDED_MUTATION_LIST";
     public static final String DATA_PRIORITY = "data_priority";
+    public static final String SELECTED_STUDIES = "selected_studies";
     private static final String DB_CONNECT_ERROR = ("An error occurred while trying to connect to the database." +
                                                     "  This could happen if the database does not contain any cancer studies.");
 
