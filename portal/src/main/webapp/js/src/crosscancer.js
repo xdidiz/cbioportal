@@ -945,7 +945,7 @@
                                 setTimeout(redrawHistogram, 3000);
 			    }
 
-                            // Let's load the mutation details 0as well
+                            // Let's load the mutation details as well
                             var servletParams = {
                                 data_priority: priority,
                                 selected_studies: window.selectedStudies

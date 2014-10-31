@@ -107,9 +107,24 @@ public class CrossCancerMutationDataServlet extends HttpServlet
         try {
             //  Cancer All Cancer Studies
             List<CancerStudy> cancerStudiesList = accessControl.getCancerStudies();
+            String[] selected_studies;
+            try {
+                selected_studies
+                        = request.getParameter(QueryBuilder.SELECTED_STUDIES).split(",");
+            } catch (Exception e) {
+                selected_studies = null;
+            } 
+            Set<String> selectedStudySet = new HashSet<>();
+            if (selected_studies != null) {
+                for (String s: selected_studies) {
+                    selectedStudySet.add(s);
+                }
+            }
             for (CancerStudy cancerStudy : cancerStudiesList) {
                 String cancerStudyId = cancerStudy.getCancerStudyStableId();
                 if(cancerStudyId.equalsIgnoreCase("all"))
+                    continue;
+                if(selected_studies != null && !selectedStudySet.contains(cancerStudyId))
                     continue;
 
                 //  Get all Genetic Profiles Associated with this Cancer Study ID.
