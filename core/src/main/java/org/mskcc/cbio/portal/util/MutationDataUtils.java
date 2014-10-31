@@ -49,6 +49,7 @@ public class MutationDataUtils {
 	public static final String CANCER_STUDY = "cancerStudy";
 	public static final String CANCER_STUDY_SHORT = "cancerStudyShort";
 	public static final String CANCER_STUDY_LINK = "cancerStudyLink";
+        public static final String CANCER_STUDY_ID = "cancerStudyId";
 	public static final String PROTEIN_CHANGE = "proteinChange";
 	public static final String MUTATION_TYPE = "mutationType";
 	public static final String COSMIC = "cosmic";
@@ -153,7 +154,6 @@ public class MutationDataUtils {
 		                mutation, geneticProfile, cancerStudy, countMap, cnaDataMap, cosmic, clinicalDataMap));
             }
         }
-
         return mutationArray;
     }
 
@@ -210,6 +210,7 @@ public class MutationDataUtils {
         mutationData.put(LINK_TO_PATIENT_VIEW, linkToPatientView);
         mutationData.put(CANCER_TYPE, typeOfCancer);
         mutationData.put(CANCER_STUDY, cancerStudy.getName());
+        mutationData.put(CANCER_STUDY_ID, cancerStudy.getCancerStudyStableId());
         mutationData.put(CANCER_STUDY_SHORT, cancerStudy.getShortName());
         mutationData.put(CANCER_STUDY_LINK, GlobalProperties.getLinkToCancerStudyView(cancerStudyStableId));
 	    mutationData.put(TUMOR_TYPE, this.getTumorType(mutation, clinicalDataMap));

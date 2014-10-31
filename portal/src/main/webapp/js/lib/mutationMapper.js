@@ -2331,18 +2331,15 @@ var MutationDetailsUtil = function(mutations)
 	this._updateGeneMap = function(mutations)
 	{
 		var mutationMap = _mutationGeneMap;
-
 		// process raw data to group mutations by genes
 		for (var i=0; i < mutations.length; i++)
 		{
 			var gene = mutations.at(i).geneSymbol.toUpperCase();
+                        var study = mutations.at(i).cancerStudyId;
 
-			if (mutationMap[gene] == undefined)
-			{
-				mutationMap[gene] = [];
-			}
-
-			mutationMap[gene].push(mutations.at(i));
+                        mutationMap[gene] = mutationMap[gene] || {};
+                        mutationMap[gene][study] = mutationMap[gene][study] || [];
+                        mutationMap[gene][study].push(mutations.at(i));
 		}
 
 		return mutationMap;
@@ -2365,10 +2362,7 @@ var MutationDetailsUtil = function(mutations)
 		{
 			var caseId = mutations.at(i).caseId.toLowerCase();
 
-			if (mutationMap[caseId] == undefined)
-			{
-				mutationMap[caseId] = [];
-			}
+                        mutationMap[caseId] = mutationMap[caseId] || [];
 
 			mutationMap[caseId].push(mutations.at(i));
 		}
@@ -3895,6 +3889,7 @@ var MutationModel = Backbone.Model.extend({
         this.cancerType = attributes.cancerType;
         this.cancerStudy = attributes.cancerStudy;
         this.cancerStudyShort = attributes.cancerStudyShort;
+        this.cancerStudyId = attributes.cancerStudyId;
         this.cancerStudyLink = attributes.cancerStudyLink;
 		this.tumorType = attributes.tumorType;
 		this.proteinChange = attributes.proteinChange;
@@ -7070,6 +7065,7 @@ function MutationDataProxy(geneList)
 	// flag to indicate if the initialization is full or lazy
 	var _fullInit;
 
+        var _queryHist =  {};
 	/**
 	 * Initializes the proxy without actually grabbing anything from the server.
 	 * Provided servlet name and servlet parameters will be used for later invocation
@@ -7130,34 +7126,31 @@ function MutationDataProxy(geneList)
 	 */
 	function getMutationData(geneList, callback)
 	{
-                _servletParams.selected_studies = window.selectedStudies.join(",");
+                var studies = window.selectedStudies;
 		var genes = geneList.trim().split(/\s+/);
-		var genesToQuery = [];
-
-		// get previously grabbed data (if any)
-		var mutationData = [];
+                var toQuery = {}; //maps gene to list of studies
+                
+                // get previously grabbed data (if any)
+                var mutationData = [];
 		var mutationMap = _util.getMutationGeneMap();
-
-		// process each gene in the given list
-		/*_.each(genes, function(gene, idx) {
-			gene = gene.toUpperCase();
-
-			var data = mutationMap[gene];
-
-			if (data == undefined ||
-			    data.length == 0)
-			{
-				// mutation data does not exist for this gene, add it to the list
-				genesToQuery.push(gene);
-			}
-			else
-			{
-				// data is already cached for this gene, update the data array
-				mutationData = mutationData.concat(data);
-			}
-		});*/
-                // no caching
-                genesToQuery = genes;
+                console.log(mutationMap);
+                $.each(genes, function(idx, gene) {
+                    gene = gene.toUpperCase();
+                    $.each(studies, function(idx, study) {
+                        var geneMap = mutationMap[gene];
+                        var data = (geneMap && geneMap[study]) || undefined;
+                        if (data !== undefined) {
+                            mutationData = mutationData.concat(data);
+                        } else {
+                            _queryHist[gene] = _queryHist[gene] || {};
+                            if (!(study in _queryHist[gene])) {
+                                _queryHist[gene][study] = true;
+                                toQuery[gene] = toQuery[gene] || [];
+                                toQuery[gene].push(study);
+                            }
+                        }
+                    });
+                });
 
 		// all data is already retrieved (full init)
 		if (_fullInit)
@@ -7171,34 +7164,38 @@ function MutationDataProxy(geneList)
 			var process = function(data) {
 				// process new data retrieved from server
 				var mutations = new MutationCollection(data);
+                                console.log(mutations);
 				_util.processMutationData(mutations);
 
 				// concat new data with already cached data,
 				// and forward it to the callback function
-				//mutationData = mutationData.concat(data);
+				mutationData = mutationData.concat(data);
                                 
-                                // no caching
-                                mutationData = data;
-				callback(mutationData);
+                                callsWaiting -= 1;
+                                if (callsWaiting === 0) {
+                                    callback(mutationData);
+                                }
 			};
-
-			// some (or all) data is missing,
-			// send ajax request for missing genes
-			if (genesToQuery.length > 0)
-			{
-				// add genesToQuery to the servlet params
-				_servletParams.geneList = genesToQuery.join(" ");
-
-				// retrieve data from the server
-				$.post(_servletName, _servletParams, process, "json");
-			}
-			// data for all requested genes already cached
-			else
-			{
-				// just forward the data to the callback function
-				callback(mutationData);
-			}
-		}
+                        
+                        var fail = function() {
+                            callsWaiting -= 1;
+                            if (callsWaiting === 0) {
+                                callback(mutationData);        
+                            }
+                        ;}
+                        
+                        var callsWaiting = Object.keys(toQuery).length;
+                        if (callsWaiting === 0) {
+                            callback(mutationData);
+                        } else {
+                            for (var gene in toQuery) {
+                                _servletParams.geneList = gene;
+                                _servletParams.selected_studies = toQuery[gene].join(",");
+                                console.log("About to query genes: "+_servletParams.geneList+" and studies: "+_servletParams.selected_studies);
+                                $.post(_servletName, _servletParams, process, "json").fail(fail);
+                            }
+                        }
+                    }
 	}
 
 	/**
@@ -14864,7 +14861,6 @@ function MutationMapper(options)
 		}
 		else if (mutationProxyOpts.lazy)
 		{
-                    console.log("LAZY");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data without a proxy
@@ -14873,7 +14869,6 @@ function MutationMapper(options)
 		}
 		else
 		{
-                    console.log("FULL");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data proxy with full data
