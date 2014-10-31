@@ -116,9 +116,7 @@ public class CrossCancerMutationDataServlet extends HttpServlet
             } 
             Set<String> selectedStudySet = new HashSet<>();
             if (selected_studies != null) {
-                for (String s: selected_studies) {
-                    selectedStudySet.add(s);
-                }
+                selectedStudySet.addAll(Arrays.asList(selected_studies));
             }
             for (CancerStudy cancerStudy : cancerStudiesList) {
                 String cancerStudyId = cancerStudy.getCancerStudyStableId();

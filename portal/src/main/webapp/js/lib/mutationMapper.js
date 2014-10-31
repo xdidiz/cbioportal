@@ -577,7 +577,7 @@ var MutationViewsUtil = (function()
 		if ($(el).is(":visible"))
 		{
 			mutationMapper.init(mut3dVis);
-			initialized = true;
+			//initialized = true;
 		}
 
 		// add a click listener for the "mutations" tab
@@ -589,7 +589,7 @@ var MutationViewsUtil = (function()
 				if (!initialized)
 				{
 					mutationMapper.init(mut3dVis);
-					initialized = true;
+					//initialized = true;
 				}
 				// if already init, then refresh genes tab
 				// (a fix for ui.tabs.plugin resize problem)
@@ -7130,6 +7130,7 @@ function MutationDataProxy(geneList)
 	 */
 	function getMutationData(geneList, callback)
 	{
+                _servletParams.selected_studies = window.selectedStudies.join(",");
 		var genes = geneList.trim().split(/\s+/);
 		var genesToQuery = [];
 
@@ -7138,7 +7139,7 @@ function MutationDataProxy(geneList)
 		var mutationMap = _util.getMutationGeneMap();
 
 		// process each gene in the given list
-		_.each(genes, function(gene, idx) {
+		/*_.each(genes, function(gene, idx) {
 			gene = gene.toUpperCase();
 
 			var data = mutationMap[gene];
@@ -7154,7 +7155,9 @@ function MutationDataProxy(geneList)
 				// data is already cached for this gene, update the data array
 				mutationData = mutationData.concat(data);
 			}
-		});
+		});*/
+                // no caching
+                genesToQuery = genes;
 
 		// all data is already retrieved (full init)
 		if (_fullInit)
@@ -7172,7 +7175,10 @@ function MutationDataProxy(geneList)
 
 				// concat new data with already cached data,
 				// and forward it to the callback function
-				mutationData = mutationData.concat(data);
+				//mutationData = mutationData.concat(data);
+                                
+                                // no caching
+                                mutationData = data;
 				callback(mutationData);
 			};
 
@@ -14858,6 +14864,7 @@ function MutationMapper(options)
 		}
 		else if (mutationProxyOpts.lazy)
 		{
+                    console.log("LAZY");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data without a proxy
@@ -14866,6 +14873,7 @@ function MutationMapper(options)
 		}
 		else
 		{
+                    console.log("FULL");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data proxy with full data
