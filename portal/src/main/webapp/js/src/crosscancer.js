@@ -621,6 +621,7 @@
 
                             var redrawHistogram = function() {
                                 histData = filterAndSortData(histDataOrg);
+                                window.selectedStudiesChanged = true;
                                 window.selectedStudies = histData.map(function(x) { return x.studyId; });
 
                                 studyLocIncrements = (width - (paddingLeft + paddingRight)) / histData.length;
@@ -944,6 +945,9 @@
 			    if( $("#histogram-remove-notaltered").trigger("click") ) {
                                 setTimeout(redrawHistogram, 3000);
 			    }
+                            
+                            // initialize
+                            redrawHistogram();
 
                             // Let's load the mutation details as well
                             var servletParams = {

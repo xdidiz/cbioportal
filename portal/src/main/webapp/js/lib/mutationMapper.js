@@ -586,9 +586,10 @@ var MutationViewsUtil = (function()
 			if (ui.newTab.text().trim().toLowerCase() == tabName.toLowerCase())
 			{
 				// init only if it is not initialized yet
-				if (!initialized)
+				if (window.selectedStudiesChanged)
 				{
 					mutationMapper.init(mut3dVis);
+                                        window.selectedStudiesChanged = false;
 					//initialized = true;
 				}
 				// if already init, then refresh genes tab
@@ -7138,24 +7139,6 @@ function MutationDataProxy(geneList)
 		var mutationData = [];
 		var mutationMap = _util.getMutationGeneMap();
 
-		// process each gene in the given list
-		/*_.each(genes, function(gene, idx) {
-			gene = gene.toUpperCase();
-
-			var data = mutationMap[gene];
-
-			if (data == undefined ||
-			    data.length == 0)
-			{
-				// mutation data does not exist for this gene, add it to the list
-				genesToQuery.push(gene);
-			}
-			else
-			{
-				// data is already cached for this gene, update the data array
-				mutationData = mutationData.concat(data);
-			}
-		});*/
                 // no caching
                 genesToQuery = genes;
 
@@ -7173,10 +7156,6 @@ function MutationDataProxy(geneList)
 				var mutations = new MutationCollection(data);
 				_util.processMutationData(mutations);
 
-				// concat new data with already cached data,
-				// and forward it to the callback function
-				//mutationData = mutationData.concat(data);
-                                
                                 // no caching
                                 mutationData = data;
 				callback(mutationData);
@@ -14864,7 +14843,6 @@ function MutationMapper(options)
 		}
 		else if (mutationProxyOpts.lazy)
 		{
-                    console.log("LAZY");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data without a proxy
@@ -14873,7 +14851,6 @@ function MutationMapper(options)
 		}
 		else
 		{
-                    console.log("FULL");
 			mutationProxy = new MutationDataProxy(_options.data.geneList.join(" "));
 
 			// init mutation data proxy with full data
