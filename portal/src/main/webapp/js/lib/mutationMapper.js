@@ -2256,6 +2256,16 @@ var MutationDetailsUtil = function(mutations)
 	var _mutationIdMap = {};
 	var _mutations = [];
 
+        this.getMutationsByGene = function(gene) {
+            if (!(gene in _mutationGeneMap)) {
+                return [];
+            }
+            var ret = [];
+            for (var study in _mutationGeneMap[gene]) {
+                ret.concat(_mutationGeneMap[gene][study]);
+            }
+            return ret;
+        }
 	this.getMutationGeneMap = function()
 	{
 		return _mutationGeneMap;
@@ -7126,6 +7136,10 @@ function MutationDataProxy(geneList)
 	 */
 	function getMutationData(geneList, callback)
 	{
+                console.log("QUERY HIST");
+                console.log(_queryHist);
+                console.log("MUTATION MAP");
+                console.log(_util.getMutationGeneMap());
                 var studies = window.selectedStudies;
 		var genes = geneList.trim().split(/\s+/);
                 var toQuery = {}; //maps gene to list of studies
@@ -7137,17 +7151,13 @@ function MutationDataProxy(geneList)
                 $.each(genes, function(idx, gene) {
                     gene = gene.toUpperCase();
                     $.each(studies, function(idx, study) {
-                        var geneMap = mutationMap[gene];
-                        var data = (geneMap && geneMap[study]) || undefined;
-                        if (data !== undefined) {
-                            mutationData = mutationData.concat(data);
+                        if ((gene in _queryHist) && (study in _queryHist[gene])) {
+                            mutationData = mutationData.concat(mutationMap[gene][study]);
                         } else {
                             _queryHist[gene] = _queryHist[gene] || {};
-                            if (!(study in _queryHist[gene])) {
-                                _queryHist[gene][study] = true;
-                                toQuery[gene] = toQuery[gene] || [];
-                                toQuery[gene].push(study);
-                            }
+                            _queryHist[gene][study] = true;
+                            toQuery[gene] = toQuery[gene] || [];
+                            toQuery[gene].push(study);
                         }
                     });
                 });
@@ -7164,7 +7174,6 @@ function MutationDataProxy(geneList)
 			var process = function(data) {
 				// process new data retrieved from server
 				var mutations = new MutationCollection(data);
-                                console.log(mutations);
 				_util.processMutationData(mutations);
 
 				// concat new data with already cached data,
@@ -7189,10 +7198,12 @@ function MutationDataProxy(geneList)
                             callback(mutationData);
                         } else {
                             for (var gene in toQuery) {
-                                _servletParams.geneList = gene;
-                                _servletParams.selected_studies = toQuery[gene].join(",");
-                                console.log("About to query genes: "+_servletParams.geneList+" and studies: "+_servletParams.selected_studies);
-                                $.post(_servletName, _servletParams, process, "json").fail(fail);
+                                (function(){
+                                    _servletParams.geneList = gene;
+                                    _servletParams.selected_studies = toQuery[gene].join(",");
+                                    console.log("About to query genes: "+_servletParams.geneList+" and studies: "+_servletParams.selected_studies);
+                                    $.post(_servletName, _servletParams, process, "json").fail(fail);
+                                })();
                             }
                         }
                     }
@@ -7350,7 +7361,7 @@ function PdbDataProxy(mutationUtil)
 		// callback function for the AJAX call
 		var processData = function(data) {
 			var positionMap = {};
-			var mutations = _util.getMutationGeneMap()[gene];
+			var mutations = _util.getMutationsByGene(gene);
 
 			if (data.positionMap != null)
 			{
@@ -14459,6 +14470,8 @@ function MutationDetailsController(
 	 */
 	function processMutationData(mutationData, mutationUtil, pdbRowData)
 	{
+                console.log("MUTATION DATA");
+                console.log(mutationData);
 		if (!pdbRowData)
 		{
 			return mutationData;
