@@ -577,7 +577,6 @@ var MutationViewsUtil = (function()
 		if ($(el).is(":visible"))
 		{
 			mutationMapper.init(mut3dVis);
-			//initialized = true;
 		}
 
 		// add a click listener for the "mutations" tab
@@ -590,7 +589,6 @@ var MutationViewsUtil = (function()
 				{
 					mutationMapper.init(mut3dVis);
                                         window.selectedStudiesChanged = false;
-					//initialized = true;
 				}
 				// if already init, then refresh genes tab
 				// (a fix for ui.tabs.plugin resize problem)
