@@ -538,43 +538,6 @@ class ImporterImpl implements Importer {
 		return tmpMAF.getCanonicalPath();
 	}
 
-    private boolean cancerStudyMetadataNeedsUpdating(String cancerStudyMetadataFilename, CancerStudyMetadata cancerStudyMetadata) throws Exception
-    {
-        Properties properties = getProperties(cancerStudyMetadataFilename);
-        return (propertyNeedsUpdating(properties.getProperty("name"), cancerStudyMetadata.getName()) ||
-                propertyNeedsUpdating(properties.getProperty("description"), cancerStudyMetadata.getDescription()) ||
-                propertyNeedsUpdating(properties.getProperty("citation"), cancerStudyMetadata.getCitation()) ||
-                propertyNeedsUpdating(properties.getProperty("pmid"), cancerStudyMetadata.getPMID()) ||
-                propertyNeedsUpdating(properties.getProperty("groups"), cancerStudyMetadata.getGroups()) ||
-                propertyNeedsUpdating(properties.getProperty("short_name"), cancerStudyMetadata.getShortName()));
-    }
-
-    private Properties getProperties(String cancerStudyMetadataFilename) throws Exception
-    {
-        Properties properties = new Properties();
-        File metaStudyFile = new File(cancerStudyMetadataFilename);
-        properties.load(new FileInputStream(metaStudyFile));
-        return properties;
-    }
-
-    private boolean propertyNeedsUpdating(String metaStudyFileProperty, String cancerStudyMetadataProperty)
-    {
-        if (!cancerStudyMetadataProperty.isEmpty() &&
-            (metaStudyFileProperty == null || metaStudyFileProperty.isEmpty())) {
-            return true;
-        }
-        if (!cancerStudyMetadataProperty.isEmpty() &&
-            metaStudyFileProperty != null &&
-            !cancerStudyMetadataProperty.equals(metaStudyFileProperty.trim())) {
-            return true;
-        }
-        if (cancerStudyMetadataProperty.isEmpty() &&
-            metaStudyFileProperty != null) {
-            return true;
-        }
-        return false;
-    }
-
     private boolean isZScoreFile(String stagingFilename, DatatypeMetadata datatypeMetadata)
     {
         return (stagingFilename.endsWith(datatypeMetadata.ZSCORE_STAGING_FILENAME_SUFFIX));
