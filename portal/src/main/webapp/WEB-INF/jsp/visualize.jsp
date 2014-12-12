@@ -180,7 +180,7 @@
             <% } %>
 
             <% if (showIGVtab) { %>
-        <%@ include file="igv.jsp" %>
+        <%@ include file="igvjs.jsp" %>
             <% } %>
 
             <% if (has_survival) { %>

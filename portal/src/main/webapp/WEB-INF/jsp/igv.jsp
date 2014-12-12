@@ -29,6 +29,10 @@
       }
 %>
 
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="//www.broadinstitute.org/igv/projects/igv-web/css/igv.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="//www.broadinstitute.org/igv/projects/igv-web/dist/igv-all.min.js"></script>
+
 <div class="section" id="igv_tab">
     <table>
         <tr>
