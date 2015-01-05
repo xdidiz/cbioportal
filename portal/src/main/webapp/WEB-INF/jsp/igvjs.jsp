@@ -47,10 +47,11 @@
                             showNavigation: true,
                             locus: locus,
                             tracks: [{
-                                    url: trackUrl,
-                                    label: trackLabel,
-                                    sampleHeight: 9,
-                                    type: "seg"
+                                        url: trackUrl,
+                                        label: trackLabel,
+                                        sampleHeight: 9,
+                                        type: "seg",
+                                        order:10000
                                 }],
                             posColorScale: true,
                             negColorScale: true,
