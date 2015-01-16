@@ -837,24 +837,32 @@
             return this.selected_item.find("abbr").remove();
         };
 
-	Chosen.prototype.do_result_select_multiple = function(elt) {
+	Chosen.prototype.do_result_select_multiple = function(elt, forceSelect) {		
 		var high, high_id, item, position;
 		high = elt;
 		if (!high.attr("data-is-group-header")) {
 			high_id = high.attr("id");
 			position = high_id.substr(high_id.lastIndexOf("_") + 1);
 			item = this.results_data[position];
-			high.toggleClass("result-selected-multi");
-			if (high.hasClass("result-selected-multi")) {
+			if (forceSelect === "select") {
+				high.addClass("result-selected-multi");
 				high.addClass("result-selected");
-			} else {
+			} else if (forceSelect === "deselect") {
+				high.removeClass("result-selected-multi");
 				high.removeClass("result-selected");
+			} else {
+				high.toggleClass("result-selected-multi");
+				if (high.hasClass("result-selected-multi")) {
+					high.addClass("result-selected");
+				} else {
+					high.removeClass("result-selected");
+				}
 			}
 			
 			if (item.disabled) {
 				return false;
 			}
-			item.selected = true;
+			item.selected = high.hasClass("result-selected-multi");
 			this.form_field.options[item.options_index].selected = true;
 			if (high.hasClass("result-selected-multi")) {
 				this.choice_build(item);
@@ -865,12 +873,26 @@
 			// recurse
 			var treeid = high.attr("data-tree-id");
 			var root = this;
-			this.container.find("[data-parent='"+treeid+"']").each(function(index, elt) {
+			this.container.find(".active-result[data-parent='"+treeid+"']").each(function(index, elt) {
 				console.log(elt);
-				root.do_result_select_multiple($(elt));
+				root.do_result_select_multiple($(elt), forceSelect);
 			});
 		}
 	}
+	
+	Chosen.prototype.all_children_selected_multiple = function(elt) {
+		if (!elt.attr("data-is-group-header")) {
+			return elt.hasClass("result-selected-multi");
+		} else {
+			var treeid = elt.attr("data-tree-id");
+			var root = this;
+			var acc = true;
+			this.container.find(".active-result[data-parent='"+treeid+"']").each(function(index, elt) {
+				acc = acc && root.all_children_selected_multiple($(elt));
+			});
+			return acc;
+		}
+	}	
         Chosen.prototype.result_select = function (evt) {
             var high, high_id, item, position;
             if (this.result_highlight) {
@@ -880,17 +902,15 @@
                 item = this.results_data[position];
                 this.result_clear_highlight();
                 if (this.is_multiple) {
-			this.do_result_select_multiple(high);
-			/*if (!high.attr("data-is-group-header")) {
-				high.toggleClass("result-selected-multi");
-				if (high.hasClass("result-selected-multi")) {
-					high.addClass("result-selected");
-				} else {
-					high.removeClass("result-selected");
-				}
+			if (!high.attr("data-is-group-header")) {
+				this.do_result_select_multiple(high);
 			} else {
-				
-			}*/
+				if (this.all_children_selected_multiple(high)) {
+					this.do_result_select_multiple(high);
+				} else {
+					this.do_result_select_multiple(high, "select");
+				}
+			}
                 } else {
                     this.search_results.find(".result-selected").removeClass("result-selected");
                     this.result_single_selected = high;
