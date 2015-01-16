@@ -787,9 +787,9 @@
             choice_id = this.container_id + "_c_" + item.array_index;
             this.choices += 1;
             if (item.disabled) {
-                html = '<li class="search-choice search-choice-disabled" id="' + choice_id + '"><span>' + item.html + '</span></li>';
+                html = '<li class="search-choice search-choice-disabled" data-dom-id="' + item.dom_id + '" id="' + choice_id + '"><span>' + item.html + '</span></li>';
             } else {
-                html = '<li class="search-choice" id="' + choice_id + '"><span>' + this.reduce_choice_label(item.html) + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>';
+                html = '<li class="search-choice" data-dom-id="' + item.dom_id + '" id="' + choice_id + '"><span>' + this.reduce_choice_label(item.html) + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>';
             }
             this.search_container.before(html);
             link = $('#' + choice_id).find("a").first();
@@ -837,7 +837,7 @@
             return this.selected_item.find("abbr").remove();
         };
 
-	Chosen.prototype.do_result_select_multiple = function(elt, forceSelect) {		
+	Chosen.prototype.do_result_select_multiple = function(elt, forceSelect, suppressChoiceIcon) {		
 		var high, high_id, item, position;
 		high = elt;
 		if (!high.attr("data-is-group-header")) {
@@ -865,7 +865,9 @@
 			item.selected = high.hasClass("result-selected-multi");
 			this.form_field.options[item.options_index].selected = true;
 			if (high.hasClass("result-selected-multi")) {
-				this.choice_build(item);
+				if (!suppressChoiceIcon) {
+					this.choice_build(item);
+				}
 			} else {
 				$("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).remove();
 			}
@@ -874,8 +876,7 @@
 			var treeid = high.attr("data-tree-id");
 			var root = this;
 			this.container.find(".active-result[data-parent='"+treeid+"']").each(function(index, elt) {
-				console.log(elt);
-				root.do_result_select_multiple($(elt), forceSelect);
+				root.do_result_select_multiple($(elt), forceSelect, suppressChoiceIcon);
 			});
 		}
 	}
@@ -907,7 +908,14 @@
 			} else {
 				if (this.all_children_selected_multiple(high)) {
 					this.do_result_select_multiple(high);
+					//$("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).remove();
 				} else {
+					/*
+					this.do_result_select_multiple(high, "select", true);
+					if ($("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).size() === 0) {
+						this.choice_build(item);
+					}*/
+					this.do_result_select_multiple(high, "deselect");
 					this.do_result_select_multiple(high, "select");
 				}
 			}
