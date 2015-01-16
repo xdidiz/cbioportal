@@ -377,6 +377,7 @@
                 child.__super__ = parent.prototype;
                 return child;
             };
+	    
 
     root = this;
 
@@ -398,7 +399,7 @@
     });
 
     Chosen = (function (_super) {
-
+	    
         __extends(Chosen, _super);
 
         function Chosen() {
@@ -408,6 +409,7 @@
         Chosen.prototype.setup = function () {
             this.form_field_jq = $(this.form_field);
             this.current_selectedIndex = this.form_field.selectedIndex;
+	    this.current_selectedIndexes = [];
             return this.is_rtl = this.form_field_jq.hasClass("chzn-rtl");
         };
 
