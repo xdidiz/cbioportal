@@ -341,7 +341,7 @@
             return true;
         };
 
-        AbstractChosen.default_multiple_text = "Select Some Options";
+        AbstractChosen.default_multiple_text = "";
 
         AbstractChosen.default_single_text = "Select an Option";
 
@@ -409,7 +409,6 @@
         Chosen.prototype.setup = function () {
             this.form_field_jq = $(this.form_field);
             this.current_selectedIndex = this.form_field.selectedIndex;
-	    this.current_selectedIndexes = [];
             return this.is_rtl = this.form_field_jq.hasClass("chzn-rtl");
         };
 
@@ -772,6 +771,10 @@
             }
         };
 
+	Chosen.prototype.reduce_choice_label = function(string) {
+		var max_len = 25;
+		return string.substring(0,max_len) + (string.length > max_len ? "..." : "");
+	}
         Chosen.prototype.choice_build = function (item) {
             var choice_id, html, link,
                     _this = this;
@@ -786,7 +789,7 @@
             if (item.disabled) {
                 html = '<li class="search-choice search-choice-disabled" id="' + choice_id + '"><span>' + item.html + '</span></li>';
             } else {
-                html = '<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>';
+                html = '<li class="search-choice" id="' + choice_id + '"><span>' + this.reduce_choice_label(item.html) + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>';
             }
             this.search_container.before(html);
             link = $('#' + choice_id).find("a").first();
@@ -834,36 +837,86 @@
             return this.selected_item.find("abbr").remove();
         };
 
+	Chosen.prototype.do_result_select_multiple = function(elt) {
+		var high, high_id, item, position;
+		high = elt;
+		if (!high.attr("data-is-group-header")) {
+			high_id = high.attr("id");
+			position = high_id.substr(high_id.lastIndexOf("_") + 1);
+			item = this.results_data[position];
+			high.toggleClass("result-selected-multi");
+			if (high.hasClass("result-selected-multi")) {
+				high.addClass("result-selected");
+			} else {
+				high.removeClass("result-selected");
+			}
+			
+			if (item.disabled) {
+				return false;
+			}
+			item.selected = true;
+			this.form_field.options[item.options_index].selected = true;
+			if (high.hasClass("result-selected-multi")) {
+				this.choice_build(item);
+			} else {
+				$("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).remove();
+			}
+		} else {
+			// recurse
+			var treeid = high.attr("data-tree-id");
+			var root = this;
+			this.container.find("[data-parent='"+treeid+"']").each(function(index, elt) {
+				console.log(elt);
+				root.do_result_select_multiple($(elt));
+			});
+		}
+	}
         Chosen.prototype.result_select = function (evt) {
             var high, high_id, item, position;
             if (this.result_highlight) {
                 high = this.result_highlight;
                 high_id = high.attr("id");
+		position = high_id.substr(high_id.lastIndexOf("_") + 1);
+                item = this.results_data[position];
                 this.result_clear_highlight();
                 if (this.is_multiple) {
-                    this.result_deactivate(high);
+			this.do_result_select_multiple(high);
+			/*if (!high.attr("data-is-group-header")) {
+				high.toggleClass("result-selected-multi");
+				if (high.hasClass("result-selected-multi")) {
+					high.addClass("result-selected");
+				} else {
+					high.removeClass("result-selected");
+				}
+			} else {
+				
+			}*/
                 } else {
                     this.search_results.find(".result-selected").removeClass("result-selected");
                     this.result_single_selected = high;
                     this.selected_item.removeClass("chzn-default");
+		    high.addClass("result-selected");
                 }
-                high.addClass("result-selected");
-                position = high_id.substr(high_id.lastIndexOf("_") + 1);
-                item = this.results_data[position];
+
+                
                 if (item.disabled) {
                     return false;
                 }
                 item.selected = true;
                 this.form_field.options[item.options_index].selected = true;
                 if (this.is_multiple) {
-                    this.choice_build(item);
+			/*if (high.hasClass("result-selected-multi")) {
+				this.choice_build(item);
+			} else {
+				$("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).remove();
+			}*/
                 } else {
                     this.selected_item.find("span").first().text(item.text);
                     if (this.allow_single_deselect) {
                         this.single_deselect_control_build();
                     }
                 }
-                if (!((evt.metaKey || evt.ctrlKey) && this.is_multiple)) {
+                if (!this.is_multiple) {
                     this.results_hide();
                 }
                 this.search_field.val("");
@@ -994,7 +1047,7 @@
         if (!option.empty) {
           if (option.group) {
             $('#' + option.dom_id).css('display', 'none');
-          } else if (!(this.is_multiple && option.selected)) {
+          } else {
             found = false;
             founddesc = false;
             result_id = option.dom_id;

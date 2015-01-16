@@ -310,6 +310,13 @@
 .chzn-container-multi .chzn-drop .result-selected {
   display: none;
 }
+
+.result-selected-multi {
+    background-color: #dbf1ff;
+}
+.result-selected-multi::before {
+    content: "\2713  ";
+}
 .chzn-container .chzn-results-scroll {
   background: white;
   margin: 0 4px;
