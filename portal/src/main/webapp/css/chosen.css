@@ -288,6 +288,17 @@
   background-image: linear-gradient(#3875d7 20%, #2a62bc 90%);
   color: #fff;
 }
+
+.chzn-container .chzn-results .highlighted-multiple-group-header {
+  background-color: #75A0E6;
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#75A0E6', endColorstr='#75A0E6', GradientType=0 );  
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(20%, #75A0E6), color-stop(90%, #75A0E6));
+  background-image: -webkit-linear-gradient(top, #75A0E6 20%, #75A0E6 90%);
+  background-image: -moz-linear-gradient(top, #75A0E6 20%, #75A0E6 90%);
+  background-image: -o-linear-gradient(top, #75A0E6 20%, #75A0E6 90%);
+  background-image: linear-gradient(#75A0E6 20%, #75A0E6 90%);
+  color: #fff !important;
+}
 .chzn-container .chzn-results li em {
   background: #feffde;
   font-style: normal;

@@ -808,7 +808,7 @@ function addMetaDataToPage() {
     var cancer_color = '#5f5f5f';
     // Next add the dmps
     var mskccDMPStudyGroup = $("<option value='mskcc-dmp-study-group' style='font-weight:bold; margin-left:0px; color:"+tissue_color+";'"
-    + "data-depth='0' data-is-group-header='true' data-tree-id='mskcc-dmp' disabled>MSKCC DMP</option>");
+    + "data-depth='0' data-is-group-header='true' data-tree-id='mskcc-dmp'>MSKCC DMP</option>");
     mskccDMPStudyGroup.appendTo(cancerTypeContainer);
     mskccDMPStudyGroup.clone().appendTo(cancerTypeContainerMultiple);
     for (var i=0; i<dmp_studies.length; i++) {	    
@@ -842,7 +842,7 @@ function addMetaDataToPage() {
                     "data-is-group-header='true' "+
                     "data-tree-id='"+ root.code +"' "
                     + (root.parent.code === 'tissue' ? "" : "data-parent='"+root.tissue+"' ")
-                    +"disabled>"
+                    +">"
                 +label 
                 + "</option>");
 		newOption.appendTo(cancerTypeContainer);
