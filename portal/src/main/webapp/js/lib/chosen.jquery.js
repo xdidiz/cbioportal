@@ -343,7 +343,7 @@
             return true;
         };
 
-        AbstractChosen.default_multiple_text = "";
+        AbstractChosen.default_multiple_text = "Click to select multiple studies..";
 
         AbstractChosen.default_single_text = "Select an Option";
 
@@ -915,10 +915,10 @@
                 this.result_clear_highlight();
                 if (this.is_multiple) {
 			if (!high.attr("data-is-group-header")) {
-				this.do_result_select_multiple(high);
+				this.do_result_select_multiple(high, null, true);
 			} else {
 				if (this.all_children_selected_multiple(high)) {
-					this.do_result_select_multiple(high);
+					this.do_result_select_multiple(high, null, true);
 					//$("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).remove();
 				} else {
 					/*
@@ -926,8 +926,8 @@
 					if ($("#"+this.container_id).find("#"+this.container_id+"_c_"+item.array_index).size() === 0) {
 						this.choice_build(item);
 					}*/
-					this.do_result_select_multiple(high, "deselect");
-					this.do_result_select_multiple(high, "select");
+					this.do_result_select_multiple(high, "deselect", true);
+					this.do_result_select_multiple(high, "select", true);
 				}
 			}
                 } else {
