@@ -802,6 +802,13 @@ function addMetaDataToPage() {
             });
         }
     }
+    var jstree_data = [];
+    $("#jstree").jstree({ 'core': {
+				'data' : [
+					{ 'id' : 'root', 'parent' : '#', 'text': 'Simple root node' }
+				]
+			    }
+    });
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {
         cancerTypeContainer.prepend($("<option value='all'>"+json.cancer_studies['all'].name+"</option>"));
