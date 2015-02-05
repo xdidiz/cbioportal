@@ -1,7 +1,7 @@
 <%
     String step1ErrorMsg = (String) request.getAttribute(QueryBuilder.STEP1_ERROR_MSG);
 %>
-<link rel="stylesheet" href="../../../css/jstree.style.css"/>
+<!--<link rel="stylesheet" href="../../../css/jstree.style.css"/>-->
 <script type="text/javascript" src="../../../js/lib/jstree.js"></script>
 <div class="query_step_section">
 <span class="step_header">Select Cancer Study:</span>

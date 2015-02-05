@@ -803,12 +803,28 @@ function addMetaDataToPage() {
         }
     }
     var jstree_data = [];
-    $("#jstree").jstree({ 'core': {
-				'data' : [
-					{ 'id' : 'root', 'parent' : '#', 'text': 'Simple root node' }
-				]
-			    }
+    $.each(oncotree, function(key, val) {
+	    jstree_data.push({'id':key, 'parent':((val.parent && val.parent.code) || '#'), 'text':(metaDataJson.type_of_cancers[key] || key)});
+	    $.each(val.studies, function(ind, elt) {
+		    jstree_data.push({'id':elt, 'parent':key, 'text':metaDataJson.cancer_studies[elt].name});
+	    });
     });
+    
+    /*[
+					{ 'id' : 'root', 'parent' : '#', 'text': 'Root' }
+				]*/
+				
+    $("#jstree").jstree({
+      "themes": {
+        "theme": "default",
+        "dots": false,
+        "icons": true,
+        "url": "../../css/jstree.style.css"
+      },
+	"plugins" : [ "themes", "ui" ,'checkbox', 'search'],
+	'core': {'data' : jstree_data}
+	});
+	console.log(oncotree);
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {
         cancerTypeContainer.prepend($("<option value='all'>"+json.cancer_studies['all'].name+"</option>"));
