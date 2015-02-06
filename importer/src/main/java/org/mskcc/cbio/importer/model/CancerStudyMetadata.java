@@ -129,13 +129,9 @@ public class CancerStudyMetadata {
         if (properties.length < 13) {
             throw new IllegalArgumentException("corrupt properties array passed to contructor");
 		}
-                
-        this.studyPath = properties[0].trim();
-        String[] parts = properties[0].trim().split(CANCER_STUDY_DELIMITER);
-		if (parts.length < 2) {
-			throw new IllegalArgumentException("cancerStudyPath is missing tumor type and or center");
-        }
-        this.center = parts[1];
+                this.studyPath = properties[0].trim();
+                String[] parts = properties[0].trim().split(CANCER_STUDY_DELIMITER);
+		this.center = (parts.length < 2) ? "No center defined" : parts[1];
 		this.tumorType = properties[1].trim();
         this.stableId = properties[2].trim();
 		this.name = properties[3].trim();
