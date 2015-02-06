@@ -802,18 +802,64 @@ function addMetaDataToPage() {
             });
         }
     }
+    var splitAndCapitalize = function(s) {
+	    return s.split("_").map(function(x) { return (x.length > 0 ? x[0].toUpperCase()+x.slice(1) : x);}).join(" ");
+    }
+    var jstree_root_id = 'tissue';
     var jstree_data = [];
-    $.each(oncotree, function(key, val) {
-	    jstree_data.push({'id':key, 'parent':((val.parent && val.parent.code) || '#'), 'text':(metaDataJson.type_of_cancers[key] || key)});
-	    $.each(val.studies, function(ind, elt) {
-		    jstree_data.push({'id':elt, 'parent':key, 'text':metaDataJson.cancer_studies[elt].name});
+    var node_queue = [oncotree['tissue']];
+    var currNode;
+    while (node_queue.length > 0) {
+	    currNode = node_queue.shift();
+	    if (currNode.desc_studies_count > 0) {
+		jstree_data.push({'id':currNode.code, 
+			'parent':((currNode.parent && currNode.parent.code) || '#'), 
+			'text':splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code)});
+		
+		$.each(currNode.studies, function(ind, elt) {
+			    jstree_data.push({'id':elt, 
+				    'parent':currNode.code, 
+				    'text':splitAndCapitalize(metaDataJson.cancer_studies[elt].name), 
+				    'li_attr':{description:metaDataJson.cancer_studies[elt].description.replace(/["'\\]/g,"")}});
+		});
+		node_queue = node_queue.concat(currNode.children);
+	    }
+    }
+    var precomputed_search = {query: '', results: {}};
+    var perform_search_single = function(query, node) {
+	    // in: a jstree node
+	    // text to search is node.text and node.li_attr.description
+	    // return true iff the query, considering quotation marks, 'and' and 'or' logic, matches
+	    // TODO: do actual logic
+	    return node.text && node.text.toLowerCase().indexOf(query.toLowerCase()) > -1;
+    };
+    var perform_search = function(query) {
+	    // IN: query, a string
+	    // void method
+	    // when this ends, the object precomputed_search has been updated
+	    //	so that results[node.id] = true iff the query directly matches it
+	    $.each($('#jstree').jstree(true)._model.data, function(key, node) {
+		    precomputed_search.results[node.id] = perform_search_single(query, node);
 	    });
-    });
-    
-    /*[
-					{ 'id' : 'root', 'parent' : '#', 'text': 'Root' }
-				]*/
-				
+	    precomputed_search.query = query;
+    };
+    var jstree_search = function(query, node) {
+	    if (query === "") {
+		    return true;
+	    }
+	    if (precomputed_search.query !== query) {
+		    perform_search(query);
+	    }
+	    var nodes_to_consider = [node.id].concat(node.parents.slice());
+	    var ret = false;
+	    $.each(nodes_to_consider, function(ind, elt) {
+		    if (elt === jstree_root_id || elt === '#') {
+			    return 0;
+		    }
+		    ret = ret || precomputed_search.results[elt];
+	    });
+	    return ret;
+    };
     $("#jstree").jstree({
       "themes": {
         "theme": "default",
@@ -821,10 +867,26 @@ function addMetaDataToPage() {
         "icons": true,
         "url": "../../css/jstree.style.css"
       },
-	"plugins" : [ "themes", "ui" ,'checkbox', 'search'],
+	"plugins" : ['checkbox', 'search'],
+	"search": {'show_only_matches':true, 'search_callback': jstree_search},
 	'core': {'data' : jstree_data}
 	});
-	console.log(oncotree);
+	$("#select_cancer_type_section").mouseenter(function() {
+		$("#jstree").jstree(true).open_node(jstree_root_id);
+	});
+	$("#select_cancer_type_section").mouseleave(function() {
+		$("#jstree").jstree(true).close_node(jstree_root_id);
+	});
+	var jstree_search_timeout = null;
+	$("#jstree_search_input").on('input', function() {
+		if (jstree_search_timeout) {
+			clearTimeout(jstree_search_timeout);
+		}
+		jstree_search_timeout = setTimeout(function() {
+			$("#jstree").jstree(true).search($("#jstree_search_input").val());
+			$("#jstree").jstree(true).open_node(jstree_root_id);
+		}, 300); // wait for a bit with no typing before searching
+	});
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {
         cancerTypeContainer.prepend($("<option value='all'>"+json.cancer_studies['all'].name+"</option>"));
