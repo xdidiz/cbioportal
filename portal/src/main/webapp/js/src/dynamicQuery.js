@@ -814,7 +814,8 @@ function addMetaDataToPage() {
 	    if (currNode.desc_studies_count > 0) {
 		jstree_data.push({'id':currNode.code, 
 			'parent':((currNode.parent && currNode.parent.code) || '#'), 
-			'text':splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code)});
+			'text':splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code),
+			'state':{opened:currNode.code===jstree_root_id}});
 		
 		$.each(currNode.studies, function(ind, elt) {
 			    jstree_data.push({'id':elt, 
@@ -826,20 +827,111 @@ function addMetaDataToPage() {
 	    }
     }
     var precomputed_search = {query: '', results: {}};
-    var perform_search_single = function(query, node) {
+    var parse_search_query = function(query) {
+		// First eliminate trailing whitespace and reduce every whitespace
+		//	to a single space.
+		query = query.toLowerCase().trim().split(/\s+/g).join(' ');
+		// Now factor out quotation marks and inter-token spaces
+		var phrases = [];
+		var currInd = 0;
+		var nextSpace, nextQuote;
+		while (currInd < query.length) {
+			if (query[currInd] === '"') {
+				nextQuote = query.indexOf('"', currInd+1);
+				if (nextQuote === -1) {
+					phrases.push(query.substring(currInd + 1));
+					currInd = query.length;
+				} else {
+					phrases.push(query.substring(currInd + 1, nextQuote));
+					currInd = nextQuote + 1;
+				}
+			} else if (query[currInd] === ' ') {
+				currInd += 1;
+			} else if (query[currInd] === '-') {
+				phrases.push('-');
+				currInd += 1;
+			} else {
+				nextSpace = query.indexOf(' ', currInd);
+				if (nextSpace === -1) {
+					phrases.push(query.substring(currInd));
+					currInd = query.length;
+				} else {
+					phrases.push(query.substring(currInd, nextSpace));
+					currInd = nextSpace + 1;
+				}
+			}
+		}
+		// Now get the conjunctive clauses, and the negative clauses
+		var clauses = [];
+		currInd = 0;
+		var nextOr, nextDash;
+		while (currInd < phrases.length) {
+			if (phrases[currInd] === '-') {
+				if (currInd < phrases.length - 1) {
+					clauses.push({"type":"not", "data":phrases[currInd+1]});
+				}
+				currInd = currInd + 2;
+			} else {
+				nextOr = phrases.indexOf('or', currInd);
+				nextDash = phrases.indexOf('-', currInd);
+				if (nextOr === -1 && nextDash === -1) {
+					clauses.push({"type":"and","data":phrases.slice(currInd)});
+					currInd = phrases.length;
+				} else if (nextOr === -1 && nextDash > 0) {
+					clauses.push({"type":"and", "data":phrases.slice(currInd, nextDash)});
+					currInd = nextDash;
+				} else if (nextOr > 0 && nextDash === -1) {
+					clauses.push({"type":"and", "data":phrases.slice(currInd, nextOr)});
+					currInd = nextOr + 1;
+				} else {
+					if (nextOr < nextDash) {
+						clauses.push({"type":"and", "data":phrases.slice(currInd, nextOr)});
+						currInd = nextOr + 1;
+					} else {
+						clauses.push({"type":"and", "data":phrases.slice(currInd, nextDash)});
+						currInd = nextDash;
+					}
+				}
+			}
+		}	
+		return clauses;
+    };
+    var perform_search_single = function(parsed_query, node) {
 	    // in: a jstree node
 	    // text to search is node.text and node.li_attr.description
 	    // return true iff the query, considering quotation marks, 'and' and 'or' logic, matches
 	    // TODO: do actual logic
-	    return node.text && node.text.toLowerCase().indexOf(query.toLowerCase()) > -1;
+	    var match = false;
+	    var forced = false;
+	    var matchPhrase = function(phrase, node) {
+		    return (node.text && node.text.toLowerCase().indexOf(phrase) > -1) 
+			    || (node.li_attr && node.li_attr.description && node.li_attr.description.toLowerCase().indexOf(phrase) > -1);
+	    };
+	    $.each(parsed_query, function(ind, clause) {
+		    if (clause.type === 'not') {
+			    if (matchPhrase(clause.data, node)) {
+				    match = false;
+				    forced = true;
+				    return 0;
+			    }
+		    } else if (clause.type === 'and') {
+			    var clauseMatch = true;
+			    $.each(clause.data, function(ind2, phrase) {
+				    clauseMatch = clauseMatch && matchPhrase(phrase, node);
+			    });
+			    match = match || clauseMatch;
+		    }
+	    });
+	    return {result:match, forced:forced};
     };
     var perform_search = function(query) {
 	    // IN: query, a string
 	    // void method
 	    // when this ends, the object precomputed_search has been updated
 	    //	so that results[node.id] = true iff the query directly matches it
+	    var parsed_query = parse_search_query(query);
 	    $.each($('#jstree').jstree(true)._model.data, function(key, node) {
-		    precomputed_search.results[node.id] = perform_search_single(query, node);
+		    precomputed_search.results[node.id] = perform_search_single(parsed_query, node);
 	    });
 	    precomputed_search.query = query;
     };
@@ -850,13 +942,16 @@ function addMetaDataToPage() {
 	    if (precomputed_search.query !== query) {
 		    perform_search(query);
 	    }
+	    if (!precomputed_search.results[node.id].result && precomputed_search.results[node.id].forced) {
+		    return false;
+	    }
 	    var nodes_to_consider = [node.id].concat(node.parents.slice());
 	    var ret = false;
 	    $.each(nodes_to_consider, function(ind, elt) {
 		    if (elt === jstree_root_id || elt === '#') {
 			    return 0;
 		    }
-		    ret = ret || precomputed_search.results[elt];
+		    ret = ret || precomputed_search.results[elt].result;
 	    });
 	    return ret;
     };
@@ -868,15 +963,18 @@ function addMetaDataToPage() {
         "url": "../../css/jstree.style.css"
       },
 	"plugins" : ['checkbox', 'search'],
-	"search": {'show_only_matches':true, 'search_callback': jstree_search},
+	"search": {'show_only_matches':true, 
+		'search_callback': jstree_search,
+		'search_leaves_only': true},
 	'core': {'data' : jstree_data}
 	});
+	/*
 	$("#select_cancer_type_section").mouseenter(function() {
 		$("#jstree").jstree(true).open_node(jstree_root_id);
 	});
 	$("#select_cancer_type_section").mouseleave(function() {
 		$("#jstree").jstree(true).close_node(jstree_root_id);
-	});
+	});*/
 	var jstree_search_timeout = null;
 	$("#jstree_search_input").on('input', function() {
 		if (jstree_search_timeout) {
