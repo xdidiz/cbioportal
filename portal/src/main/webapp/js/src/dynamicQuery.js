@@ -809,6 +809,13 @@ function addMetaDataToPage() {
     var jstree_data = [];
     var node_queue = [oncotree['tissue']];
     var currNode;
+    if (dmp_studies.length > 0) {
+	jstree_data.push({'id':'mskimpact', 'parent':'tissue', 'text':'MSKCC DMP'});
+	$.each(dmp_studies, function(ind, id) {
+		console.log("adding dmp study");
+		jstree_data.push({'id':id, 'parent':'mskimpact', 'text':json.cancer_studies[id].name});
+	});
+    }
     while (node_queue.length > 0) {
 	    currNode = node_queue.shift();
 	    if (currNode.desc_studies_count > 0) {
@@ -962,10 +969,11 @@ function addMetaDataToPage() {
         "icons": true,
         "url": "../../css/jstree.style.css"
       },
-	"plugins" : ['checkbox', 'search'],
+	"plugins" : ['checkbox', 'search', 'wholerow'],
 	"search": {'show_only_matches':true, 
 		'search_callback': jstree_search,
 		'search_leaves_only': true},
+	"checkbox": {},
 	'core': {'data' : jstree_data}
 	});
 	/*
@@ -985,6 +993,7 @@ function addMetaDataToPage() {
 			$("#jstree").jstree(true).open_node(jstree_root_id);
 		}, 300); // wait for a bit with no typing before searching
 	});
+	
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {
         cancerTypeContainer.prepend($("<option value='all'>"+json.cancer_studies['all'].name+"</option>"));
