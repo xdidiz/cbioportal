@@ -976,6 +976,10 @@ function addMetaDataToPage() {
 	"checkbox": {},
 	'core': {'data' : jstree_data}
 	});
+	$('#jstree').on('changed.jstree', function(e, data) {
+		/*console.log(e);
+		console.log(data);*/
+	});
 	/*
 	$("#select_cancer_type_section").mouseenter(function() {
 		$("#jstree").jstree(true).open_node(jstree_root_id);
