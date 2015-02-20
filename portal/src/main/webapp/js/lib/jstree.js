@@ -2827,7 +2827,7 @@
 						this.select_node(obj, false, false, e);
 					}
 					else {
-						this.deselect_node(obj, false, e);
+						this.deselect_node(obj, false, e, true);
 					}
 				}
 			}
@@ -2965,7 +2965,7 @@
 		 * @param {Boolean} supress_event if set to `true` the `changed.jstree` event won't be triggered
 		 * @trigger deselect_node.jstree, changed.jstree
 		 */
-		deselect_node : function (obj, supress_event, e) {
+		deselect_node : function (obj, supress_event, e, force_deselect) {
 			var t1, t2, dom;
 			if($.isArray(obj)) {
 				obj = obj.slice();
@@ -2979,7 +2979,7 @@
 				return false;
 			}
 			dom = this.get_node(obj, true);
-			if(obj.state.selected) {
+			if(obj.state.selected || force_deselect) {
 				obj.state.selected = false;
 				this._data.core.selected = $.vakata.array_remove_item(this._data.core.selected, obj.id);
 				if(dom.length) {
@@ -3062,6 +3062,14 @@
 			obj = this.get_node(obj);
 			if(!obj || obj.id === '#') {
 				return false;
+			}
+			if (this._data.search.str.length > 0 && obj.descendants && obj.descendants.length > 0) {
+				for (var i=0, _len=obj.descendants.length; i<_len; i++) {
+					if (!(obj.descendants[i] in this._data.search.state_frozen) && !(this.get_node(obj.descendants[i]).state.selected)) {
+						return false;
+					}
+				}
+				return true;
 			}
 			return obj.state.selected;
 		},
