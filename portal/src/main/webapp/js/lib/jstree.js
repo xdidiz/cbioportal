@@ -3276,7 +3276,7 @@
 		},
 		/**
 		 * Private, used internally. Refreshes the node labels so they
-		 * have next to them the number of visible study descendants.
+		 * have next to them the number of visible leaf descendants.
 		 * @name _set_descendant_count_names ()
 		 */
 		_set_descendant_count_names: function() {
@@ -3287,9 +3287,21 @@
 				}
 				var count = 0;
 				for (var i=0, _len=val.descendants.length; i<_len; i++) {
-					count += (this._data.search.str.length > 0 && (val.descendants[i] in this._data.search.state_frozen) ? 0 : 1);
+					count += !(this._data.search.str.length > 0 && (val.descendants[i] in this._data.search.state_frozen));
 				}
 				this.rename_node(key, val.li_attr.name+' ('+count+')');
+			}, this));
+		},
+		/**
+		 * Private, used internally. Counts the number of leaves selected
+		 * @name _count_selected_leaves ()
+		 */
+		_count_selected_leaves: function() {
+			this._model.selected_leaves = 0;
+			$.each(this._model.data, $.proxy(function(key, val) {
+				if (val.children.length === 0) {
+					this._model.selected_leaves += val.state.selected;
+				}
 			}, this));
 		},
 		/**
@@ -4622,6 +4634,9 @@
 							}
 
 							this._data[ t ? 'core' : 'checkbox' ].selected = $.vakata.array_unique(this._data[ t ? 'core' : 'checkbox' ].selected);
+						}, this))
+					.on('changed.jstree', $.proxy(function(e) {
+							this._count_selected_leaves();
 						}, this))
 					.on(this.settings.checkbox.tie_selection ? 'select_node.jstree' : 'check_node.jstree', $.proxy(function (e, data) {
 							var obj = data.node,

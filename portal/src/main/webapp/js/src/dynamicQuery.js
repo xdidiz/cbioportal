@@ -988,6 +988,10 @@ function addMetaDataToPage() {
 			$("#jstree").jstree(true).search($("#jstree_search_input").val());
 		}, 300); // wait for a bit with no typing before searching
 	});
+	$('#jstree').on('changed.jstree', function() {
+		var ct = $('#jstree').jstree(true)._model.selected_leaves;
+		$('#jstree_selected_study_count').html((ct === 0 ? "No" : ct)+" stud"+(ct === 1 ? "y" : "ies")+" selected.");
+	});
 	
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {

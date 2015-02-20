@@ -6,6 +6,7 @@
 <div class="query_step_section" id="select_cancer_type_section">
 <span class="step_header">Select Cancer Study:</span>
 <input type="text" id="jstree_search_input"/>
+<div id="jstree_selected_study_count">No studies selected.</div>
 <div id="jstree" style="max-height:250px; overflow-y: scroll"></div>
 <select id="select_cancer_type" name="<%= QueryBuilder.CANCER_STUDY_ID %>" ></select>
 <select id="select_cancer_type_multiple" name="<%= QueryBuilder.CANCER_STUDY_ID %>" multiple></select>
