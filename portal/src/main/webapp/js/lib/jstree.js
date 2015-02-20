@@ -2873,6 +2873,25 @@
 			this.trigger('dehover_node', { 'node' : this.get_node(obj) });
 		},
 		/**
+		 * Private, used internally. Maintains node selection states so 
+		 * that only found search results can be selected/deselected. May be slow
+		 * on large trees.
+		 * @name _freeze_state()
+		 */
+		_freeze_state: function() {
+			if (this._data.search.str.length > 0) {
+				$.each(this._model.data, $.proxy(function(key,val) {
+					if (key in this._data.search.state_frozen && val.state.selected !== this._data.search.state_frozen[key]) {
+						if (this._data.search.state_frozen[key]) {
+							this.select_node(key);
+						} else {
+							this.deselect_node(key);
+						}
+					}
+				}, this));
+			}
+		},
+		/**
 		 * select a node
 		 * @name select_node(obj [, supress_event, prevent_open])
 		 * @param {mixed} obj an array can be used to select multiple nodes
@@ -2882,9 +2901,6 @@
 		 */
 		select_node : function (obj, supress_event, prevent_open, e) {
 			var dom, t1, t2, th;
-			if (this.get_node(obj).id === 'chol_jhu_2013') { // todo:abeshouse
-				return false;
-			}
 			if($.isArray(obj)) {
 				obj = obj.slice();
 				for(t1 = 0, t2 = obj.length; t1 < t2; t1++) {
@@ -2937,10 +2953,6 @@
 		 * @trigger deselect_node.jstree, changed.jstree
 		 */
 		deselect_node : function (obj, supress_event, e) {
-			console.log("deselecting");
-			if (this.get_node(obj).id === 'chol_jhu_2013') { // todo:abeshouse
-				return false;
-			}
 			var t1, t2, dom;
 			if($.isArray(obj)) {
 				obj = obj.slice();
@@ -4617,6 +4629,7 @@
 							if(s.indexOf('down') !== -1 && dom.length) {
 								dom.find('.jstree-anchor').addClass(t ? 'jstree-clicked' : 'jstree-checked').parent().attr('aria-selected', true);
 							}
+							this._freeze_state();
 						}, this))
 					.on(this.settings.checkbox.tie_selection ? 'deselect_all.jstree' : 'uncheck_all.jstree', $.proxy(function (e, data) {
 							var obj = this.get_node('#'),
@@ -6341,7 +6354,7 @@
 			this._data.search.dom = $();
 			this._data.search.res = [];
 			this._data.search.opn = [];
-			this._data.search.vis = [];
+			this._data.search.state_frozen = {};
 			this._data.search.som = false;
 
 			this.element
@@ -6434,21 +6447,24 @@
 			this._data.search.dom = $();
 			this._data.search.res = [];
 			this._data.search.opn = [];
-			this._data.search.vis = [];
+			this._data.search.state_frozen = {};
 			this._data.search.som = show_only_matches;
 
 			f = new $.vakata.search(str, true, { caseSensitive : s.case_sensitive, fuzzy : s.fuzzy });
 
-			$.each(this._model.data, function (i, v) {
+			$.each(this._model.data, $.proxy(function (i, v) {
 				if(v.text && ( (s.search_callback && s.search_callback.call(this, str, v)) || (!s.search_callback && f.search(v.text).isMatch) ) && (!s.search_leaves_only || (v.state.loaded && v.children.length === 0)) ) {
 					r.push(i);
 					p = p.concat(v.parents);
+				} else {
+					if (!s.search_leaves_only || (v.state.loaded && v.children.length === 0)) {
+						this._data.search.state_frozen[i] = this._model.data[i].state.selected;
+					}
 				}
-			});
+			}, this));
 			if(r.length) {
 				p = $.vakata.array_unique(p);
 				this._search_open(p);
-				this._data.search.vis = p.concat(r); // results and parents
 				this._data.search.dom = $(this.element[0].querySelectorAll('#' + $.map(r, function (v) { return "0123456789".indexOf(v[0]) !== -1 ? '\\3' + v[0] + ' ' + v.substr(1).replace($.jstree.idregex,'\\$&') : v.replace($.jstree.idregex,'\\$&'); }).join(', #')));
 				this._data.search.res = r;
 				this._data.search.dom.children(".jstree-anchor").addClass('jstree-search');
@@ -6488,7 +6504,7 @@
 			this._data.search.str = "";
 			this._data.search.res = [];
 			this._data.search.opn = [];
-			this._data.search.vis = [];
+			this._data.search.state_frozen = {};
 			this._data.search.dom = $();
 		};
 		/**

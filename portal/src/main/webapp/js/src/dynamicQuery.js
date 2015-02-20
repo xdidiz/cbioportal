@@ -825,10 +825,11 @@ function addMetaDataToPage() {
 			'state':{opened:currNode.code===jstree_root_id}});
 		
 		$.each(currNode.studies, function(ind, elt) {
+			var name = splitAndCapitalize(metaDataJson.cancer_studies[elt].name);
 			    jstree_data.push({'id':elt, 
 				    'parent':currNode.code, 
-				    'text':splitAndCapitalize(metaDataJson.cancer_studies[elt].name), 
-				    'li_attr':{description:metaDataJson.cancer_studies[elt].description.replace(/["'\\]/g,"")}});
+				    'text':name,
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt].description.replace(/["'\\]/g,"")}});
 		});
 		node_queue = node_queue.concat(currNode.children);
 	    }
