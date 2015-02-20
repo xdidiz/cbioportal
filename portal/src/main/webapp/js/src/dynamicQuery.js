@@ -810,15 +810,16 @@ function addMetaDataToPage() {
     var node_queue = [oncotree['tissue']];
     var currNode;
     if (dmp_studies.length > 0) {
-	jstree_data.push({'id':'mskimpact', 'parent':'tissue', 'text':'MSKCC DMP'});
+	jstree_data.push({'id':'mskimpact', 'parent':'tissue', 'text':'MSKCC DMP', 'li_attr':{name:'MSKCC DMP'}});
 	$.each(dmp_studies, function(ind, id) {
-		jstree_data.push({'id':id, 'parent':'mskimpact', 'text':json.cancer_studies[id].name});
+		jstree_data.push({'id':id, 'parent':'mskimpact', 'text':json.cancer_studies[id].name, 
+			'li_attr':{name: json.cancer_studies[id].name, description: metaDataJson.cancer_studies[id].description}});
 	});
     }
     while (node_queue.length > 0) {
 	    currNode = node_queue.shift();
 	    if (currNode.desc_studies_count > 0) {
-		var name = splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code)
+		var name = (currNode.code === jstree_root_id ? 'All' : splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code));
 		jstree_data.push({'id':currNode.code, 
 			'parent':((currNode.parent && currNode.parent.code) || '#'), 
 			'text':name,
@@ -831,7 +832,7 @@ function addMetaDataToPage() {
 			    jstree_data.push({'id':elt, 
 				    'parent':currNode.code, 
 				    'text':name,
-				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt].description.replace(/["'\\]/g,"")}});
+				    'li_attr':{name: name, description:metaDataJson.cancer_studies[elt].description}});
 		});
 		node_queue = node_queue.concat(currNode.children);
 	    }
