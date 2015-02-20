@@ -812,17 +812,19 @@ function addMetaDataToPage() {
     if (dmp_studies.length > 0) {
 	jstree_data.push({'id':'mskimpact', 'parent':'tissue', 'text':'MSKCC DMP'});
 	$.each(dmp_studies, function(ind, id) {
-		console.log("adding dmp study");
 		jstree_data.push({'id':id, 'parent':'mskimpact', 'text':json.cancer_studies[id].name});
 	});
     }
     while (node_queue.length > 0) {
 	    currNode = node_queue.shift();
 	    if (currNode.desc_studies_count > 0) {
+		var name = splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code)
 		jstree_data.push({'id':currNode.code, 
 			'parent':((currNode.parent && currNode.parent.code) || '#'), 
-			'text':splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code),
-			'state':{opened:currNode.code===jstree_root_id}});
+			'text':name,
+			'state':{opened:currNode.code===jstree_root_id},
+			'li_attr':{name:name}
+		});
 		
 		$.each(currNode.studies, function(ind, elt) {
 			var name = splitAndCapitalize(metaDataJson.cancer_studies[elt].name);
@@ -975,19 +977,8 @@ function addMetaDataToPage() {
 		'search_callback': jstree_search,
 		'search_leaves_only': true},
 	"checkbox": {},
-	'core': {'data' : jstree_data}
+	'core': {'data' : jstree_data, 'check_callback': true}
 	});
-	$('#jstree').on('changed.jstree', function(e, data) {
-		/*console.log(e);
-		console.log(data);*/
-	});
-	/*
-	$("#select_cancer_type_section").mouseenter(function() {
-		$("#jstree").jstree(true).open_node(jstree_root_id);
-	});
-	$("#select_cancer_type_section").mouseleave(function() {
-		$("#jstree").jstree(true).close_node(jstree_root_id);
-	});*/
 	var jstree_search_timeout = null;
 	$("#jstree_search_input").on('input', function() {
 		if (jstree_search_timeout) {
@@ -995,7 +986,6 @@ function addMetaDataToPage() {
 		}
 		jstree_search_timeout = setTimeout(function() {
 			$("#jstree").jstree(true).search($("#jstree_search_input").val());
-			$("#jstree").jstree(true).open_node(jstree_root_id);
 		}, 300); // wait for a bit with no typing before searching
 	});
 	

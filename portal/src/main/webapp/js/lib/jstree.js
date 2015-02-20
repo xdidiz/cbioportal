@@ -792,6 +792,19 @@
 							if(end) { return; }
 						}
 					}, this))
+				.on("loaded.jstree", $.proxy(function (e) {
+					// compute descendants
+					$.each(this._model.data, $.proxy(function(key, val) {
+							if (val.children.length === 0) {
+								for (var i=0, _len = val.parents.length; i<_len-1; i++) {
+									this._model.data[val.parents[i]].descendants = this._model.data[val.parents[i]].descendants || [];
+									this._model.data[val.parents[i]].descendants.push(key);
+								}
+							}
+						}, this));
+					this._set_descendant_count_names();
+					}, this))
+					
 				// THEME RELATED
 				.on("init.jstree", $.proxy(function () {
 						var s = this.settings.core.themes;
@@ -3254,6 +3267,24 @@
 			return false;
 		},
 		/**
+		 * Private, used internally. Refreshes the node labels so they
+		 * have next to them the number of visible study descendants.
+		 * @name _set_descendant_count_names ()
+		 */
+		_set_descendant_count_names: function() {
+			$.each(this._model.data, $.proxy(function(key, val) {
+				// a node is visible iff it's not in state_frozen
+				if (!(val.descendants) || val.descendants.length === 0) {
+					return 1;
+				}
+				var count = 0;
+				for (var i=0, _len=val.descendants.length; i<_len; i++) {
+					count += (this._data.search.str.length > 0 && (val.descendants[i] in this._data.search.state_frozen) ? 0 : 1);
+				}
+				this.rename_node(key, val.li_attr.name+' ('+count+')');
+			}, this));
+		},
+		/**
 		 * refreshes the tree - all nodes are reloaded with calls to `load_node`.
 		 * @name refresh()
 		 * @param {Boolean} skip_loading an option to skip showing the loading indicator
@@ -4691,6 +4722,7 @@
 							if(s.indexOf('down') !== -1 && dom.length) {
 								dom.find('.jstree-anchor').removeClass(t ? 'jstree-clicked' : 'jstree-checked').parent().attr('aria-selected', false);
 							}
+							this._freeze_state();
 						}, this));
 			}
 			if(this.settings.checkbox.cascade.indexOf('up') !== -1) {
@@ -6478,6 +6510,7 @@
 			 * @param {Array} res a collection of objects represeing the matching nodes
 			 * @plugin search
 			 */
+			this._set_descendant_count_names();
 			this.trigger('search', { nodes : this._data.search.dom, str : str, res : this._data.search.res, show_only_matches : show_only_matches });
 		};
 		/**
@@ -6506,6 +6539,7 @@
 			this._data.search.opn = [];
 			this._data.search.state_frozen = {};
 			this._data.search.dom = $();
+			this._set_descendant_count_names();
 		};
 		/**
 		 * opens nodes that need to be opened to reveal the search results. Used only internally.
