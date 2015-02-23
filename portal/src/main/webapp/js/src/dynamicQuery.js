@@ -807,28 +807,28 @@ function addMetaDataToPage() {
     }
     var jstree_root_id = 'tissue';
     var jstree_data = [];
-    var node_queue = [oncotree['tissue']];
+    jstree_data.push({'id':jstree_root_id, parent:'#', text:'All', state:{opened:true}, li_attr:{name:'All'}});
+    var node_queue = [].concat(oncotree['tissue'].children);
     var currNode;
     if (dmp_studies.length > 0) {
-	jstree_data.push({'id':'mskimpact', 'parent':'tissue', 'text':'MSKCC DMP', 'li_attr':{name:'MSKCC DMP'}});
+	jstree_data.push({'id':'mskimpact-study-group', 'parent':jstree_root_id, 'text':'MSKCC DMP', 'li_attr':{name:'MSKCC DMP'}});
 	$.each(dmp_studies, function(ind, id) {
-		jstree_data.push({'id':id, 'parent':'mskimpact', 'text':json.cancer_studies[id].name, 
+		jstree_data.push({'id':id, 'parent':'mskimpact-study-group', 'text':json.cancer_studies[id].name, 
 			'li_attr':{name: json.cancer_studies[id].name, description: metaDataJson.cancer_studies[id].description}});
 	});
     }
     while (node_queue.length > 0) {
 	    currNode = node_queue.shift();
 	    if (currNode.desc_studies_count > 0) {
-		var name = (currNode.code === jstree_root_id ? 'All' : splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code));
+		var name = splitAndCapitalize(metaDataJson.type_of_cancers[currNode.code] || currNode.code);
 		jstree_data.push({'id':currNode.code, 
 			'parent':((currNode.parent && currNode.parent.code) || '#'), 
 			'text':name,
-			'state':{opened:currNode.code===jstree_root_id},
 			'li_attr':{name:name}
 		});
 		
 		$.each(currNode.studies, function(ind, elt) {
-			var name = splitAndCapitalize(metaDataJson.cancer_studies[elt].name);
+			    name = splitAndCapitalize(metaDataJson.cancer_studies[elt].name);
 			    jstree_data.push({'id':elt, 
 				    'parent':currNode.code, 
 				    'text':name,
@@ -978,7 +978,7 @@ function addMetaDataToPage() {
 		'search_callback': jstree_search,
 		'search_leaves_only': true},
 	"checkbox": {},
-	'core': {'data' : jstree_data, 'check_callback': true, 'dblclick_toggle':false}
+	'core': {'data':jstree_data, 'check_callback': true, 'dblclick_toggle':false}
 	});
 	var jstree_search_timeout = null;
 	$("#jstree_search_input").on('input', function() {
