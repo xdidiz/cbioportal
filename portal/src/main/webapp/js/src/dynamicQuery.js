@@ -970,7 +970,7 @@ function addMetaDataToPage() {
       "themes": {
         "theme": "default",
         "dots": false,
-        "icons": true,
+        "icons": false,
         "url": "../../css/jstree.style.css"
       },
 	"plugins" : ['checkbox', 'search', 'wholerow'],
@@ -987,12 +987,13 @@ function addMetaDataToPage() {
 		}
 		jstree_search_timeout = setTimeout(function() {
 			$("#jstree").jstree(true).search($("#jstree_search_input").val());
-		}, 300); // wait for a bit with no typing before searching
+		}, 400); // wait for a bit with no typing before searching
 	});
 	$('#jstree').on('changed.jstree', function() {
 		var ct = $('#jstree').jstree(true)._model.selected_leaves;
 		$('#jstree_selected_study_count').html((ct === 0 ? "No" : ct)+" stud"+(ct === 1 ? "y" : "ies")+" selected.");
 	});
+	$('#jstree').jstree(true).hide_icons();
 	
     // First add 'all' study to single cancer type container
     if ('all' in json.cancer_studies) {
