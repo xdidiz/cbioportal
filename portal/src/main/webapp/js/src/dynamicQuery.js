@@ -978,7 +978,7 @@ function addMetaDataToPage() {
 		'search_callback': jstree_search,
 		'search_leaves_only': true},
 	"checkbox": {},
-	'core': {'data' : jstree_data, 'check_callback': true}
+	'core': {'data' : jstree_data, 'check_callback': true, 'dblclick_toggle':false}
 	});
 	var jstree_search_timeout = null;
 	$("#jstree_search_input").on('input', function() {
