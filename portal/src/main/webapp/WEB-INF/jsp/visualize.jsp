@@ -143,6 +143,7 @@
             }
             out.println ("<li><a href='#data_download' class='result-tab' title='Download all alterations or copy and paste into Excel'>Download</a></li>");
             out.println ("<li><a href='#bookmark_email' class='result-tab' title='Bookmark or generate a URL for email'>Bookmark</a></li>");
+            out.println ("<li><a href='#own_code_tab' class='result-tab' title='Paste in your own code!'>Own Code</a></li>");
             out.println ("<!--<li><a href='index.do' class='result-tab'>Create new query</a> -->");
             out.println ("</ul>");
 
@@ -215,6 +216,7 @@
 
         <%@ include file="data_download.jsp" %>
         <%@ include file="image_tabs_data.jsp" %>
+        <%@ include file="own_code_tab.jsp" %>
 
 </div> <!-- end tabs div -->
 <% } %>
