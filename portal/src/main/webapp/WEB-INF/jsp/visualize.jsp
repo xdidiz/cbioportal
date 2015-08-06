@@ -79,6 +79,7 @@
     <ul>
     <%
         Boolean showMutTab = false;
+        Boolean showCancerTypesSummary = true;
         if (geneWithScoreList.size() > 0) {
 
             Enumeration paramEnum = request.getParameterNames();
@@ -134,7 +135,31 @@
                 }
             }
 
+            // determine whether to show the cancerTypesSummaryTab
+            // retrieve the cancerTypesMap and create an iterator for the values
+            Map<String, List<String>>  cancerTypesMap = (Map<String, List<String>>) request.getAttribute("sample_attribute");
+            if(cancerTypesMap.size()>0){
+                Iterator it = cancerTypesMap.values().iterator();
+                // iterate over the values
+                while (it.hasNext()) {
+                    List<String> valueList = (List<String>)it.next();
+                    // if the valueList has a size of 1 or more, it means there are either multiple CANCER_TYPEs or
+                    // multiple CANCER_TYPE_DETAILEDs. In that case, show the tab
+                    if(valueList.size()>1) {
+                        showCancerTypesSummary = true;
+                        break;
+                    }
+                }
+            }
+
             out.println ("<li><a href='#summary' class='result-tab' title='Compact visualization of genomic alterations'>OncoPrint</a></li>");
+
+            // if showCancerTypesSummary is try, add the list item
+            if(showCancerTypesSummary){
+                out.println ("<li><a href='#cancertype' class='result-tab' title='Cancer types summary'>"
+                + "Cancer Types Summary</a></li>");
+            }
+
 
             if (computeLogOddsRatio && geneWithScoreList.size() > 1) {
                 out.println ("<li><a href='#mutex' class='result-tab' title='Mutual exclusivity and co-occurrence analysis'>"
@@ -204,6 +229,11 @@
             <% //contents of fingerprint.jsp now come from attribute on request object %>
             <%@ include file="oncoprint/main.jsp" %>
         </div>
+
+        <!-- if showCancerTypes is true, include cancer_types_summary.jsp -->
+        <% if(showCancerTypesSummary) { %>
+        <%@ include file="cancer_types_summary.jsp" %>
+        <%}%>
 
             <% //if ( has_mrna && (has_copy_no || has_methylation || has_copy_no) ) { %>
         <%@ include file="plots_tab.jsp" %>

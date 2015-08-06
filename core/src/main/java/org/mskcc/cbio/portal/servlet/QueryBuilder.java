@@ -111,7 +111,7 @@ public class QueryBuilder extends HttpServlet {
     public static final String SELECTED_PATIENT_SAMPLE_ID_MAP = "selected_patient_sample_id_map";
     private static final String DB_CONNECT_ERROR = ("An error occurred while trying to connect to the database." +
                                                     "  This could happen if the database does not contain any cancer studies.");
-    
+    public static final String SAMPLE_ATTRIBUTE = "sample_attribute";
 
     private ServletXssUtil servletXssUtil;
 
@@ -404,7 +404,11 @@ public class QueryBuilder extends HttpServlet {
         {
             patientIdsKey = PatientSetUtil.shortenPatientIds(sampleIds);
         }
-        
+
+        // retrieve information about the cancer types
+        Map<String, List<String>> cancerTypeInfo = DaoClinicalData.getCancerTypeInfo(cancerStudyInternalId);
+        request.setAttribute(SAMPLE_ATTRIBUTE, cancerTypeInfo);
+
         // this will create a key even if the patient set is a predefined set,
         // because it is required to build a patient id string in any case
         request.setAttribute(CASE_IDS_KEY, patientIdsKey);
