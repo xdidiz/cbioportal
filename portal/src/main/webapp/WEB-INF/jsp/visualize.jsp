@@ -79,7 +79,7 @@
     <ul>
     <%
         Boolean showMutTab = false;
-        Boolean showCancerTypesSummary = true;
+        Boolean showCancerTypesSummary = false;
         if (geneWithScoreList.size() > 0) {
 
             Enumeration paramEnum = request.getParameterNames();
