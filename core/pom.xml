@@ -362,6 +362,7 @@
 				<srcFiles>
 				  <srcFile>src/main/resources/db/cgds.sql</srcFile>
 				  <srcFile>src/test/resources/seed_mini.sql</srcFile>
+					<srcFile>src/test/resources/pan-cancer/seed_mini_pancancer.sql</srcFile>
 				</srcFiles>
 				<!-- added encoding to prevent Unknown initial character set index '192' received from server error -->
 				<encoding>UTF-8</encoding>
