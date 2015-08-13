@@ -30,7 +30,7 @@
  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --%>
 
-<%@ include file="global/global_variables.jsp" %>
+<%@ include file="global/global_variables.jsp" %> 
 
 <jsp:include page="global/header.jsp" flush="true" />
 
@@ -137,30 +137,22 @@
 
             // determine whether to show the cancerTypesSummaryTab
             // retrieve the cancerTypesMap and create an iterator for the values
-            Map<String, List<String>>  cancerTypesMap = (Map<String, List<String>>) request.getAttribute("sample_attribute");
-            if(cancerTypesMap.size()>0){
-                Iterator it = cancerTypesMap.values().iterator();
-                // iterate over the values
-                while (it.hasNext()) {
-                    List<String> valueList = (List<String>)it.next();
-                    // if the valueList has a size of 1 or more, it means there are either multiple CANCER_TYPEs or
-                    // multiple CANCER_TYPE_DETAILEDs. In that case, show the tab
-                    if(valueList.size()>1) {
-                        showCancerTypesSummary = true;
-                        break;
-                    }
-                }
+            Map<String, List<String>>  cancerTypesMap = (Map<String, List<String>>) request.getAttribute(QueryBuilder.CANCER_TYPES_MAP);
+            if(cancerTypesMap.keySet().size() > 1) {
+            	showCancerTypesSummary = true;
             }
-
+            else if (cancerTypesMap.keySet().size() == 1 && cancerTypesMap.values().iterator().next().size() > 1 )  {
+            	showCancerTypesSummary = true;
+            }
+                        
             out.println ("<li><a href='#summary' class='result-tab' title='Compact visualization of genomic alterations'>OncoPrint</a></li>");
 
             // if showCancerTypesSummary is try, add the list item
             if(showCancerTypesSummary){
-                out.println ("<li><a href='#cancertype' class='result-tab' title='Cancer types summary'>"
+                out.println ("<li><a href='#pancancer_study_summary' class='result-tab' title='Cancer types summary'>"
                 + "Cancer Types Summary</a></li>");
             }
-
-
+            
             if (computeLogOddsRatio && geneWithScoreList.size() > 1) {
                 out.println ("<li><a href='#mutex' class='result-tab' title='Mutual exclusivity and co-occurrence analysis'>"
                 + "Mutual Exclusivity</a></li>");
@@ -232,7 +224,7 @@
 
         <!-- if showCancerTypes is true, include cancer_types_summary.jsp -->
         <% if(showCancerTypesSummary) { %>
-        <%@ include file="cancer_types_summary.jsp" %>
+        <%@ include file="pancancer_study_summary.jsp" %>
         <%}%>
 
             <% //if ( has_mrna && (has_copy_no || has_methylation || has_copy_no) ) { %>

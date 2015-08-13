@@ -30,48 +30,38 @@
  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --%>
 
-<%@ page import="org.mskcc.cbio.portal.servlet.QueryBuilder" %>
-<%@ page import="org.mskcc.cbio.portal.servlet.ServletXssUtil" %>
+<%--
+ - This is the main page for loading the pan-cancer study view,
+ - where "pan-cancer study" = a study comprising more than 1 cancer type.
+ --%>
+
+
 <%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
-<%@ page import="org.mskcc.cbio.portal.util.XssRequestWrapper" %>
 
-<%
-/*
-  ServletXssUtil servletXssUtil = ServletXssUtil.getInstance();
-
-  // Get priority settings
-  Integer dataPriority;
-  try {
-    dataPriority
-            = Integer.parseInt(request.getParameter(QueryBuilder.DATA_PRIORITY).trim());
-  } catch (Exception e) {
-    dataPriority = 0;
-  }
-
-  String geneList = request.getParameter(QueryBuilder.GENE_LIST);
-  //String cancerStudyList = request.getParameter(QueryBuilder.CANCER_STUDY_LIST);
-
-  // we need the raw gene list
-  if (request instanceof XssRequestWrapper)
-  {
-    geneList = ((XssRequestWrapper)request).getRawParameter(QueryBuilder.GENE_LIST);
-    //cancerStudyList = ((XssRequestWrapper)request).getRawParameter(QueryBuilder.CANCER_STUDY_LIST);
-  }
-
-  geneList = geneList.replaceAll("\n", " ").replaceAll("\r", "").replaceAll("/", "_");
-  geneList = servletXssUtil.getCleanerInput(geneList);
-*/
-%>
-
-<style type="text/css">
-
-</style>
+<!-- The pancer_study_summary files: -->
+<link href="css/pancancer_study_summary/pancancer_study_summary.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
+<jsp:include page="pancancer_study_summary/pancancer_study_summary_templates.html" flush="true"/>
+<script type="text/javascript" src="js/src/pancancer_study_summary/pancancer_study_summary.js?<%=GlobalProperties.getAppVersion()%>"></script>
 
 
-<script type="text/javascript" src="js/src/cancer-types-summary/cancerTypesSummary.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<div class="section" id="pancancer_study_summary"><!-- this div id "pancancer_study_summary" is referenced back in visualize.jsp -->
+	<!-- main container -->
+	<div id="pancancer_study_summary"></div>
+</div>
+
+<!-- Initialization script -->
 <script>
-  $(document).ready( function() {
-    CancerTypesSummary.init();
-  });
+	// This is for the moustache-like templates
+	// prevents collisions with JSP tags
+	_.templateSettings = {
+	    interpolate : /\{\{(.+?)\}\}/g
+	};
+
+	//Initialize the pancancer study summary object which triggers the creation of the sub tabs,
+	//models and respective views, one per gene:
+	$(document).ready( function() {
+		var pancancerStudySummary = new PancancerStudySummary();
+		pancancerStudySummary.init();
+	});
 </script>
 
