@@ -172,6 +172,10 @@
                         showXDebug(graphml);
                         showNetworkMessage(graphml, "#network #netmsg");
 
+                        // hide the loading page info and show the network
+                        $("#loadingPage").css("display","none");
+                        $("#network_wrapper").css("display","inline");
+
                         // when the data is available call send2cytoscapeweb
                         send2cytoscapeweb(window.networkGraphJSON, "cytoscapeweb", "network");
                     });

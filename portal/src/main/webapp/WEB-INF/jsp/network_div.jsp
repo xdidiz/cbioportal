@@ -32,7 +32,11 @@
 
 <div class="section" id="network">
     <div id="netmsg" style="margin-bottom: 12px; text-align: left"></div>
-	<table id="network_wrapper">
+    <div id="loadingPage" style="margin-top: -15px">
+        <img src="images/ajax-loader.gif"/>
+        Retrieving the network data. This can take several minutes...
+    </div>
+	<table id="network_wrapper" style="display: none">
 		<tr><td>
 			<div>
 				<jsp:include page="network_menu.jsp"/>
