@@ -243,7 +243,7 @@ var CustomizeHistogramView = Backbone.View.extend({
          fields["cancerType"] = cancerType;
          fields["cancerTypeDetailed"] = self.dmPresenter.getCancerTypeDetailedList(cancerType);
          //also reset minAlteredSamples (for the slider):
-         fields["minAlteredSamples"] = 0;
+         fields["minAlteredSamples"] = 1;
     	 self.model.set(fields);
      }
      // create the dropdown and add it
@@ -382,29 +382,35 @@ var MinAlteredSamplesSliderView = Backbone.View.extend({
 	 this.max = this.dmPresenter.getMaxAlteredSamplesForCancerTypeAndGene(this.model.get("cancerType"), this.gene, this.model.get("dataTypeYAxis"));
 
      var text = "Min. # altered samples ";
+     var init=1;
 
 	 if (this.model.get("dataTypeYAxis") == "Alteration Frequency") {
 		 suffix = "%";
 		 //in %, with 1 decimal:
 		 this.max = Math.round(parseFloat(this.max) * 1000)/10;
          text = "Min. alteration ";
+
+         // in the rare cases where the maximum alteration frequency is smaller than 1%
+         // set the init to 0
+         if(this.max<=init) init=0;
 	 }
-	 
+
+     // initialise general template with initial value of 1
      var templateFn = PanCancerTemplateCache.getTemplateFn("general_slider_template");
-     this.template = templateFn({min:0, init:0, max:this.max, suffix: suffix, text:text});
+     this.template = templateFn({min:0, init:init, max:this.max, suffix: suffix, text:text});
 
      // add the template
      $(this.el).html(this.template);
 
-     // create the jQuery ui slider
+     // create the jQuery ui slider with initial value of 1
      var sampleSlider = this.$el.find(".diagram-general-slider");
      sampleSlider.slider({ 
-        value: 0, 
+        value: init,
         min: 0, 
         max: this.max 
      });
-     //synchronize model:
-     this.model.set("minAlteredSamples", 0);
+
+     if(init==0) this.model.set("minAlteredSamples", init);
   },
 
   // handle change to the slider        
@@ -451,7 +457,6 @@ var MinTotalSamplesSliderView = Backbone.View.extend({
         //this.template = templateFn({min:0, max:this.max});
         this.template = templateFn({min:0, init:0, max:this.max, suffix: "", text:"Min. # total samples "});
 
-
         // add the template
         $(this.el).html(this.template);
 
@@ -462,8 +467,8 @@ var MinTotalSamplesSliderView = Backbone.View.extend({
             min: 0,
             max: this.max
         });
-        //synchronize model:
-        this.model.set("minTotalSamples", 0);
+
+        //this.model.set("minTotalSamples", 0);
     },
 
     // handle change to the slider
@@ -660,7 +665,7 @@ var HistogramSettings = Backbone.Model.extend({
      cancerTypeDetailed: "All",
      sortXAxis: "Y-Axis Values",
      dataTypeYAxis: "Alteration Frequency",
-     minAlteredSamples: "0",
+     minAlteredSamples: "1",
      minTotalSamples: "0",
      showGenomicAlterationTypes: true
   },
@@ -762,7 +767,7 @@ function DataManagerPresenter(dmInitCallBack)
 	var self = this;
 	//keep track of samples and their respective alteration events 
 	self.sampleList = []; //each entry contains alterationEvents[] 
-	self.cancerTypeList = [];  //each entry contains cancerTypeDetailed[] and sample_ids[], each cancerTypeDetailed entry also contains sample_ids[]
+	var nrResponsesReceived = 0;
 	
 	//Initialize: run initial ws requests and data parsing. 
 	//This sequence of calls gets: 
@@ -786,12 +791,20 @@ function DataManagerPresenter(dmInitCallBack)
 			
 			//do the next call:
 			console.log(new Date() + ": CALL to get sample clinical atttributes (cancer types)");
-			return window.QuerySession.getSampleClinicalData(["CANCER_TYPE","CANCER_TYPE_DETAILED"]);
+			//this and next call below are in parallel, so the last one should call the dmInitCallBack:
+			nrResponsesReceived++;
+			if (nrResponsesReceived == 2) {
+				dmInitCallBack(self);
+			}
 		},
 		function(err){
 			// handle error, if any
 			alert(" error found");//TODO - check how the error will come in and how we should present it. Logged in https://github.com/cBioPortal/cbioportal/issues/264
-		})
+		});
+	
+	console.log(new Date() + ": CALL to getSampleClinicalData()");
+	self.cancerTypeList = [];  //each entry contains cancerTypeDetailed[] and sample_ids[], each cancerTypeDetailed entry also contains sample_ids[]
+	window.QuerySession.getSampleClinicalData(["CANCER_TYPE","CANCER_TYPE_DETAILED"])
 	.then(
 		function (sampleClinicalData){
 			//parse the data to the correct internal format. Here we can assume that the samples are only the ones 
@@ -810,7 +823,6 @@ function DataManagerPresenter(dmInitCallBack)
 					//a sample contains only one cancer_type, so refer to it:
 					sampleIdAndCancerTypeIdx[sampleClinicalData[i].sample] = cancerType;
 					cancerType.sampleIds.push(sampleClinicalData[i].sample);
-					
 				}
 			}
 			for (var i = 0; i < sampleClinicalData.length; i++)
@@ -825,7 +837,11 @@ function DataManagerPresenter(dmInitCallBack)
 				}
 			}
 			console.log(new Date() + ": finished processing sample clinical atttributes (cancer types)");
-			dmInitCallBack(self);
+			//this and next call above are in parallel, so the last one should call the dmInitCallBack:
+			nrResponsesReceived++;
+			if (nrResponsesReceived == 2) {
+				dmInitCallBack(self);
+			}
 		},
 		function(err){
 			// handle error, if any
@@ -1005,7 +1021,7 @@ function DataManagerPresenter(dmInitCallBack)
 				if (dataTypeYAxis == "Alteration Frequency")
 					denominator = this.getTotalNrSamplesPerCancerType(cancerTypes[i], null);
 				//this method call is repeated (also called to build histogram JSON data)...TODO - performance improvement could be gained here...tests will indicate if necessary
-				var value = this.getAlterationEvents(cancerTypes[i], null, geneId).all / denominator;				
+				var value = this.getAlterationEvents(cancerTypes[i], null, geneId).all / denominator;
 				if (value > max)
 					max = value;
 			}
