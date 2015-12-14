@@ -12,33 +12,42 @@ var PlotUtilsModel = Backbone.Model.extend({
   },
   reset: function() {
 	  var clinical_attr_is_discretized = function(_axis) {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
-		    var _type = metaData.getClinicalAttrType($("#" + ids.sidebar[_axis].clin_attr).val());
-		    if (_type === "STRING") return true;
-		    else return false;
+		  if ($("input:radio[name='" + ids.sidebar[_axis].data_type + "']:checked").val() === vals.data_type.clin){ 
+			  var _type = metaData.getClinicalAttrType($("#" + ids.sidebar[_axis].clin_attr).val());
+			  if (_type === "STRING") return true;
+			  else return false;
+		  }
+		  else{
+			  return null;
+		  }
 		};
 		var isSameGene = function () {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-		    var elt_x = document.getElementById(ids.sidebar.x.gene);
-		    var elt_y = document.getElementById(ids.sidebar.y.gene);
-		    if (elt_x.options[elt_x.selectedIndex].value === elt_y.options[elt_y.selectedIndex].value) {
-		        return true;
-		    } 
-		    return false;
+			if (genetic_vs_genetic()) {
+			    var elt_x = document.getElementById(ids.sidebar.x.gene);
+			    var elt_y = document.getElementById(ids.sidebar.y.gene);
+			    if (elt_x.options[elt_x.selectedIndex].value === elt_y.options[elt_y.selectedIndex].value) {
+			        return true;
+			    } 
+			    return false;
+			}
+			else {
+				return null;
+			}
 		};
 		var isTwoGenes = function () {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
-		    var elt_x = document.getElementById(ids.sidebar.x.gene);
-		    var elt_y = document.getElementById(ids.sidebar.y.gene);
-		    if (elt_x.options[elt_x.selectedIndex].value !== elt_y.options[elt_y.selectedIndex].value) {
-		        return true;
-		    } 
-		    return false;
+			if (genetic_vs_genetic()) {
+			    var elt_x = document.getElementById(ids.sidebar.x.gene);
+			    var elt_y = document.getElementById(ids.sidebar.y.gene);
+			    if (elt_x.options[elt_x.selectedIndex].value !== elt_y.options[elt_y.selectedIndex].value) {
+			        return true;
+			    } 
+			    return false;
+			}
+			else {
+				return null;
+			}
 		};
 		var genetic_vs_genetic = function() {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
 		    if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === $("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() && 
 		            $("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.genetic) {
 		            return true;
@@ -46,8 +55,6 @@ var PlotUtilsModel = Backbone.Model.extend({
 		};
 
 		var genetic_vs_clinical = function() {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
 		    var _type_x = $("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val();
 		    var _type_y = $("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val();
 		    if (_type_x !== _type_y) {
@@ -56,8 +63,6 @@ var PlotUtilsModel = Backbone.Model.extend({
 		};
 
 		var clinical_vs_clinical = function() {
-			//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
 		    if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === $("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() && 
 		        $("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin) {
 		        return true;
@@ -65,17 +70,27 @@ var PlotUtilsModel = Backbone.Model.extend({
 		};
 
 		var getXGene = function() {
-		    var elt_x = document.getElementById(ids.sidebar.x.gene);
-		    var _gene_symbol = elt_x.options[elt_x.selectedIndex].value;
-		    return _gene_symbol;
+			if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.genetic) {
+			    var elt_x = document.getElementById(ids.sidebar.x.gene);
+			    var _gene_symbol = elt_x.options[elt_x.selectedIndex].value;
+			    return _gene_symbol;
+			}
+			else {
+				return null;
+			}
+				
 		};
 
 		var getYGene = function() {
-		    var elt_y = document.getElementById(ids.sidebar.y.gene);
-		    var _gene_symbol = elt_y.options[elt_y.selectedIndex].value;
-		    return _gene_symbol;
+			if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.genetic) {
+			    var elt_y = document.getElementById(ids.sidebar.y.gene);
+			    var _gene_symbol = elt_y.options[elt_y.selectedIndex].value;
+			    return _gene_symbol;
+			}
+			else {
+				return null;
+			}
 		};
-		
 		
 		this.set("x_clinical_attr_is_discretized", clinical_attr_is_discretized("x"));
 		this.set("y_clinical_attr_is_discretized", clinical_attr_is_discretized("y"));
@@ -117,24 +132,18 @@ var isSameGene = function () {
 };
 
 var isTwoGenes = function () {
-	//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
 	return getModelVal("is_two_genes");
 };
 
 var genetic_vs_genetic = function() {
-	//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
 	return getModelVal("genetic_vs_genetic");
 };
 
 var genetic_vs_clinical = function() {
-	//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
 	return getModelVal("genetic_vs_clinical");
 };
 
 var clinical_vs_clinical = function() {
-	//TODO - performance improvement: set and read this from a model instead of doing this selection again and again thousands of times...
-
 	return getModelVal("clinical_vs_clinical");
 };
 
@@ -281,7 +290,7 @@ var regenerate_plots = function(_axis) {
 	//Add this block to end of queue so that changes in UI are done first:
 	window.setTimeout( function () {
 		//update model variables:
-		updateModelVariables();
+		plotUtilsModel.reset();
 		//calls to plotsData.fecth:
 		if (_axis === "x" || _axis === "y") {
 	        clear_plot_box();
