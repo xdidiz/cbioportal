@@ -209,9 +209,7 @@ var PieChart = function(){
         });
 
         if(category[1] === 'h1' && currentView === 'pie') {
-            $('#' + DIV.mainDiv).one('mouseover', function () {
                 initMainDivQtip();
-            });
         }
         //else if(category === 'extendable'){
         $("#"+ DIV.chartDiv +"-extend").css('display', 'block');
@@ -223,6 +221,7 @@ var PieChart = function(){
     }
 
     function initMainDivQtip () {
+    	$('#' + DIV.mainDiv).one('mouseover', function () {
         var _sDom = 'rt',
             _sScrollY = '200';
         $('#' + DIV.mainDiv).qtip('destroy', true);
@@ -283,6 +282,7 @@ var PieChart = function(){
                 }
             }
         });
+    	}
     }
 
     //This function is designed to add functions like click, on, or other
@@ -469,9 +469,8 @@ var PieChart = function(){
                });
             $('#' + DIV.chartDiv ).css('display','block');
             $('#' + DIV.titleDiv ).css('display','block');
-            $('#' + DIV.mainDiv).one('mouseover', function () {
-                initMainDivQtip();
-            });
+            initMainDivQtip();
+
         });
 
         $("#"+DIV.chartDiv+"-reload-icon").click(function() {
