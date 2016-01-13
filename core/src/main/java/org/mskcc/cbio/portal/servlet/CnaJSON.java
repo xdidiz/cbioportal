@@ -41,6 +41,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
+
 import javax.servlet.http.*;
 import javax.servlet.ServletException;
 
@@ -82,8 +84,8 @@ public class CnaJSON extends HttpServlet {
             
         processGetCnaRequest(request, response);
     }
-    
-    private void processGetCnaRequest(HttpServletRequest request, HttpServletResponse response)
+    //the old method:
+    private void processGetCnaRequest_old(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String[] sampleIds = null;
         String cnaProfileId = request.getParameter(PatientView.CNA_PROFILE);
@@ -146,6 +148,83 @@ public class CnaJSON extends HttpServlet {
         }
 
         response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            out.write(mapper.writeValueAsString(data));
+        } finally {            
+            out.close();
+        }
+    }
+    
+    //process request in similar way to what is done in MutationsJSON:
+    private void processGetCnaRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String[] sampleIds = null;
+        String cnaProfileId = request.getParameter(PatientView.CNA_PROFILE);
+        Boolean filterByCbioGene = Boolean.parseBoolean(request.getParameter(CBIO_GENES_FILTER));
+        if(request.getParameterMap().containsKey(PatientView.SAMPLE_ID)) {
+            sampleIds = request.getParameter(PatientView.SAMPLE_ID).split(" +");
+        }
+                
+        GeneticProfile cnaProfile;
+        CancerStudy cancerStudy = null;
+        DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
+        Map<Long, Map<String, String>> cnaEvents;
+
+        try {
+            cnaProfile = DaoGeneticProfile.getGeneticProfileByStableId(cnaProfileId);
+            cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(cnaProfile.getCancerStudyId());
+            List<Integer> internalSampleIds = new ArrayList<>();
+            if(sampleIds == null){
+                internalSampleIds = InternalIdUtil.getInternalNonNormalSampleIds(cancerStudy.getInternalId());
+            }else{
+                internalSampleIds = InternalIdUtil.getInternalSampleIds(cancerStudy.getInternalId(), Arrays.asList(sampleIds));
+            }
+            cnaEvents = DaoCnaEvent.getCnaEventCounts(internalSampleIds,
+                    (filterByCbioGene?daoGeneOptimized.getEntrezGeneIds(daoGeneOptimized.getCbioCancerGenes()):null), cnaProfile.getGeneticProfileId(), Arrays.asList((short)-2,(short)2));
+            
+        } catch (DaoException ex) {
+            throw new ServletException(ex);
+        }
+        
+        List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
+        for (Map.Entry<Long, Map<String, String>> entry : cnaEvents.entrySet()) {
+            Map<String,Object> map = new HashMap<String,Object>();
+            
+            Long entrez = entry.getKey();
+            CanonicalGene gene = daoGeneOptimized.getGene(entrez);
+            
+            map.put("alter", entry.getValue().get("cnaLevel"));
+            
+            String hugo = gene.getHugoGeneSymbolAllCaps();
+            map.put("gene", hugo);
+            
+            String cytoband = gene.getCytoband();
+            map.put("cytoband", cytoband);
+            
+            int length = gene.getLength();
+            if (length>0) {
+                map.put("length", length);
+            }
+            
+            Integer count = Integer.parseInt(entry.getValue().get("count"));
+            map.put("num_alt", count);
+            
+            Pattern p = Pattern.compile("[,\\s]+");
+            String caseIds[] = p.split(entry.getValue().get("caseIds"));
+            List<Integer> sampleInternalIds = new ArrayList<>();
+            for(String s : caseIds) {
+                sampleInternalIds.add(Integer.valueOf(s));
+            }
+            List<String> sampleStableIds = InternalIdUtil.getStableSampleIds(sampleInternalIds);
+                
+            map.put("caseIds", sampleStableIds);
+            data.add(map);
+        }
+        
+        response.setContentType("application/json");
+        
         PrintWriter out = response.getWriter();
         ObjectMapper mapper = new ObjectMapper();
         try {

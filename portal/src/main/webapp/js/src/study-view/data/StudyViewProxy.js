@@ -424,7 +424,7 @@ var StudyViewProxy = (function() {
      *                      Reminder: the length for each attribute should be the same.
      * @returns {{}} Sample ID based CNA data.
      */
-    function convertCNAData(data) {
+    function convertCNAData_old(data) {
         var converted = {};
 
         if (data) {
@@ -446,6 +446,33 @@ var StudyViewProxy = (function() {
         }
         return converted;
     }
+    
+    
+    /**
+     * Convert copy number alteration data into sample ID based object.
+     * It will be used to quickly get selected samples' CNA data.
+     *
+     * @param data  Object  It contains caseIds, alter, cytoban, gene and gistic information. Each attribute is an array.
+     *                      Reminder: the length for each attribute should be the same.
+     * @returns {{}} Sample ID based CNA data.
+     */
+    function convertCNAData(data) {
+        var converted = {};
+
+        if (data) {
+            for (var i = 0, dataL = data.length; i < dataL; i++) {
+                var caseIds = data[i].caseIds;
+
+                for (var j = 0, caseIdsL = caseIds.length; j < caseIdsL; j++) {
+                    if (_.isUndefined(converted[caseIds[j]])) {
+                        converted[caseIds[j]] = [];
+                    }
+                    converted[caseIds[j]].push(data[i]);
+                }
+            }
+        }
+        return converted;
+    }    
 
     /**
      * Only return selected samples' copy number alterations data.
@@ -454,6 +481,46 @@ var StudyViewProxy = (function() {
      * @returns data    Object  Keep the original CNA data format.
      */
     function getCNABasedOnSampleIds(sampleIds) {
+    	alert('test')
+        var data = [];
+        if (sampleIds instanceof Array) {
+            if(sampleIds.length === this.getSampleIds().length) {
+            	//assume no change:
+                return obtainDataObject.cna;
+            }
+            if(_.isObject(obtainDataObject['cnaSampleBased'])){
+                var geneSpecific = {};
+                var numOfSample = sampleIds.length;
+                for (var i = 0; i < numOfSample; i++) {
+                    if (obtainDataObject.cnaSampleBased[sampleIds[i]]) {
+                        for (var j = 0, numOfGenes = obtainDataObject.cnaSampleBased[sampleIds[i]].length; j < numOfGenes; j++) {
+                            var  geneSymbol = obtainDataObject.cnaSampleBased[sampleIds[i]][j].gene;
+                            if (_.isUndefined(geneSpecific[geneSymbol])) {
+                            	//this is wrong, as it is not getting a copy...sander has fixed this before:
+                                geneSpecific[geneSymbol] = obtainDataObject.cnaSampleBased[sampleIds[i]][j];
+                                geneSpecific[geneSymbol].caseIds = [];
+                            }
+                            geneSpecific[geneSymbol].caseIds.push(sampleIds[i]);
+                            //TODO / idea: instead of pushing/copying these lists over and over again, why not flag the samples that are selected? So the code sets/removes a flag
+                        }
+                    }
+                }
+                data = _.values(geneSpecific);
+
+                
+            }
+        }
+        alert('test done')
+        return data;
+    }
+
+    /**
+     * Only return selected samples' copy number alterations data.
+     *
+     * @param sampleIds Array   List of sample IDs.
+     * @returns data    Object  Keep the original CNA data format.
+     */
+    function getCNABasedOnSampleIds_old(sampleIds) {
         var data = {
             alter: [],
             caseIds: [],

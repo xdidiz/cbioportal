@@ -392,26 +392,26 @@ var StudyViewInitTables = (function() {
         var genes = [];
 
         if(data) {
-            for(var i = 0, dataL = data.gene.length; i < dataL; i++){
+            for(var i = 0, dataL = data.length; i < dataL; i++){
                 var datum = {},
                     _altType = '';
-
-                switch(data.alter[i]) {
-                    case -2:
+                switch(data[i].alter) {
+                    case "-2":
                         _altType = 'DEL';
                         break;
-                    case 2:
+                    case "2":
                         _altType = 'AMP';
                         break;
                     default:
                         break;
                 }
-                datum.gene = data.gene[i];
-                datum.cytoband = data.cytoband[i];
+                datum.gene = data[i].gene;
+                datum.cytoband = data[i].cytoband;
                 datum.altType = _altType;
-                datum.samples = data.caseIds[i].length;
+                datum.samples = data[i].caseIds.length;
                 datum.altrateInSample = (datum.samples / numOfCases * 100).toFixed(1) + '%';
-                if(data.gistic[i] && (data.gistic[i] instanceof Array) && !isNaN(data.gistic[i][0])){
+                /* still relevant? 
+				if(data.gistic[i] && (data.gistic[i] instanceof Array) && !isNaN(data.gistic[i][0])){
                     var qval = Number(data.gistic[i][0]);
                     if(qval === 0) {
                         datum.qval = 0;
@@ -421,7 +421,9 @@ var StudyViewInitTables = (function() {
                 }else{
                     datum.qval = '';
                 }
-                datum.caseIds = data.caseIds[i];
+                */
+                datum.qval = '';
+                datum.caseIds = data[i].caseIds;
                 datum.uniqueId = datum.gene + '-' + datum.altType;
                 genes.push(datum);
             }

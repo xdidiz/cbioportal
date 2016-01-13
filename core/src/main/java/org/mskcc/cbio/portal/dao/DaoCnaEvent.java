@@ -185,6 +185,48 @@ public final class DaoCnaEvent {
         }
     }
     
+	public static Map<Long, Map<String, String>> getCnaEventCounts(List<Integer> sampleIds, Collection<Long> entrezGeneIds , int profileId, Collection<Short> cnaLevels) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoCnaEvent.class);
+            //this is needed for returning large lists of samples in GROUP_CONCAT function used in query:
+            pstmt = con.prepareStatement("SET SESSION group_concat_max_len = 1000000");
+            rs = pstmt.executeQuery();
+            pstmt.close();
+            //The query:
+            pstmt = con.prepareStatement
+		("SELECT ENTREZ_GENE_ID, ALTERATION, GROUP_CONCAT(sample_id) as CASE_IDS, count(*)"
+                    + " FROM sample_cna_event, cna_event"
+                    + " WHERE GENETIC_PROFILE_ID=?"
+                    + " AND sample_cna_event.CNA_EVENT_ID=cna_event.CNA_EVENT_ID"
+                    + (entrezGeneIds==null?"":" AND ENTREZ_GENE_ID IN(" + StringUtils.join(entrezGeneIds,",") + ")")
+                    + " AND ALTERATION IN (" + StringUtils.join(cnaLevels,",") + ")"
+                    + " AND SAMPLE_ID in ('"+StringUtils.join(sampleIds, "','")+"')" 
+                    + " group by ENTREZ_GENE_ID, ALTERATION ");
+            pstmt.setInt(1, profileId);
+            rs = pstmt.executeQuery();
+            Map<Long, Map<String, String>> map = new HashMap<Long, Map<String, String>>();
+            while (rs.next()) {
+                Map<String, String> value = new HashMap<>();
+                value.put("cnaLevel", rs.getString(2));
+                value.put("caseIds", rs.getString(3));
+                value.put("count", rs.getString(4));
+                map.put(rs.getLong(1), value);
+            }
+            return map;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoCnaEvent.class, con, pstmt, rs);
+        }
+    }
+	
+
+	
+    
+    
     public static List<CnaEvent.Event> getAllCnaEvents() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
