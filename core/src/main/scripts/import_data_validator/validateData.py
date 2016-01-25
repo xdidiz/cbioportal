@@ -1491,46 +1491,33 @@ class SegValidator(Validator):
         """
 
         chrom_size_dict = {}
-        chrom_size_url = (
-            'http://hgdownload.cse.ucsc.edu'
-            '/goldenPath/{build}/bigZips/{build}.chrom.sizes').format(
-                build=genome_build)
-        r = requests.get(chrom_size_url)
-        try:
-            r.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            raise IOError('Error retrieving chromosome lengths from UCSC: ' +
-                          e.message)
-        for line in r.text.splitlines():
-            try:
-                # skip comment lines
-                if line.startswith('#'):
-                    continue
-                cols = line.split('\t', 1)
-                if not (len(cols) == 2 and
-                        cols[0].startswith('chr')):
-                    raise IOError()
-                # skip unplaced sequences
-                if cols[0].endswith('_random') or cols[0].startswith('chrUn_'):
-                    continue
-                # skip entries for alternative haplotypes
-                if re.search(r'_hap[0-9]+$', cols[0]):
-                    continue
-                # skip the mitochondrial chromosome
-                if cols[0] == 'chrM':
-                    continue
+        if genome_build != 'hg19':
+            RuntimeError('Validation of .seg files using other genomes '
+                         'than hg19 is currently not implemented')
+        # downloaded from http://hgdownload.cse.ucsc.edu
+        # /goldenPath/{build}/bigZips/{build}.chrom.sizes
+        fn = os.path.join(os.path.dirname(__file__), 'hg19.chrom.sizes')
+        with open(fn, 'rU') as f:
+            lines = f.readlines()
+        for line in lines:
+            # skip comment lines
+            if line.startswith('#'):
+                continue
+            cols = line.split('\t', 1)
+            # skip unplaced sequences
+            if cols[0].endswith('_random') or cols[0].startswith('chrUn_'):
+                continue
+            # skip entries for alternative haplotypes
+            if re.search(r'_hap[0-9]+$', cols[0]):
+                continue
+            # skip the mitochondrial chromosome
+            if cols[0] == 'chrM':
+                continue
 
-                # remove the 'chr' prefix
-                chrom_name = cols[0][3:]
-                try:
-                    chrom_size = int(cols[1])
-                except ValueError:
-                    raise IOError()
-                chrom_size_dict[chrom_name] = chrom_size
-            except IOError:
-                raise IOError(
-                    "Unexpected response from {url}: {line}".format(
-                        url=chrom_size_url, line=repr(line)))
+            # remove the 'chr' prefix
+            chrom_name = cols[0][3:]
+            chrom_size = int(cols[1])
+            chrom_size_dict[chrom_name] = chrom_size
         return chrom_size_dict
 
 
