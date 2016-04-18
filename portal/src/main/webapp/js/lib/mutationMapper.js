@@ -6508,7 +6508,7 @@ var VepParser = (function()
  */
 var MutationModel = Backbone.Model.extend({
 	// TODO update initialize method when all done!
-	_initialize: function(attributes) {
+	initialize: function(attributes) {
 		this.mutationId = attributes.mutationId;
         this.mutationSid = attributes.mutationSid;
 		this.geneticProfileId = attributes.geneticProfileId;
@@ -6561,6 +6561,8 @@ var MutationModel = Backbone.Model.extend({
 		this.cna = attributes.cna;
 		this.myCancerGenome = attributes.myCancerGenome;
 		this.isHotspot = attributes.isHotspot;
+		this.civicVariantSummaries = attributes.civicVariantSummaries;
+		this.civicClinicalEvidenceStats = attributes.civicClinicalEvidenceStats;
 	},
 	url: function() {
 		// TODO implement this to get the data from a web service

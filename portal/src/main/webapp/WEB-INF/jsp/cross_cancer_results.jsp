@@ -69,6 +69,7 @@
     boolean showMyCancerGenomeUrl = (Boolean) GlobalProperties.showMyCancerGenomeUrl();
     String oncokbGeneStatus = (String) GlobalProperties.getOncoKBGeneStatus();
     boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
+    boolean showCivic = (Boolean) GlobalProperties.showCivic();
     String userName = GlobalProperties.getAuthenticatedUserName();
 
     //are we using session service for bookmarking?
@@ -144,6 +145,7 @@ if (sessionError != null) {  %>
 <script>
     var oncokbGeneStatus = <%=oncokbGeneStatus%>;
     var showHotspot = <%=showHotspot%>;
+    var showCivic = <%=showCivic%>;
     var userName = '<%=userName%>';
     var enableMyCancerGenome = <%=showMyCancerGenomeUrl%>;
 
@@ -396,6 +398,9 @@ if (sessionError != null) {  %>
     </span>
     <span class='annotation-item chang_hotspot' alt='{{changHotspotAlt}}'>
         <img width='14' height='14' src='images/cancer-hotspots.svg'>
+    </span>
+    <span class='annotation-item civic' alt='{{civicAlt}}'>
+        <img width='14' height='14' src='images/civic-logo.png'>
     </span>
 </script>
 

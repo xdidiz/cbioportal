@@ -60,12 +60,18 @@ import org.mskcc.cbio.portal.model.MutSig;
 import org.mskcc.cbio.portal.model.Sample;
 import org.mskcc.cbio.portal.model.converter.MutationModelConverter;
 import org.mskcc.cbio.portal.util.AccessControl;
+import org.mskcc.cbio.portal.util.CivicAnotationUtil;
+import org.mskcc.cbio.portal.util.CivicAnotationUtil.ClinicalEvidenceStats;
+import org.mskcc.cbio.portal.util.CivicAnotationUtil.ClinicalEvidenceSummary;
+import org.mskcc.cbio.portal.util.CivicAnotationUtil.VariantSummary;
 import org.mskcc.cbio.portal.util.InternalIdUtil;
 import org.mskcc.cbio.portal.util.MyCancerGenomeLinkUtil;
 import org.mskcc.cbio.portal.util.OncokbHotspotUtil;
 import org.mskcc.cbio.portal.util.SpringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  *
@@ -330,6 +336,10 @@ public class MutationsJSON extends HttpServlet {
                 mcgLinks = MyCancerGenomeLinkUtil.getMyCancerGenomeLinks(mutation.getGeneSymbol(), mutation.getProteinChange(), false);
             }
             isHotspot = OncokbHotspotUtil.getOncokbHotspot(mutation.getGeneSymbol(), mutation.getProteinChange());
+            ImmutableList<CivicAnotationUtil.VariantSummary> civicVariantSummaries = CivicAnotationUtil.getVariantSummary(
+                    mutation.getGeneSymbol(), mutation.getProteinChange());
+            ImmutableList<CivicAnotationUtil.ClinicalEvidenceStats> civicClinicalEvidenceStats = CivicAnotationUtil.getClinicalEvidenceStats(
+                    mutation.getGeneSymbol(), mutation.getProteinChange());
             exportMutation(data, mapMutationEventIndex, mutation, cancerStudy,
                     drugs.get(mutation.getEntrezGeneId()), geneContextMap.get(mutation.getGeneSymbol()),
                     mutation.getKeyword()==null?1:keywordContextMap.get(mutation.getKeyword()),
@@ -338,6 +348,8 @@ public class MutationsJSON extends HttpServlet {
                     cnaContext.get(mutation.getEntrezGeneId()),
                     mcgLinks,
                     isHotspot,
+                    civicVariantSummaries,
+                    civicClinicalEvidenceStats,
                     daoGeneOptimized);
         }
 
@@ -639,6 +651,8 @@ public class MutationsJSON extends HttpServlet {
         map.put("validation", new ArrayList());
         map.put("mycancergenome", new ArrayList());
         map.put("is-hotspot", new ArrayList());
+        map.put("civic-variant-summaries", new ArrayList());
+        map.put("civic-clinical-evidence-stats", new ArrayList());
         
         return map;
     }
@@ -653,7 +667,8 @@ public class MutationsJSON extends HttpServlet {
     private void exportMutation(Map<String,List> data, Map<Long, Integer> mapMutationEventIndex,
             ExtendedMutation mutation, CancerStudy cancerStudy, Set<String> drugs,
             int geneContext, int keywordContext, Set<CosmicMutationFrequency> cosmic, Map<String,Object> mrna,
-            String cna, List<String> mycancergenomelinks, Boolean isHotspot, DaoGeneOptimized daoGeneOptimized) throws ServletException {
+            String cna, List<String> mycancergenomelinks, Boolean isHotspot, ImmutableList<VariantSummary> civicVariantSummaries,
+            ImmutableList<ClinicalEvidenceStats> civicClinicalEvidenceStats, DaoGeneOptimized daoGeneOptimized) throws ServletException {
         Sample sample = DaoSample.getSampleById(mutation.getSampleId());
         Long eventId = mutation.getMutationEventId();
         Integer ix = mapMutationEventIndex.get(eventId);
@@ -696,6 +711,8 @@ public class MutationsJSON extends HttpServlet {
         data.get("mrna").add(mrna);
         data.get("mycancergenome").add(mycancergenomelinks);
         data.get("is-hotspot").add(isHotspot);
+        data.get("civic-variant-summaries").add(CivicAnotationUtil.prepareVariantSummariesForJSON(civicVariantSummaries));
+        data.get("civic-clinical-evidence-stats").add(CivicAnotationUtil.prepareClinicalEvidenceStatsForJSON(civicClinicalEvidenceStats));
         
         // cosmic
         data.get("cosmic").add(convertCosmicDataToMatrix(cosmic));

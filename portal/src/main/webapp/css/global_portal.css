@@ -1704,3 +1704,12 @@ ul.ui-autocomplete li.ui-menu-item { font-size: 0.6em; text-align: left; }
     padding: 0;
 }
 
+
+.qtip-civic .qtip-content {
+    max-height: 200px;
+    overflow: auto;
+}
+
+.qtip-civic ul {
+    padding-left: 10px;
+}
