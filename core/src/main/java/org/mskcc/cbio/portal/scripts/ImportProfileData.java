@@ -46,13 +46,32 @@ import org.mskcc.cbio.portal.util.*;
  * @author ECerami
  * @author Arthur Goldberg goldberg@cbio.mskcc.org
  */
-public class ImportProfileData{
+public class ImportProfileData implements Runnable {
+	
+	private String[] args;
+	public ImportProfileData(String[] args) {
+		this.args = args;
+	}
 
-   public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
        try {
-    	   Date start = new Date();
+    	   ImportProfileData runner = new ImportProfileData(args);
+    	   runner.run();
+       }
+       catch (Exception e) {
+           ConsoleUtil.showWarnings();
+    	   //exit with error status:
+    	   System.err.println ("\nABORTED! Error:  " + e.getMessage());
+           System.exit(1);
+       }
+    }
 
-    	   String description = "Import 'profile' files that contain data matrices indexed by gene, case";
+	@Override
+	public void run() {
+		try {
+ 	       Date start = new Date();
+
+ 	   	   String description = "Import 'profile' files that contain data matrices indexed by gene, case";
 	
 	       // using a real options parser, helps avoid bugs
 	       OptionSet options = ConsoleUtil.parseStandardDataAndMetaOptions(args, description, true);
@@ -96,12 +115,12 @@ public class ImportProfileData{
 	        Date end = new Date();
 	        long totalTime = end.getTime() - start.getTime();
 	        System.out.println ("Total time:  " + totalTime + " ms\n");
-       }
-       catch (Exception e) {
-           ConsoleUtil.showWarnings();
-    	   //exit with error status:
-    	   System.err.println ("\nABORTED! Error:  " + e.getMessage());
-           System.exit(1);
-       }
-    }
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
 }
