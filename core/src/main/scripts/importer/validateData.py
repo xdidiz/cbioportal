@@ -42,10 +42,11 @@ DEFINED_CANCER_TYPES = None
 
 VALIDATOR_IDS = {
     cbioportal_common.MetaFileTypes.CNA:'CNAValidator',
-    cbioportal_common.MetaFileTypes.CNA_LOG2:'ContinuousValuesValidator',
-    cbioportal_common.MetaFileTypes.CNA_CONTINUOUS:'ContinuousValuesValidator',
-    cbioportal_common.MetaFileTypes.EXPRESSION:'ContinuousValuesValidator',
-    cbioportal_common.MetaFileTypes.METHYLATION:'ContinuousValuesValidator',
+    cbioportal_common.MetaFileTypes.CNA_LOG2:'NumericValuesValidator',
+    cbioportal_common.MetaFileTypes.CNA_CONTINUOUS:'NumericValuesValidator',
+    cbioportal_common.MetaFileTypes.EXPRESSION:'PositiveValuesValidator',
+    cbioportal_common.MetaFileTypes.EXPRESSION_ZSCORE:'NumericValuesValidator',
+    cbioportal_common.MetaFileTypes.METHYLATION:'NumericValuesValidator',
     cbioportal_common.MetaFileTypes.MUTATION:'MutationsExtendedValidator',
     cbioportal_common.MetaFileTypes.CANCER_TYPE:'CancerTypeValidator',
     cbioportal_common.MetaFileTypes.SAMPLE_ATTRIBUTES:'SampleClinicalValidator',
@@ -1730,12 +1731,12 @@ class SegValidator(Validator):
         return chrom_size_dict
 
 
-class ContinuousValuesValidator(GenewiseFileValidator):
+class NumericValuesValidator(GenewiseFileValidator):
     """Validator for matrix files mapping floats to gene/sample combinations.
 
-    Allowing missing values indicated by 'NA' or [Not Available].
+    Allowing missing values as in other GenewiseFileValidator types.
     """
-    
+
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
         stripped_value = value.strip()
@@ -1744,6 +1745,37 @@ class ContinuousValuesValidator(GenewiseFileValidator):
                               extra={'line_number': self.line_number,
                                      'column_number': col_index + 1,
                                      'cause': value})
+
+
+class PositiveValuesValidator(GenewiseFileValidator):
+    """Validator for matrix files mapping pos. floats to gene/sample combos.
+
+    Allowing missing values as in other GenewiseFileValidator types.
+    """
+
+    def checkValue(self, value, col_index):
+        """Check a value in a sample column."""
+        stripped_value = value.strip()
+        if stripped_value.lower() in self.NULL_VALUES:
+            # nothing more to validate
+            return
+        try:
+            num_value = float(value)
+        except ValueError:
+            self.logger.error(
+                "Value is neither a real number nor %s",
+                '/'.join(self.NULL_VALUES),
+                extra={'line_number': self.line_number,
+                       'column_number': col_index + 1,
+                       'cause': value})
+            # nothing more to validate
+            return
+        if num_value <= 0:
+            self.logger.error(
+                'Value is not positive',
+                extra={'line_number': self.line_number,
+                       'column_number': col_index + 1,
+                       'cause': value})
 
 
 class FusionValidator(Validator):

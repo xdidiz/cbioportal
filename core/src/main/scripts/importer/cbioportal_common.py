@@ -38,6 +38,7 @@ class MetaFileTypes(object):
     CNA_CONTINUOUS = 'meta_contCNA'
     SEG = 'meta_segment'
     EXPRESSION = 'meta_expression'
+    EXPRESSION_ZSCORE = 'meta_expression_Zscores'
     MUTATION = 'meta_mutations_extended'
     METHYLATION = 'meta_methylation'
     FUSION = 'meta_fusions'
@@ -127,6 +128,16 @@ META_FIELD_MAP = {
         'normal_samples_list': False
     },
     MetaFileTypes.EXPRESSION: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'show_profile_in_analysis_tab': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True
+    },
+    MetaFileTypes.EXPRESSION_ZSCORE: {
         'cancer_study_identifier': True,
         'genetic_alteration_type': True,
         'datatype': True,
@@ -447,7 +458,7 @@ def get_meta_file_type(metaDictionary, logger, filename):
         ("COPY_NUMBER_ALTERATION", "SEG"): MetaFileTypes.SEG,
         # expression
         ("MRNA_EXPRESSION", "CONTINUOUS"): MetaFileTypes.EXPRESSION,
-        ("MRNA_EXPRESSION", "Z-SCORE"): MetaFileTypes.EXPRESSION,
+        ("MRNA_EXPRESSION", "Z-SCORE"): MetaFileTypes.EXPRESSION_ZSCORE,
         ("MRNA_EXPRESSION", "DISCRETE"): MetaFileTypes.EXPRESSION,
         # mutations
         ("MUTATION_EXTENDED", "MAF"): MetaFileTypes.MUTATION,
