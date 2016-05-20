@@ -57,19 +57,12 @@ public class TransactionalScripts implements Runnable {
 					break;
 				}
 				
-				Object newInstance = ctor.newInstance(new Object[] { args });
-				Method method = scriptClass.getMethod("run");
+				Runnable newInstance = (Runnable)ctor.newInstance(new Object[] { args });
+				newInstance.run();
 				
-				Object result = method.invoke(newInstance);
-				if (result != null && result.toString() != "0") {
-					throw new RuntimeException("Nonzero exit status from: " + className + ", exit: " + result.toString());
-				}
 			} catch (InstantiationException e) {
 				e.printStackTrace(System.err);
 				throw new NestableRuntimeException("Can't find instantiate runner for: " + className, e);
-			} catch (NoSuchMethodException e) {
-				e.printStackTrace(System.err);
-				throw new NestableRuntimeException("Can't find main method in: " + className, e);
 			} catch (SecurityException e) {
 				e.printStackTrace(System.err);
 				throw new NestableRuntimeException("Can't access main method in: " + className, e);
@@ -83,6 +76,9 @@ public class TransactionalScripts implements Runnable {
 				e.printStackTrace(System.err);
 				throw new NestableRuntimeException("Can't call main method in: " + className, e);
 			}
+			catch (RuntimeException e) {
+				throw new RuntimeException("Nonzero exit status from: " + className );
+			} 
 		}
 	}
 	
