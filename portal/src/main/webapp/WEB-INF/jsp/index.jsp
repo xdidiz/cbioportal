@@ -113,13 +113,6 @@ $(document).ready(function(){
 </p>
 
 <%
-String dbError = (String) request.getAttribute(QueryBuilder.DB_ERROR);
-if (dbError != null && userMessage != null) {  %>
-<p id="db-warning" style="background-color:red;display:block;">
-    <img src="images/warning.gif" alt="warning"/>
-    The version of the portal is out of sync with the database! Please contact the site administrator to update the database.<br/><%= dbError %>
-</p>
-<% } 
 String sessionError = (String) request.getAttribute(SessionServiceRequestWrapper.SESSION_ERROR);
 if (sessionError != null) {  %>
 <p id="session-warning" style="background-color:red;display:block;">
