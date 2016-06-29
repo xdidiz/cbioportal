@@ -50,14 +50,20 @@
 	 				Build Case Set
 	 			</a>
 	 			-->
-                <div style="padding-left: 10px">
+	 		</td>
+		</tr>
+        <tr>
+            <td></td>
+            <td>
+                <div>
                     <!-- add new link for the new functionality which links to the study view -->
                     <a id="build_case_set" onclick="openStudyView()" title="Build a Case Set via Study View">
                         <%= GlobalProperties.getStudyviewLinkText()%>
                     </a>
                 </div>
-	 		</td>
-		</tr>
+            </td>
+            <td></td>
+        </tr>
 	</table>
 	
 	<div id="custom_case_set_dialog" title="Build a Case Set">
@@ -89,7 +95,7 @@
 	</div>
     <script type="text/javascript" src="js/src/mutsig.js?<%=GlobalProperties.getAppVersion()%>"></script>
     <div id="mutsig_dialog" title="Recurrently Mutated Genes" class='display' style="font-size: 11px; .ui-dialog {padding: 0em;};">
-        <img id='loader-img' src="images/ajax-loader.gif"/>
+        <img id='loader-img' src="images/ajax-loader.gif" alt='loading'/>
         <table class="MutSig">
             <thead>
                 <tr>
@@ -109,7 +115,7 @@
     </div>
     <script type="text/javascript" src="js/src/gistic.js?<%=GlobalProperties.getAppVersion()%>"></script>
     <div id="gistic_dialog" title="Recurrent Copy Number Alterations (Gistic)" style="font-size:11px; text-align:left; .ui-dialog {padding:0em;};">
-        <div id='gistic_loading'><img id='loader-img' src="images/ajax-loader.gif"/></div>
+        <div id='gistic_loading'><img id='loader-img' src="images/ajax-loader.gif" alt='loading'/></div>
         <table id="gistic_table" class='display' style='border-spacing:12px;'></table>
         <div id="gistic_dialog_footer">
             <button style="float: right; display:none; margin-top:1.1em;" id="gistic_close" onclick="Gistic.UI.updateGenes(); Gistic.dialog_el.dialog('close');" class="tabs-button" title="Use these ROI genes">Select Genes</button>

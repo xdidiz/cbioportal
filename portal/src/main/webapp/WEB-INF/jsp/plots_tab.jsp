@@ -140,7 +140,7 @@
                         </div>
                         <div id="plots-x-spec"></div>
                     </div>
-                    <button id='plots-tab-swap-btn'><img src='images/swap.png'></button>
+                    <button id='plots-tab-swap-btn'><img src='images/swap.png' alt='swap'></button>
                     <div id="plots-sidebar-y-div" class="plots">
                         <h4>Vertical Axis</h4>
                         <div id="plots-y-data-type" style="padding-left:20px;">
@@ -169,23 +169,23 @@
 
 <script>
     $(document).ready( function() {
-        var plots_tab_init = false;
-        if ($("#plots").is(":visible")) {
-            plotsTab.init();
-            plots_tab_init = true;
-        } else {
-            $(window).trigger("resize");
-        }
+    	//whether this tab has already been initialized or not:
+    	var tab_init = false;
+    	//function that will listen to tab changes and init this one when applicable:
+    	function tabsUpdate() {
+	        if ($("#plots").is(":visible")) {
+		    	if (tab_init === false) {
+		        	plotsTab.init();
+		            tab_init = true;
+		        }
+		        $(window).trigger("resize");
+	    	}
+    	}
+        //this is for the scenario where the tab is open by default (as part of URL >> #tab_name at the end of URL):
+    	tabsUpdate();
+        //this is for the scenario where the user navigates to this tab:
         $("#tabs").bind("tabsactivate", function(event, ui) {
-            if (ui.newTab.text().trim().toLowerCase() === "plots") {
-                if (plots_tab_init === false) {
-                    plotsTab.init();
-                    plots_tab_init = true;
-                    $(window).trigger("resize");
-                } else {
-                    $(window).trigger("resize");
-                }
-            }
+        	tabsUpdate();
         });
     });
 </script>

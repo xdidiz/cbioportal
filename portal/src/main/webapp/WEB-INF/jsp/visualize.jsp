@@ -30,8 +30,8 @@
  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --%>
 
-<%@ include file="global/global_variables.jsp" %>
 
+<%@ include file="global/global_variables.jsp" %>
 <jsp:include page="global/header.jsp" flush="true" />
 <%@ page import="java.util.Map" %>
 
@@ -50,38 +50,11 @@
     </div>
 </div>
 
-<%
-    if (warningUnion.size() > 0) {
-        out.println ("<div class='warning'>");
-        out.println ("<h4>Errors:</h4>");
-        out.println ("<ul>");
-        Iterator<String> warningIterator = warningUnion.iterator();
-        int counter = 0;
-        while (warningIterator.hasNext()) {
-            String warning = warningIterator.next();
-            if (counter++ < 10) {
-                out.println ("<li>" +  warning + "</li>");
-            }
-        }
-        if (warningUnion.size() > 10) {
-            out.println ("<li>...</li>");
-        }
-        out.println ("</ul>");
-        out.println ("</div>");
-    }
-
-    if (geneWithScoreList.size() == 0) {
-        out.println ("<b>Please go back and try again.</b>");
-        out.println ("</div>");
-    } else {
-%>
-
 <div id="tabs">
     <ul>
     <%
         Boolean showMutTab = false;
         Boolean showCancerTypesSummary = false;
-        if (geneWithScoreList.size() > 0) {
 
             Enumeration paramEnum = request.getParameterNames();
             StringBuffer buf = new StringBuffer(request.getAttribute(QueryBuilder.ATTRIBUTE_URL_BEFORE_FORWARDING) + "?");
@@ -152,7 +125,7 @@
                 + "Cancer Types Summary</a></li>");
             }
 
-            if (computeLogOddsRatio && geneWithScoreList.size() > 1) {
+            if (computeLogOddsRatio) {
                 out.println ("<li><a href='#mutex' class='result-tab' id='mutex-result-tab'>"
                 + "Mutual Exclusivity</a></li>");
             }
@@ -164,7 +137,7 @@
                 out.println ("<li><a href='#coexp' class='result-tab' id='coexp-result-tab'>Co-Expression</a></li>");
             }
             if (has_mrna || has_copy_no || showMutTab) {
-                out.println("<li><a href='#or_analysis' id='enrichments-result-tab' class='result-tab' style='height: 18px;'>Enrichments</a></li>");
+                out.println("<li><a href='#enrichementTabDiv' id='enrichments-result-tab' class='result-tab'>Enrichments</a></li>");
             }
             if (has_survival) {
                 out.println ("<li><a href='#survival' class='result-tab' id='survival-result-tab'>Survival</a></li>");
@@ -182,7 +155,7 @@
             out.println ("<div class=\"section\" id=\"bookmark_email\">");
 
             // diable bookmark link if case set is user-defined
-            if (patientSetId.equals("-1"))
+            if (sampleSetId.equals("-1"))
             {
                 out.println("<br>");
                 out.println("<h4>The bookmark option is not available for user-defined case lists.</h4>");
@@ -198,7 +171,6 @@
             }
 
             out.println("</div>");
-        }
     %>
 
         <div class="section" id="summary">
@@ -221,7 +193,7 @@
             <%@ include file="survival_tab.jsp" %>
         <% } %>
 
-        <% if (computeLogOddsRatio && geneWithScoreList.size() > 1) { %>
+        <% if (computeLogOddsRatio) { %>
             <%@ include file="mutex_tab.jsp" %>
         <% } %>
 
@@ -244,14 +216,13 @@
         <% } %>
 
         <% if (has_mrna || has_copy_no || showMutTab) { %>
-            <%@ include file="over_representation_analysis.jsp" %>
+            <%@ include file="enrichments_tab.jsp" %>
         <% } %>
 
         <%@ include file="data_download.jsp" %>
-        <%@ include file="image_tabs_data.jsp" %>
 
 </div> <!-- end tabs div -->
-<% } %>
+
 
 </div>
 </td>
@@ -288,6 +259,7 @@
 			        clearInterval(interval);
 			        if (firstTime)
 			        {
+                $(window).resize();
 				        send2cytoscapeweb(window.networkGraphJSON, "cytoscapeweb", "network");
 				        firstTime = false;
 			        }
@@ -297,19 +269,27 @@
 
         $("a.result-tab").click(function(){
 
-            if($(this).attr("href")=="#network") {
-                if(firstTime)
+            if($(this).attr("href")=="#network")
+            {
+              var interval = setInterval(function() {
+                if (window.networkGraphJSON != null)
                 {
-                  send2cytoscapeweb(window.networkGraphJSON, "cytoscapeweb", "network");
-                  firstTime = false;
-                }
-	            else
-                {
-	                // TODO this is a workaround to adjust cytoscape canvas
-	                // and probably not the best way to do it...
-	                $(window).resize();
-                }
+                  clearInterval(interval);
+                  if(firstTime)
+                  {
+                    $(window).resize();
+                    send2cytoscapeweb(window.networkGraphJSON, "cytoscapeweb", "network");
+                    firstTime = false;
+                  }
+                else
+                  {
+                    // TODO this is a workaround to adjust cytoscape canvas
+                    // and probably not the best way to do it...
+                    $(window).resize();
+                  }
 
+                }
+              }, 50);
             } else {
                 if($(this).attr("href")=="#bookmark_email") {
                     $("#bookmark-link").attr("href",window.location.href);
@@ -332,6 +312,9 @@
                 position: {my:'left top',at:'right bottom', viewport: $(window)}
             }
         );
+        $("#oncoprint-result-tab").click(function() {
+            $(window).trigger('resize');
+        });
         $("#mutex-result-tab").qtip(
             {
                 content: {text: "Mutual exclusivity and co-occurrence analysis"},

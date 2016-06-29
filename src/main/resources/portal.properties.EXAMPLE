@@ -10,6 +10,8 @@ db.portal_db_name=cbioportal
 db.driver=com.mysql.jdbc.Driver
 db.connection_string=jdbc:mysql://localhost/
 db.tomcat_resource_name=jdbc/cbioportal
+# this is the *expected* DB version (expected by the code). Don't set it manually, it is filled by maven:
+db.version=${db.version}
 
 # web page cosmetics
 skin.title=cBioPortal for Cancer Genomics
@@ -19,10 +21,14 @@ skin.authorization_message=Access to this portal is only available to authorized
 skin.right_nav.show_testimonials=true
 skin.data_sets_header=The portal currently contains data from the following cancer genomics studies.  The table below lists the number of available samples per data type and tumor.
 skin.data_sets_footer=Data sets of TCGA studies were downloaded from Broad Firehose (http://gdac.broadinstitute.org) and updated monthly. In some studies, data sets were from the TCGA working groups directly.
-skin.faq=faq.html
-skin.about=about_us.html
-skin.news=news.html
 skin.examples_right_column=examples.html
+
+# documentation pages
+skin.documentation.baseurl=https://github.com/cBioPortal/cbioportal/wiki/
+skin.documentation.markdown=true
+skin.documentation.faq=FAQ.md
+skin.documentation.about=About-Us.md
+skin.documentation.skin.news=News.md
 
 # setting controlling the logos
 skin.right_logo=mskcc_logo_3d_grey.jpg
@@ -69,7 +75,7 @@ skin.study_view.link_text=To build your own case set, try out our enhanced Study
 # authentication
 ## is authorization enabled at all? (true, false)
 authorization=false
-## which method of authentication to use (false, googleplus, saml, openid)
+## which method of authentication to use (false, googleplus, saml, openid, ad, ldap)
 authenticate=false
 ## Should the permissions for groups and users be filtered by this instance's app.name?
 ## (true means the system only handles "CBIOPORTAL:someGroupPermission" groups, false means "someGroupPermission" works)
@@ -89,6 +95,18 @@ saml.keystore.default-key=
 ## settings to connect to an Active Directory domain controller
 ad.domain=
 ad.url=
+## configuration for the LDAP access
+ldap.user_search_base=DC=example,DC=com
+ldap.url=ldap://ldap.example.com
+ldap.manager.dn=CN=manager-user,DC=example,DC=com
+ldap.manager.password=PASSWORD
+## The following attributes for are good for ActiveDirectory, for OpenLDAP use "uid" for username
+ldap.attributes.username=sAMAccountName
+#ldap.attributes.username=uid
+ldap.attributes.last_name=sn
+ldap.attributes.given_name=givenName
+ldap.attributes.email=mail
+
 # always show studies with this group
 always_show_study_group=
 
@@ -109,8 +127,8 @@ oncokb.url=
 # Enable Chang's hotspot list (true, false)
 show.hotspot=true
 
-# My Cancer Genome link. Please disable (remove this link) when using cBioPortal with patient identifiable data due My Cancer Genome license restrictions.
-mycancergenome.url=http://www.mycancergenome.org
+# Link to My Cancer Genome. Please disable (set to false) when using cBioPortal with patient identifiable data due My Cancer Genome license restrictions.
+mycancergenome.show=true
 
 # igv bam linking
 igv.bam.linking=

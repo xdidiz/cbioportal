@@ -31,39 +31,26 @@
 --%>
 <%
     String oncokbUrl = (String) GlobalProperties.getOncoKBUrl();
-    String myCancerGenomeUrl = (String) GlobalProperties.getMyCancerGenomeUrl();
+    boolean showMyCancerGenomeUrl = (Boolean) GlobalProperties.showMyCancerGenomeUrl();
     String oncokbGeneStatus = (String) GlobalProperties.getOncoKBGeneStatus();
     boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
+    String userName = GlobalProperties.getAuthenticatedUserName();
 %>
 
 <div class='section' id='mutation_details'>
-    <img src='images/ajax-loader.gif'/>
+    <img src='images/ajax-loader.gif' alt='loading'/>
 </div>
 
-<script type="text/template" id="mutation_table_protein_change_oncokb_template">
-    <span class='{{proteinChangeClass}}' alt='{{proteinChangeTip}}'>
-		<a>{{proteinChange}}</a>
-	</span>
-    <span class='mutation-table-additional-protein-change simple-tip'
-          alt='{{additionalProteinChangeTip}}'>
-        <img height=12 width=12 style='opacity:0.2' src='images/warning.gif'>
+<script type="text/template" id="mutation_table_annotation_template">
+    <span class='annotation-item oncokb oncokb_alteration oncogenic' oncokbId='{{oncokbId}}'>
+        <img class='oncokb oncogenic' width="14" height="14" src="images/ajax-loader.gif" alt='loading'/>
     </span>
-    <span class='oncokb oncokb_alteration oncogenic' oncokbId='{{oncokbId}}'>
-        <img class='oncokb oncogenic loader' width="13" height="13" class="loader" src="images/ajax-loader.gif"/>
+    <span class='annotation-item mcg' alt='{{mcgAlt}}'>
+        <img width='14' height='14' src='images/mcg_logo.png' alt='My Cancer Genome Symbol'>
     </span>
-    <span class='mcg' alt='{{mcgAlt}}'>
-        <img src='images/mcg_logo.png'>
+    <span class='annotation-item chang_hotspot' alt='{{changHotspotAlt}}'>
+        <img width='14' height='14' src='images/oncokb-flame.svg' alt='Recurrent Hotspot Symbol'>
     </span>
-    <span class='chang_hotspot' alt='{{changHotspotAlt}}'>
-        <img width='13' height='13' src='images/oncokb-flame.svg'>
-    </span>
-    <a href='{{pdbMatchLink}}' class="mutation-table-3d-link">
-        <span class="mutation-table-3d-icon">3D</span>
-    </a>
-</script>
-
-<script type="text/template" id="mutation_table_oncokb_template">
-    <span class='oncokb oncokb_column' oncokbId='{{uniqueId}}'></span>
 </script>
 
 <style type="text/css" title="currentStyle">
@@ -72,28 +59,28 @@
     @import "css/mutationMapper.min.css?<%=GlobalProperties.getAppVersion()%>";
 </style>
 <script type="text/javascript"
-        src="js/src/patient-view/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>
+        src="js/src/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript">
 
-    // TODO 3d Visualizer should be initialized before document get ready
-    // ...due to incompatible Jmol initialization behavior
-    var _mut3dVis = null;
-    var myCancerGenomeUrl = '<%=myCancerGenomeUrl%>';
     var oncokbGeneStatus = <%=oncokbGeneStatus%>;
     var showHotspot = <%=showHotspot%>;
-    var enableMyCancerGenome = myCancerGenomeUrl?true:false;
-
-    _mut3dVis = new Mutation3dVis("default3dView");
-    _mut3dVis.init();
-
-    OncoKB.setUrl('<%=oncokbUrl%>');
+    var userName = '<%=userName%>';
+    var enableMyCancerGenome = <%=showMyCancerGenomeUrl%>;
 
     // Set up Mutation View
     $(document).ready(function () {
-        var sampleArray = _.keys(PortalGlobals.getPatientSampleIdMap());
+        var sampleArray = window.QuerySession.getSampleIds();
+        OncoKB.setUrl('<%=oncokbUrl%>');
         var mutationProxy = DataProxyFactory.getDefaultMutationDataProxy();
 
-
+        var columnOrder = [
+            "datum", "mutationId", "mutationSid", "caseId", "cancerStudy", "tumorType",
+            "proteinChange", "annotation", "mutationType", "cna", "cBioPortal", "cosmic", "mutationStatus",
+            "validationStatus", "mutationAssessor", "sequencingCenter", "chr",
+            "startPos", "endPos", "referenceAllele", "variantAllele", "tumorFreq",
+            "normalFreq", "tumorRefCount", "tumorAltCount", "normalRefCount",
+            "normalAltCount", "igvLink", "mutationCount"
+        ];
         var options = {
             el: "#mutation_details",
             data: {
@@ -103,195 +90,183 @@
                 mutationProxy: {
                     instance: mutationProxy
                 }
-            }
-        };
-
-        if(OncoKB.getAccess()) {
-            var oncokbInstance = new OncoKB.Instance();
-            if(oncokbGeneStatus) {
-                oncokbInstance.setGeneStatus(oncokbGeneStatus);
-            }
-            options.view = {
+            },
+            view: {
                 mutationTable: {
-                    columns: {
-                        oncokb: {
-                            sTitle: "oncokb",
-                            tip: "OncoKB Annotation",
-                            sType: "string",
-                            sClass: "center-align-td"
-                        }
-                    },
-                    columnOrder: [
-                        "datum", "mutationId", "mutationSid", "caseId", "cancerStudy", "tumorType",
-                        "proteinChange", "mutationType", "cna", "cBioPortal", "cosmic", "mutationStatus",
-                        "validationStatus", "mutationAssessor", "sequencingCenter", "chr",
-                        "startPos", "endPos", "referenceAllele", "variantAllele", "tumorFreq",
-                        "normalFreq", "tumorRefCount", "tumorAltCount", "normalRefCount",
-                        "normalAltCount", "igvLink", "mutationCount", 'oncokb'
-                    ],
-                    columnVisibility: {
-                        oncokb: 'visible'
-                    },
                     columnRender: {
-                        oncokb: function (datum) {
+                        annotation: function (datum) {
                             var mutation = datum.mutation;
-
-                            if (datum.oncokb == null) {
-                                // TODO make the image customizable?
-                                var vars = {loaderImage: "images/ajax-loader.gif", width: 15, height: 15};
-                                var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_placeholder_template");
-                                return templateFn(vars);
-                            }
-                            else {
-
-                                var vars = {};
-                                vars.uniqueId = datum.mutation.mutationSid;
-                                var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_oncokb_template");
-                                return templateFn(vars);
-                            }
-                        },
-                        proteinChange: function (datum) {
-                            var mutation = datum.mutation;
-                            var proteinChange = MutationDetailsTableFormatter.getProteinChange(mutation);
                             var vars = {};
-                            vars.proteinChange = proteinChange.text;
-                            vars.proteinChangeClass = proteinChange.style;
-                            vars.proteinChangeTip = proteinChange.tip;
-                            vars.additionalProteinChangeTip = proteinChange.additionalTip;
-                            vars.pdbMatchLink = MutationDetailsTableFormatter.getPdbMatchLink(mutation);
-                            vars.oncokbId = mutation.mutationSid;
+                            vars.oncokbId = mutation.get("mutationSid");
                             vars.mcgAlt = '';
                             vars.changHotspotAlt = '';
 
-                            if(enableMyCancerGenome && mutation.myCancerGenome instanceof Array && mutation.myCancerGenome.length > 0) {
-                                vars.mcgAlt = "<b>My Cancer Genome links:</b><br/><ul style=\"list-style-position: inside;padding-left:0;\"><li>"+mutation.myCancerGenome.join("</li><li>")+"</li></ul>";
+                            if (enableMyCancerGenome &&
+                                mutation.get("myCancerGenome") instanceof Array && 
+                                mutation.get("myCancerGenome").length > 0) {
+                                vars.mcgAlt = "<b>My Cancer Genome links:</b><br/><ul style=\"list-style-position: inside;padding-left:0;\"><li>" + mutation.get("myCancerGenome").join("</li><li>") + "</li></ul>";
                             }
 
-                            if(showHotspot && mutation['isHotspot']) {
-                                vars.changHotspotAlt = "<b>Recurrent Hotspot</b><br/>This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang, M. et al. Nature Biotech. 2015).";
+                            if (showHotspot && mutation.get('isHotspot')) {
+                                vars.changHotspotAlt = cbio.util.getHotSpotDesc();
                             }
 
-                            var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_protein_change_oncokb_template");
+                            if (_.isUndefined(mutation.get("oncokb")))
+                            {
+                                datum.table.requestColumnData("annotation");
+                            }
+                            
+                            var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_annotation_template");
                             return templateFn(vars);
                         }
                     },
+                    columnVisibility: {
+                        annotation: 'visible'
+                    },
+                    columns: {
+                        annotation: {
+                            sTitle: "Annotation",
+                            tip: "",
+                            sType: "sort-icons",
+                            sClass: "left-align-td"
+                        }
+                    },
+                    columnOrder: columnOrder,
+                    columnSort: {
+                        "annotation": function (datum) {
+                            return datum;
+                        }
+                    },
                     columnTooltips: {
-                        oncokb: function (selector, helper) {
-                            oncokbInstance.addEvents(selector, 'column');
-                        },
-                        proteinChange: function (selector, helper) {
-                            $(selector).find('span.mcg[alt=""]').remove();
-                            $(selector).find('span.chang_hotspot[alt=""]').remove();
+                        annotation: function (selector, helper) {
+                            $(selector).find('span.oncokb').remove();
+                            $(selector).find('span.mcg[alt=""]').empty();
+                            $(selector).find('span.chang_hotspot[alt=""]').empty();
                             $(selector).find('span.mutation-table-additional-protein-change[alt=""]').remove();
-                            oncokbInstance.addEvents(selector, 'alteration');
+                            $(selector).find('span.mcg').one('mouseenter', function () {
+                                $(this).qtip({
+                                    content: {attr: 'alt'},
+                                    show: {event: "mouseover", ready: true},
+                                    hide: {fixed: true, delay: 100, event: "mouseout"},
+                                    style: {classes: 'qtip-light qtip-rounded qtip-wide'},
+                                    position: {my: 'top left', at: 'bottom center', viewport: $(window)}
+                                });
 
-                            $(selector).find('span.mcg').qtip({
-                                content: {attr: 'alt'},
-                                show: {event: "mouseover"},
-                                hide: {fixed: true, delay: 100, event: "mouseout"},
-                                style: { classes: 'qtip-light qtip-rounded qtip-wide' },
-                                position: {my:'top left',at:'bottom center',viewport: $(window)}
                             });
 
-                            $(selector).find('span.chang_hotspot').qtip({
-                                content: {attr: 'alt'},
-                                show: {event: "mouseover"},
-                                hide: {fixed: true, delay: 100, event: "mouseout"},
-                                style: { classes: 'qtip-light qtip-rounded qtip-wide' },
-                                position: {my:'top left',at:'bottom center',viewport: $(window)}
+                            $(selector).find('span.chang_hotspot').one('mouseenter', function () {
+                                $(this).qtip({
+                                    content: {attr: 'alt'},
+                                    show: {event: "mouseover", ready: true},
+                                    hide: {fixed: true, delay: 100, event: "mouseout"},
+                                    style: {classes: 'qtip-light qtip-rounded qtip-wide'},
+                                    position: {my: 'top left', at: 'bottom center', viewport: $(window)}
+                                });
                             });
                         }
                     },
-                    additionalData: {
-                        oncokb: function (helper) {
-                            var indexMap = helper.indexMap;
-                            var dataTable = helper.dataTable;
+                    dataTableOpts: {
+                        'aaSorting': [[columnOrder.indexOf('annotation'), 'asc']]
+                    }
+                }
+            }
+        };
+
+        options = jQuery.extend(true, cbio.util.baseMutationMapperOpts(), options);
+        
+        if(OncoKB.getAccess()) {
+            var oncokbInstanceManager = new OncoKB.addInstanceManager();
+            _.each(mutationProxy.getGeneList(), function (gene) {
+                var instance = oncokbInstanceManager.addInstance(gene);
+                if(oncokbGeneStatus) {
+                    instance.setGeneStatus(oncokbGeneStatus);
+                }
+            });
+            jQuery.extend(true, options, {
+                dataManager: {
+                    dataFn: {
+                        annotation: function(dataProxies, params, callback) {
+                            var indexMap = params.mutationTable.getIndexMap();
+                            var dataTable = params.mutationTable.getDataTable();
                             var tableData = dataTable.fnGetData();
+                            var oncokbInstance = oncokbInstanceManager.getInstance(params.mutationTable.getGene());
                             if (tableData.length > 0) {
                                 _.each(tableData, function (ele, i) {
-                                    var _datum = ele[indexMap["datum"]];
                                     var _mutation = ele[indexMap["datum"]].mutation;
-                                    oncokbInstance.addVariant(_mutation.mutationSid, _mutation.geneSymbol, _mutation.proteinChange, _mutation.tumorType, null);
+                                    oncokbInstance.addVariant(_mutation.get("mutationSid"), '', 
+                                                              _mutation.get("geneSymbol"),
+                                                              _mutation.get("proteinChange"),
+                                                              _mutation.get("tumorType") ? _mutation.get("tumorType") : _mutation.get("cancerType"),
+                                                              _mutation.get("mutationType"), 
+                                                              _mutation.get("cosmicCount"), 
+                                                              _mutation.get("isHotspot"),
+                                                              _mutation.get("proteinPosStart"), 
+                                                              _mutation.get("proteinPosEnd"));
                                 });
-                                oncokbInstance.getEvidence().done(function () {
+                                oncokbInstance.getIndicator().done(function () {
                                     var tableData = dataTable.fnGetData();
                                     if (tableData.length > 0) {
                                         _.each(tableData, function (ele, i) {
-                                            if (oncokbInstance.getVariant(ele[indexMap['datum']].mutation.mutationSid)) {
-                                                if (oncokbInstance.getVariant(ele[indexMap['datum']].mutation.mutationSid).hasOwnProperty('evidence')) {
-                                                    ele[indexMap["datum"]].oncokb = oncokbInstance.getVariant(ele[indexMap['datum']].mutation.mutationSid).evidence;
-                                                    dataTable.fnUpdate(null, i, indexMap["oncokb"], false, false);
+                                            if (oncokbInstance.getVariant(ele[indexMap['datum']].mutation.get("mutationSid"))) {
+                                                if (oncokbInstance.getVariant(ele[indexMap['datum']].mutation.get("mutationSid")).hasOwnProperty('evidence')) {
+                                                    ele[indexMap["datum"]].oncokb = oncokbInstance.getVariant(ele[indexMap['datum']].mutation.get("mutationSid"));
+                                                    ele[indexMap['datum']].mutation.set({oncokb: true});
+                                                    //dataTable.fnUpdate(null, i, indexMap["annotation"], false, false);
                                                 }
                                             }
                                         });
-                                        dataTable.fnUpdate(null, 0, indexMap['oncokb']);
+                                        //dataTable.fnUpdate(null, 0, indexMap['annotation']);
+                                    }
+
+                                    if (_.isFunction(callback))
+                                    {
+                                        callback(params);
                                     }
                                 });
                             }
                         }
                     }
-                }
-            }
-        }else{
-            options.view = {
-                mutationTable: {
-                    columnRender: {
-                        proteinChange: function (datum) {
-                            var mutation = datum.mutation;
-                            var proteinChange = MutationDetailsTableFormatter.getProteinChange(mutation);
-                            var vars = {};
-                            vars.proteinChange = proteinChange.text;
-                            vars.proteinChangeClass = proteinChange.style;
-                            vars.proteinChangeTip = proteinChange.tip;
-                            vars.additionalProteinChangeTip = proteinChange.additionalTip;
-                            vars.pdbMatchLink = MutationDetailsTableFormatter.getPdbMatchLink(mutation);
-                            vars.oncokbId = mutation.mutationSid;
-                            vars.mcgAlt = '';
-                            vars.changHotspotAlt = '';
+                },
+                view: {
+                    mutationTable: {
+                        columnTooltips: {
+                            annotation: function (selector, helper) {
+                                $(selector).find('span.mcg[alt=""]').empty();
+                                $(selector).find('span.chang_hotspot[alt=""]').empty();
+                                oncokbInstanceManager.getInstance(helper.gene).addEvents(selector, 'column');
+                                oncokbInstanceManager.getInstance(helper.gene).addEvents(selector, 'alteration');
 
-                            if(enableMyCancerGenome && mutation.myCancerGenome instanceof Array && mutation.myCancerGenome.length > 0) {
-                                vars.mcgAlt = "<b>My Cancer Genome links:</b><br/><ul style=\"list-style-position: inside;padding-left:0;\"><li>"+mutation.myCancerGenome.join("</li><li>")+"</li></ul>";
+                                $(selector).find('span.mcg').one('mouseenter', function () {
+                                    $(this).qtip({
+                                        content: {attr: 'alt'},
+                                        show: {event: "mouseover", ready: true},
+                                        hide: {fixed: true, delay: 100, event: "mouseout"},
+                                        style: {classes: 'qtip-light qtip-rounded qtip-wide'},
+                                        position: {my: 'top left', at: 'bottom center', viewport: $(window)}
+                                    });
+
+                                });
+
+                                $(selector).find('span.chang_hotspot').one('mouseenter', function () {
+                                    $(this).qtip({
+                                        content: {attr: 'alt'},
+                                        show: {event: "mouseover", ready: true},
+                                        hide: {fixed: true, delay: 100, event: "mouseout"},
+                                        style: {classes: 'qtip-light qtip-rounded qtip-wide'},
+                                        position: {my: 'top left', at: 'bottom center', viewport: $(window)}
+                                    });
+                                });
                             }
-
-                            if(showHotspot && mutation['isHotspot']) {
-                                vars.changHotspotAlt = "<b>Recurrent Hotspot</b><br/>This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang, M. et al. Nature Biotech. 2015).";
-                            }
-
-                            var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_protein_change_oncokb_template");
-                            return templateFn(vars);
-                        }
-                    },
-                    columnTooltips: {
-                        proteinChange: function (selector, helper) {
-                            $(selector).find('span.oncokb').remove();
-                            $(selector).find('span.mcg[alt=""]').remove();
-                            $(selector).find('span.chang_hotspot[alt=""]').remove();
-                            $(selector).find('span.mutation-table-additional-protein-change[alt=""]').remove();
-                            $(selector).find('span.mcg').qtip({
-                                content: {attr: 'alt'},
-                                show: {event: "mouseover"},
-                                hide: {fixed: true, delay: 100, event: "mouseout"},
-                                style: { classes: 'qtip-light qtip-rounded qtip-wide' },
-                                position: {my:'top left',at:'bottom center',viewport: $(window)}
-                            });
-
-                            $(selector).find('span.chang_hotspot').qtip({
-                                content: {attr: 'alt'},
-                                show: {event: "mouseover"},
-                                hide: {fixed: true, delay: 100, event: "mouseout"},
-                                style: { classes: 'qtip-light qtip-rounded qtip-wide' },
-                                position: {my:'top left',at:'bottom center',viewport: $(window)}
-                            });
                         }
                     }
                 }
-            }
+            });
         }
+
         var defaultView = MutationViewsUtil.initMutationMapper("#mutation_details",
                 options,
                 "#tabs",
-                "Mutations",
-                _mut3dVis);
+                "Mutations");
     });
 
 </script>

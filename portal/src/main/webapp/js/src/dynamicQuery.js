@@ -108,6 +108,10 @@ $(document).ready(function(){
        userClickedMainTab("tab_download");
     });
     
+    $("#gene_list").on('input', function(event) {
+	$('.oql_error').remove();
+    });
+    
     // Set up custom case set related GUI & event handlers (step 3)
     initCustomCaseSetUI();
 
@@ -332,12 +336,12 @@ function getMapping() {
     function getMap() {
 	var def = new $.Deferred();
         // Get input selection
-        var sampleIds = $("#custom_case_set_ids").val().trim().replace(/"/g,'').split(/\s+/);
+        var caseIds = $("#custom_case_set_ids").val().trim().replace(/"/g,'').split(/\s+/);
         // Get study selection
         var studyId = $("#select_single_study").val();
-        if (sampleIds[0] !== "")
+        if (caseIds[0] !== "")
         {
-            window.cbioportal_client.getSamples({study_id: [studyId],patient_ids: sampleIds}).then(function(sampleMap){
+            window.cbioportal_client.getSamplesByPatient({study_id: [studyId],patient_ids: caseIds}).then(function(sampleMap){
                 $("#custom_case_set_ids").val(setPatientSampleIdMap(sampleMap));
 		def.resolve();
             });                
@@ -359,24 +363,33 @@ function getMapping() {
 //  Determine whether to submit a cross-cancer query or
 //  a study-specific query
 function chooseAction(evt) {
-    var haveExpInQuery = $("#gene_list").val().toUpperCase().search("EXP") > -1;
     $(".error_box").remove();
-    
-       
+       var haveExpInQuery = false;
        if (!window.changingTabs) {
 		// validate OQL
 		try {
-			oql_parser.parse($('#gene_list').val());
+			var parsed_result = oql_parser.parse($('#gene_list').val());
+			for (var i = 0; i < parsed_result.length; i++) {
+			    for (var j = 0; j < parsed_result[i].alterations.length; j++) {
+				if (parsed_result[i].alterations[j].constr_val === "EXP") {
+				    haveExpInQuery = true;
+				    break;
+				}
+			    }
+			    if (haveExpInQuery) {
+				break;
+			    }
+			}
 		} catch (err) {
 			var offset = err.offset;
 			if (offset === $('#gene_list').val().length) {
-			    createAnError("OQL syntax error after selected character; please fix and submit again.", $('#gene_list'));
+			    createAnError("OQL syntax error after selected character; please fix and submit again.", $('#gene_list'), "oql_error");
 			    $('#gene_list')[0].setSelectionRange(err.offset-1, err.offset);
 			} else if (offset === 0) {
-			    createAnError("OQL syntax error before selected character; please fix and submit again.", $('#gene_list'));
+			    createAnError("OQL syntax error before selected character; please fix and submit again.", $('#gene_list'), "oql_error");
 			    $('#gene_list')[0].setSelectionRange(err.offset, err.offset+1);
 			} else {
-			    createAnError("OQL syntax error at selected character; please fix and submit again.", $('#gene_list'));
+			    createAnError("OQL syntax error at selected character; please fix and submit again.", $('#gene_list'), "oql_error");
 			    $('#gene_list')[0].setSelectionRange(err.offset, err.offset+1);
 			}
 			return false;
@@ -426,8 +439,11 @@ function chooseAction(evt) {
 
 }
 
-function createAnError(errorText, targetElt) {
+function createAnError(errorText, targetElt, optClassStr) {
 	var errorBox = $("<div class='error_box'>").addClass("ui-state-error ui-corner-all exp_error_box");
+	if (optClassStr) {
+	    errorBox.addClass(optClassStr);
+	}
 	var errorButton = $("<span>").addClass("ui-icon ui-icon-alert exp_error_button");
 	var strongErrorText = $("<small>").html("Error: " + errorText + "<br>");
 	var errorTextBox = $("<span>").addClass("exp_error_text");
@@ -438,6 +454,8 @@ function createAnError(errorText, targetElt) {
 	
 	errorBox.insertBefore(targetElt);
 	errorBox.slideDown();
+	
+	return errorBox;
 }
 
 //  Triggered when a genomic profile radio button is selected
@@ -571,21 +589,14 @@ function updateCaseListSmart() {
     $("#select_case_set").trigger("liszt:updated");
     $("#select_case_set_chzn .chzn-drop ul.chzn-results li")
         .each(function(i, e) {
-            $(e).qtip({
-                content: "<font size='2'>" + $($("#select_case_set option")[i]).attr("title") + "</font>",
-                style: {
-                    classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'
-                },
-                position: {
-                    my: 'left middle',
-                    at: 'middle right',
-                    viewport: $(window)
-                },
-	            show: "mouseover",
-	            hide: "mouseout"
-            });
-        }
-    );
+        	//make qtip for an element on first mouseenter:
+        	cbio.util.addTargetedQTip($(e), {
+        		content: "<font size='2'>" + $($("#select_case_set option")[i]).attr("title") + "</font>",
+        		style: {
+        			classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow'
+                }
+        	}); 
+      });
 }
 
 // Called when and only when a cancer study is selected from the dropdown menu
@@ -651,8 +662,7 @@ function updateCancerStudyInformation() {
     //  Add the user-defined case list option
     $("#select_case_set").append("<option class='case_set_option' value='-1' "
         + "title='Specify you own case list'>User-defined Case List</option>");
-    updateCaseListSmart();
-
+    
     //  Set up Tip-Tip Event Handler for Case Set Pull-Down Menu
     //  commented out for now, as this did not work in Chrome or Safari
     //  $(".case_set_option").tipTip({defaultPosition: "right", delay:"100", edgeOffset: 25});
@@ -1476,7 +1486,7 @@ function outputGenomicProfileOption (downloadTab, optionType, targetClass, id, n
         + " name='" + paramName + "'"
         + " class='" + targetClass + "'"
         + " value='" + id +"'>" + '&nbsp;&nbsp;' + name + "</input>"
-        + "  <img class='profile_help' src='images/help.png' title='"
+        + "  <img class='profile_help' alt='help' src='images/help.png' title='"
         + description + "'><br/>";
     return html;
 }
