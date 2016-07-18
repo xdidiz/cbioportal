@@ -138,7 +138,7 @@ public class ImportClinicalData extends ConsoleRunnable {
         int sampleIdIndex = findSampleIdColumn(columnAttrs);
 
         //validate required columns:
-        if (patientIdIndex < 0) { //TODO - for backwards compatibility maybe add and !attributesType.toString().equals("MIXED")? See next TODO in addDatum()
+        if (patientIdIndex < 0) {
         	//PATIENT_ID is required in both file types:
         	throw new RuntimeException("Aborting owing to failure to find " +
                     PATIENT_ID_COLUMN_NAME + 
@@ -332,15 +332,6 @@ public class ImportClinicalData extends ConsoleRunnable {
     			throw new RuntimeException("Error: Sample " + stableSampleId + " was previously linked to another patient, and not to " + stablePatientId);
     		}
         	numSamplesProcessed++;
-        }
-
-        // this will happen when clinical file contains sample id, but not patient id
-        //TODO - this part, and the dummy patient added in addSampleToDatabase, can be removed as the field PATIENT_ID is now
-        //always required (as validated at start of importData() ). Probably kept here for "old" studies, but Ben's tests did not find anything...
-        // --> alternative would be to be less strict in validation at importData() and allow for missing PATIENT_ID when type is MIXED... 
-        if (internalPatientId == -1 && internalSampleId != -1) {
-            sample = DaoSample.getSampleById(internalSampleId);
-            internalPatientId = sample.getInternalPatientId();
         }
 
         for (int lc = 0; lc < fields.length; lc++) {
