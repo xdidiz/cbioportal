@@ -246,6 +246,14 @@ public class ProgressMonitor {
         return ret;
     }
     
+    /**
+     * Reset the warnings list.
+     */
+    public static void resetWarnings() {
+    	progressMonitor.warnings = new TreeSet<>();
+    	progressMonitor.warningCounts = new HashMap<>();
+    }
+    
     public static ArrayList<String> getMessages() {
     	ArrayList<String> ret = getWarnings();
     	ret.addAll(progressMonitor.debugMessages);

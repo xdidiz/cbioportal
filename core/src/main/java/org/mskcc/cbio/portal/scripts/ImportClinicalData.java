@@ -109,6 +109,22 @@ public class ImportClinicalData extends ConsoleRunnable {
         
         public String toString() {return attributeType;}
     }
+    
+    public static enum DataTypes 
+    {
+        STRING,
+        NUMBER,
+        BOOLEAN;
+    	
+    	static public boolean has(String value) {
+    		try { 
+                return valueOf(value.toUpperCase()) != null; 
+            }
+            catch (IllegalArgumentException x) { 
+                return false;
+            }
+    	}
+    }
 
     public void setFile(CancerStudy cancerStudy, File clinicalDataFile, String attributesDatatype, boolean relaxed)
     {
@@ -186,6 +202,13 @@ public class ImportClinicalData extends ConsoleRunnable {
                     	}	
                     }
                     break;
+            }
+            
+            //quick validation: datatypes values should be one of the valid types
+            for (String datatype : datatypes) {
+            	if (!DataTypes.has(datatype)) {
+            		throw new RuntimeException("Invalid value for datatype: " + datatype + ". Check the header rows of your data file."); 
+            	}	
             }
                      
             priorities = splitFields(buff.readLine());
@@ -271,6 +294,7 @@ public class ImportClinicalData extends ConsoleRunnable {
     {
         String[] fields = line.split(DELIMITER, -1);
         if (fields.length < columnAttrs.size()) {
+        	ProgressMonitor.logWarning("Data row found to have less columns than the header row. Missing end columns were given empty values");
             int origFieldsLen = fields.length;
             fields = Arrays.copyOf(fields, columnAttrs.size());
             Arrays.fill(fields, origFieldsLen, columnAttrs.size(), "");
