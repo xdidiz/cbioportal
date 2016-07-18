@@ -274,13 +274,13 @@ public class ImportClinicalData extends ConsoleRunnable {
         String line;
         MultiKeyMap attributeMap = new MultiKeyMap();
         while ((line = buff.readLine()) != null) {
-
+            String untrimmedLine = line;
             line = line.trim();
             if (skipLine(line)) {
                 continue;
             }
 
-            String[] fields = getFields(line, columnAttrs);
+            String[] fields = getFields(line, untrimmedLine, columnAttrs);
             addDatum(fields, columnAttrs, attributeMap);
         }
     }
@@ -290,15 +290,19 @@ public class ImportClinicalData extends ConsoleRunnable {
         return (line.isEmpty() || line.substring(0,1).equals(METADATA_PREFIX));
     }
 
-    private String[] getFields(String line, List<ClinicalAttribute> columnAttrs)
+    private String[] getFields(String line, String untrimmedLine, List<ClinicalAttribute> columnAttrs)
     {
         String[] fields = line.split(DELIMITER, -1);
         if (fields.length < columnAttrs.size()) {
-        	ProgressMonitor.logWarning("Data row found to have less columns than the header row. Missing end columns were given empty values");
             int origFieldsLen = fields.length;
             fields = Arrays.copyOf(fields, columnAttrs.size());
             Arrays.fill(fields, origFieldsLen, columnAttrs.size(), "");
         }
+        String [] untrimmedFields = untrimmedLine.split(DELIMITER, -1);
+        if (untrimmedFields.length < columnAttrs.size()) {
+            ProgressMonitor.logWarning("Data row found to have less columns than the header row. Missing end columns were given empty values");
+        }
+        
         return fields; 
     }
 

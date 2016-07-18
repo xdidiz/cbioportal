@@ -93,6 +93,7 @@ public class TestIntegrationTest {
     @Before
     public void setUp() throws DaoException, JsonParseException, JsonMappingException, IOException {
         ProgressMonitor.setConsoleMode(false);
+        ProgressMonitor.resetWarnings();
         loadGenes();
     }
 	
