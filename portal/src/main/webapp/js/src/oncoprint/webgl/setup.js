@@ -1260,12 +1260,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		QuerySession.getHeatmapData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample")
 		.then(function (heatmap_data) {
 		    State.addHeatmapTracks(heatmap_data);
-		})
+		});
 	    } else {
 		return $.when();
 	    }
-	//}).fail(function () {
-	    //def.reject();
+	}).fail(function () {
+	    def.reject();
 	}).then(function () {
 	    (function fetchClinicalAttributes() {
 		QuerySession.getClinicalAttributes().then(function (attrs) {
