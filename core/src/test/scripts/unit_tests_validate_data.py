@@ -125,7 +125,7 @@ class PostClinicalDataFileTestCase(DataFileTestCase):
 # ----------------------------------------------------------------------------
 # Test cases for the various Validator classes found in validateData script
 
-class ColumnOrderTestCase(DataFileTestCase):
+class ColumnOrderTestCase1(PostClinicalDataFileTestCase):
 
     """Test if column order requirements are appropriately validated."""
 
@@ -147,6 +147,10 @@ class ColumnOrderTestCase(DataFileTestCase):
         for error in record_list[:2]:
             self.assertEqual("ERROR", error.levelname)
             self.assertEqual("_checkOrderedRequiredColumns", error.funcName)
+
+class ColumnOrderTestCase2(DataFileTestCase):
+
+    """Test if column order requirements are appropriately validated."""
 
     def test_column_order_validation_ClinicalValidator(self):
         """Sample attributes do NOT need their columns in a specific order.
