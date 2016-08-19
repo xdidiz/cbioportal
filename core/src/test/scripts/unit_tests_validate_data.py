@@ -83,7 +83,8 @@ class DataFileTestCase(LogBufferTestCase):
     particular validator class and collect the log records emitted.
     """
 
-    def validate(self, data_filename, validator_class, extra_meta_fields=None, relaxed_mode=False):
+    def validate(self, data_filename, validator_class, extra_meta_fields=None,
+                 relaxed_mode=True):
         """Validate a file with a Validator and return the log records."""
         meta_dict = {'data_filename': data_filename}
         if extra_meta_fields is not None:
