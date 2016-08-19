@@ -233,13 +233,12 @@ public class DaoSample {
     public static Sample getSampleByCancerStudyAndSampleId(int cancerStudyId, String stableSampleId, boolean errorWhenNotFound)
     {
         Map<String, Sample> samples = byCancerStudyIdAndStableSampleId.get(cancerStudyId);
-        if (samples==null) {
-        	if (errorWhenNotFound) {
-        		ProgressMonitor.logWarning("Couldn't find sample "+stableSampleId+" in study "+cancerStudyId);
-        	}
+        if (samples==null || !samples.containsKey(stableSampleId)) {
+            if (errorWhenNotFound) {
+                ProgressMonitor.logWarning("Couldn't find sample "+stableSampleId+" in study "+cancerStudyId);
+            }
             return null;
         }
-        
         return samples.get(stableSampleId);
     }
 
