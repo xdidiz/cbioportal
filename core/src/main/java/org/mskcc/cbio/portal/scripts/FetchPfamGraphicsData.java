@@ -48,7 +48,6 @@ import org.mskcc.cbio.portal.util.ProgressMonitor;
  */
 public class FetchPfamGraphicsData
 {
-<<<<<<< 3226f0430d4dc8a94dabb6d8d4741827d6b7a340
 	public static final String URL_PREFIX = "http://pfam.xfam.org/protein/";
 	public static final String URL_SUFFIX = "/graphic";
 
