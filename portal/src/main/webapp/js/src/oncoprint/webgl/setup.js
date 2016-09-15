@@ -423,6 +423,7 @@ var utils = {
 
           var total_tracks_to_add = Object.keys(State.genetic_alteration_tracks).length
           + Object.keys(State.heatmap_tracks).length
+          + Object.keys(State.geneset_tracks).length
           + Object.keys(State.clinical_tracks).length;
 
           utils.timeoutSeparatedLoop(Object.keys(State.genetic_alteration_tracks), function (track_line, i) {
@@ -441,6 +442,24 @@ var utils = {
                   oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'sample');
                   oncoprint.setTrackTooltipFn(hm_id, tooltip_utils.makeHeatmapTrackTooltip(QuerySession.getDefaultGeneticProfileId(), 'sample', true));
                   LoadingBar.update((i + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
+                });
+              });
+            } else {
+              return $.when();
+            }
+          }).then(function() {
+            if ("geneset data is available") {
+              QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample')
+              .then(function (geneset_data_by_line) {
+                return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
+                  var hm_id = State.geneset_tracks[hm_line];
+                  oncoprint.setTrackData(hm_id, geneset_data_by_line[hm_line].oncoprint_data, 'sample');
+                  // Update progress bar
+                  LoadingBar.update(
+                          (i
+                           + Object.keys(State.heatmap_tracks).length
+                           + Object.keys(State.genetic_alteration_tracks).length) /
+                          total_tracks_to_add);
                 });
               });
             } else {

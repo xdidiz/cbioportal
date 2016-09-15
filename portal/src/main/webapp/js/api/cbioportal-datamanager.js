@@ -706,6 +706,30 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 		});
 		return def.promise();
 	},
+	'getGseaData': function (studyId, genesetNameList, sample_or_patient) {
+		var def = new $.Deferred();
+		if (sample_or_patient === "patient") {
+			def.reject();
+			return def.promise();
+		}
+		var sample_ids = this.getSampleIds();
+		var send_data = [];
+		for (var i = 0; i < genesetNameList.length; i++) {
+			var gsName = genesetNameList[i].toUpperCase();
+			var track_data = {};
+			track_data["gs_name"] = gsName;
+			track_data["study_id"] = studyId;
+			var oncoprint_data = [];
+			for (var j = 0; j < sample_ids.length; j++) {
+				var id = sample_ids[j];
+				oncoprint_data.push(Math.random() * 4 - 2);
+			}
+			track_data["oncoprint_data"] = oncoprint_data;
+			send_data.push(track_data);
+		}
+		def.resolve(send_data);
+		return def.promise();
+	},
 	'getWebServiceGenomicEventData': makeCachedPromiseFunction(
 		function (self, fetch_promise) {
 		    var profile_types = {};
