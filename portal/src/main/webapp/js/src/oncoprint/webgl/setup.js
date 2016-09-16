@@ -626,6 +626,7 @@ var utils = {
         'genetic_alteration_tracks': {}, // track_id -> gene
         'first_heatmap_track': null,
         'heatmap_tracks': {},
+        'geneset_tracks': {},
         'clinical_tracks': {}, // track_id -> attr
 
         'used_clinical_attributes': [],
@@ -755,6 +756,35 @@ var utils = {
           }
           oncoprint.releaseRendering();
           return hm_ids;
+        },
+        'addGenesetTracks': function (geneset_data_by_line) {
+          oncoprint.suppressRendering();
+          var gstrack_ids = [];
+          for (var i = 0; i < geneset_data_by_line.length; i++) {
+            var track_params = {
+              'rule_set_params': {
+                'type': 'gradient',
+                'value_key': 'profile_data',
+                'value_range': [-2, 2],
+                'colormap': 'viridis',
+                'null_color': 'rgba(211,211,211,1)'
+              },
+              'label': geneset_data_by_line[i].gs_name,
+              'target_group': 2,
+              'removable': true,
+              'description': geneset_data_by_line[i].gs_name,
+            };
+            var new_gstrack_id = oncoprint.addTracks([track_params])[0];
+            gstrack_ids.push(new_gstrack_id);
+            State.geneset_tracks[i] = new_gstrack_id;
+            //if (State.first_heatmap_track === null) {
+              //State.first_heatmap_track = new_hm_id;
+            //} else {
+              //oncoprint.shareRuleSet(State.first_heatmap_track, new_hm_id);
+            //}
+          }
+          oncoprint.releaseRendering();
+          return gstrack_ids;
         },
         'useAndAddAttribute': function(attr_id) {
           var attr = this.useAttribute(attr_id);
@@ -1064,13 +1094,23 @@ var utils = {
       ).then(function (ws_data, oncoprint_data) {
         State.addGeneticTracks(oncoprint_data);
         var default_profile_id = QuerySession.getDefaultGeneticProfileId();
+        var heatmap_processing_finished = new $.Deferred();
         if (default_profile_id) {
           QuerySession.getHeatmapData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample")
             .then(function (heatmap_data) {
               State.addHeatmapTracks(heatmap_data);
+              heatmap_processing_finished.resolve();
             });
         } else {
-          return $.when();
+          heatmap_processing_finished.resolve();
+        }
+        if ("geneset data is available") {
+          $.when(
+                QuerySession.getGseaData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample"),
+                heatmap_processing_done
+          ).done(function (geneset_data) {
+              State.addGenesetTracks(geneset_data);
+          });
         }
       }).fail(function() {
         def.reject();
