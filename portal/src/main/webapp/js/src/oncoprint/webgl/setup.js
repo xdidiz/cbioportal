@@ -548,6 +548,11 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				    return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
 					var hm_id = State.geneset_tracks[hm_line];
 					oncoprint.setTrackData(hm_id, geneset_data_by_line[hm_line].oncoprint_data, 'sample');
+                  oncoprint.setTrackTooltipFn(hm_id, function(d) {
+                	  var label = d.data;
+                	  return label;
+                  }, 'sample', true);
+
 					// Update progress bar
 					LoadingBar.update(
 						(i
@@ -740,6 +745,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'genetic_alteration_tracks': {}, // track_id -> gene
 	    'first_heatmap_track': null,
 	    'heatmap_tracks': {},
+        'first_geneset_track': null,
         'geneset_tracks': {},
 	    'clinical_tracks': {}, // track_id -> attr
 	    
@@ -905,7 +911,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                 'type': 'gradient',
                 'value_key': 'profile_data',
                 'value_range': [-2, 2],
-                'colormap': 'viridis',
+                'colormap': 'inferno', //'viridis',
                 'null_color': 'rgba(211,211,211,1)'
               },
               'label': geneset_data_by_line[i].gs_name,
@@ -916,11 +922,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
             var new_gstrack_id = oncoprint.addTracks([track_params])[0];
             gstrack_ids.push(new_gstrack_id);
             State.geneset_tracks[i] = new_gstrack_id;
-            //if (State.first_heatmap_track === null) {
-              //State.first_heatmap_track = new_hm_id;
-            //} else {
-              //oncoprint.shareRuleSet(State.first_heatmap_track, new_hm_id);
-            //}
+            if (State.first_geneset_track === null) {
+              State.first_geneset_track = new_gstrack_id;
+            } else {
+            	//this does...?
+            	//oncoprint.shareRuleSet(State.first_geneset_track, new_gstrack_id);
+            }
           }
           oncoprint.releaseRendering();
           return gstrack_ids;
