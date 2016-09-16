@@ -1318,7 +1318,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
         if ("geneset data is available") {
           $.when(
                 QuerySession.getGseaData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample"),
-                heatmap_processing_done
+                heatmap_processing_finished
           ).done(function (geneset_data) {
               State.addGenesetTracks(geneset_data);
           });
