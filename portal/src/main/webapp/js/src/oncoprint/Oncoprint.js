@@ -974,6 +974,7 @@ define("Oncoprint",
                     // throws unsupported sort option if something other than the 3 options
                     // above is given.
                     var sortBy = function(by, cases,mutationColorControl,mutationColorSort,sortStatus) {
+                    	alert( 'test'); //not used??
                         if (by === 'genes') {
 //                            state.attrs = params.genes.concat(clinical_attrs);
                             state.attrs = params.genes.slice(0);
