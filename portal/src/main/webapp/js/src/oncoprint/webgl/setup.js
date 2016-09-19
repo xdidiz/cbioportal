@@ -543,6 +543,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    }
 			}).then(function () {
 			    if ("geneset data is available") {
+				console.log("populateSampleData, calling getGseaData()...");
 				QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample')
 				.then(function (geneset_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
@@ -818,15 +819,18 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			return case_uid_map[study_id][id];
 		    };
 		    var proxy_promise;
+		    console.log("setDataType()...")
 		    if (sample_or_patient === 'sample') {
 			self.using_sample_data = true;
 			URL.update();
 			updateAlteredPercentIndicator(self);
+			console.log("setDataType, calling populateSampleData()...");
 			proxy_promise = populateSampleData();
 		    } else if (sample_or_patient === 'patient') {
 			self.using_sample_data = false;
 			URL.update();
 			updateAlteredPercentIndicator(self);
+			console.log("setDataType, calling populatePatientData()...");
 			proxy_promise = populatePatientData();
 		    }
 		    self.patient_order_loaded.then(function () {
@@ -1323,10 +1327,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
           heatmap_processing_finished.resolve();
         }
         if ("geneset data is available") {
+          console.log("initOncoprint, calling getGseaData()...");
           $.when(
                 QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
           ).done(function (geneset_data) {
+              console.log("addGenesetTracks()...");
               State.addGenesetTracks(geneset_data);
           });
 	    }
@@ -1346,6 +1352,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	})
 	return def.promise();
     })().then(function () {
+	console.log("initOncoprint, calling State.setDataType()...");
+	// ! in some cases this is being executed BEFORE addHeatmapTracks above... !
         var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 	    
         $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), QuerySession.getCaseUIDMap(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients, case_uid_map) {
@@ -1821,6 +1829,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				   .find('input[type="radio"][name="datatype"]').change(function(e) {
 		State.using_sample_data = $(toolbar_selector).find('#oncoprint_diagram_view_menu')
 				   .find('input[type="radio"][name="datatype"]:checked').val() === 'sample';
+		console.log("radio change, calling State.setDataType()...")
 		if (State.using_sample_data) {
 		    State.setDataType('sample');
 		} else {
