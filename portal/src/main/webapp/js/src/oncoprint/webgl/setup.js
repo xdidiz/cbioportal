@@ -911,7 +911,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                 'type': 'gradient',
                 'value_key': 'profile_data',
                 'value_range': [-2, 2],
-                'colormap': 'inferno', //'viridis',
+                'colormap': 'viridis',
                 'null_color': 'rgba(211,211,211,1)'
               },
               'label': geneset_data_by_line[i].gs_name,
@@ -1324,7 +1324,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
         }
         if ("geneset data is available") {
           $.when(
-                QuerySession.getGseaData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample"),
+                QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
           ).done(function (geneset_data) {
               State.addGenesetTracks(geneset_data);

@@ -1189,7 +1189,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 			var oncoprint_data = [];
 			for (var j = 0; j < sample_ids.length; j++) {
 				var id = sample_ids[j];
-				oncoprint_data.push(Math.random() * 4 - 2);
+				oncoprint_data.push({sample: id, profile_data: Math.random() * 4 - 2});
 			}
 			track_data["oncoprint_data"] = oncoprint_data;
 			send_data.push(track_data);
