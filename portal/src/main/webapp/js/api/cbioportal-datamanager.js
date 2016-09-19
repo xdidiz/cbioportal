@@ -707,6 +707,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 		return def.promise();
 	},
 	'getGseaData': function (studyId, genesetNameList, sample_or_patient) {
+		console.log("getGseaData()...");
 		var def = new $.Deferred();
 		if (sample_or_patient === "patient") {
 			def.reject();

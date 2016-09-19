@@ -449,6 +449,7 @@ var utils = {
             }
           }).then(function() {
             if ("geneset data is available") {
+              console.log("populateSampleData, calling getGseaData()...");
               QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample')
               .then(function (geneset_data_by_line) {
                 return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
@@ -686,12 +687,14 @@ var utils = {
         },
         'setDataType': function (sample_or_patient) {
           if (sample_or_patient === 'sample') {
+        	console.log("setDataType()...")
             this.using_sample_data = true;
             URL.update();
             if (this.sorting_by_given_order) {
               setSortOrder(QuerySession.getSampleIds());
             }
             updateAlteredPercentIndicator(this);
+            console.log("setDataType, calling populatePatientData()...");
             return populateSampleData();
           } else if (sample_or_patient === 'patient') {
             this.using_sample_data = false;
@@ -704,6 +707,7 @@ var utils = {
               });
             }
             updateAlteredPercentIndicator(this);
+            console.log("setDataType, calling populatePatientData()...");
             return populatePatientData();
           }
         },
@@ -1112,10 +1116,12 @@ var utils = {
           heatmap_processing_finished.resolve();
         }
         if ("geneset data is available") {
+          console.log("initOncoprint, calling getGseaData()...");
           $.when(
                 QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
           ).done(function (geneset_data) {
+        	  console.log("addGenesetTracks()...");
               State.addGenesetTracks(geneset_data);
           });
         }
@@ -1148,6 +1154,8 @@ var utils = {
       });
       return def.promise();
     })().then(function() {
+      console.log("initOncoprint, calling State.setDataType()...");
+      // ! in some cases this is being executed BEFORE addHeatmapTracks above... ! 
       var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 
       $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients) {
@@ -1482,6 +1490,7 @@ var utils = {
           State.using_sample_data = $(toolbar_selector).find('#oncoprint_diagram_view_menu')
           .find('input[type="radio"][name="datatype"]:checked').val() === 'sample';
           if (State.using_sample_data) {
+        	console.log("radio change, calling State.setDataType()...")
             State.setDataType('sample');
           } else {
             State.setDataType('patient');
