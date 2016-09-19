@@ -1197,6 +1197,21 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 		def.resolve(send_data);
 		return def.promise();
 	},
+	'getGenesetClusteringOrder': function () {
+		var def = new $.Deferred();
+		var sample_ids = this.getSampleIds();
+
+		//just some random order for now. Later this can be the clustering order for the columns:
+	    for (var i = sample_ids.length - 1; i > 0; i--) {
+	        var j = Math.floor(Math.random() * (i + 1));
+	        var temp = sample_ids[i];
+	        sample_ids[i] = sample_ids[j];
+	        sample_ids[j] = temp;
+	    }
+		
+		def.resolve(sample_ids);
+		return def.promise();
+	},
 	'getWebServiceGenomicEventData': makeCachedPromiseFunction(
 		function (self, fetch_promise) {
 		    var profile_types = {};

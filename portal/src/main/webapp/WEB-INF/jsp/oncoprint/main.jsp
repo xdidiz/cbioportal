@@ -78,6 +78,7 @@
                        </div>
                        <div class="radio"><label><input type="radio" name="sortby" value="id" /> Sort by case id (alphabetical)</label></div>
                        <div class="radio"><label><input type="radio" name="sortby" value="custom" /> Sort by user-defined order / default</label></div>
+                       <div class="radio"><label><input type="radio" name="sortby" value="geneset_clustering" /> Sort by Geneset clustering</label></div>
                    </form>
                </div>
             </div>

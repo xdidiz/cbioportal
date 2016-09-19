@@ -1588,6 +1588,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		}
 		oncoprint.keepSorted();
 	    };
+        /**
+         * This function is triggered by the change of the radio buttons in the "sort"
+         * menu of the oncoprint. 
+         */
 	    var updateSortConfig = function() {
 		if (State.sortby === "data") {
 		    oncoprint.setSortConfig({'type':'tracks'});
@@ -1616,6 +1620,13 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			oncoprint.setSortConfig({'type': 'order', order: (State.using_sample_data ? QuerySession.getSampleIds().map(getUID) : State.patient_order.map(getUID))});
 		    });
 		}
+          else if (State.sortby === "geneset_clustering") {
+        	  //sort according to order found in the clustering results: 
+	    	  State.sorting_by_given_order = true;
+	          QuerySession.getGenesetClusteringOrder().then(function (sampleIdsInClusteringOrder) {
+	            oncoprint.setSortConfig({'type': 'order', order: sampleIdsInClusteringOrder});
+	          });
+          }
 	    };
 	    $('#oncoprint_diagram_sortby_group').find('input[name="sortby"]').change(function() {
 		State.sortby = $('#oncoprint_diagram_sortby_group').find('input[name="sortby"]:checked').val();
@@ -2253,7 +2264,7 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 
 	    return $slider;
 	})();
-	
+      /* is this used at all? apparently not...according to tests...disabling this had no apparent effects on UI or functionality...
 	(function setUpSortBySelector() {
 	    $(toolbar_selector + ' #by_data_a').click(function () {
 		oncoprint.setSortConfig({'type':'tracks'});
@@ -2270,7 +2281,7 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 		});
 	    });
 	})();
-	
+		*/
 	
 	(function setUpToggleCellPadding() {
 	    setUpButton($(toolbar_selector + ' #oncoprint-diagram-removeWhitespace-icon'),
