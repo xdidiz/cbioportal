@@ -915,7 +915,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                 'null_color': 'rgba(211,211,211,1)'
               },
               'label': geneset_data_by_line[i].gs_name,
-              'target_group': 2,
+              'target_group': 3,
               'removable': true,
               'description': geneset_data_by_line[i].gs_name,
             };
