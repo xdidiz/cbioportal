@@ -71,8 +71,8 @@ public class ImportGeneData extends ConsoleRunnable {
                 
                 String parts[] = line.split("\t");
                 int taxonimy = Integer.parseInt(parts[0]);
-                if (taxonimy!=9606) {
-                    // only import human genes
+                if (taxonimy!=10090) {
+                    // only import mouse genes
                     continue;
                 }
                 
@@ -364,7 +364,7 @@ public class ImportGeneData extends ConsoleRunnable {
         	
         	/// If there is a cytoband in database, check if cytoband-chr matches input-chr
         	else {
-            	String cbChr = "chr"+cytoband.split("p|q")[0];
+            	String cbChr = "chr"+cytoband.split(" |\\|")[0]; //changed to mouse cytobands
             	if (cbChr.equals(chromosome)) { //Update the length only if the chromosome matches
             		gene.setLength(length);
             		daoGeneOptimized.updateGene(gene);
