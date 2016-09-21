@@ -913,6 +913,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return hm_ids;
 	    },
+        /**
+         * Adds heatmap tracks to the gene set group of the Oncoprint.
+         *
+         * @param {Object[]} geneset_data_by_line - metadata for each track
+         * @param {string} geneset_data_by_line[].gs_name - the name of the
+         * gene set for this track
+         * @returns {number[]} - the track IDs assigned to the added tracks
+         */
         'addGenesetTracks': function (geneset_data_by_line) {
           oncoprint.suppressRendering();
           var gstrack_ids = [];
