@@ -774,6 +774,14 @@ var utils = {
           oncoprint.releaseRendering();
           return hm_ids;
         },
+        /**
+         * Adds heatmap tracks to the gene set group of the Oncoprint.
+         *
+         * @param {Object[]} geneset_data_by_line - metadata for each track
+         * @param {string} geneset_data_by_line[].gs_name - the name of the
+         * gene set for this track
+         * @returns {number[]} - the track IDs assigned to the added tracks
+         */
         'addGenesetTracks': function (geneset_data_by_line) {
           oncoprint.suppressRendering();
           var gstrack_ids = [];
@@ -1109,7 +1117,7 @@ var utils = {
       oncoprint.setCellPaddingOn(State.cell_padding_on);
       // get data
       $.when(QuerySession.getWebServiceGenomicEventData(),
-      QuerySession.getOncoprintSampleGenomicEventData()
+          QuerySession.getOncoprintSampleGenomicEventData()
       ).then(
       // what to do if data retrieval works: 
       function (ws_data, oncoprint_data) {

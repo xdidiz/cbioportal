@@ -706,6 +706,30 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 		});
 		return def.promise();
 	},
+	/**
+	 * A unit of gene set data for one track of the Oncoprint
+	 *
+	 * @typedef {Object} HeatmapOncoprintDataTrack
+	 * @property {string} gs_name -- label of the gene set in the Oncoprint
+	 * @property {string} study_id -- stable ID of the study to which the
+	 * data apply
+	 * @property {Object[]} oncoprint_data -- list of values for the cells
+	 * @property {string} oncoprint_data[].sample -- stable ID of the sample
+	 * @property {number} oncoprint_data[].profile_data -- score value
+	 */
+	/**
+	 * Retrieves GSEA data for the Oncoprint.
+	 *
+	 * @param {string} studyId -- stable ID of the study for which to
+	 * retrieve data
+	 * @param {string[]} genesetNameList -- list of names for the gene sets
+	 * (values are ignored, only the length is used)
+	 * @param {string} sample_or_patient -- "sample" for sample-level data;
+	 * gene set data for the Oncoprint is only applicable on sample level.
+	 * @returns {Promise<GseaOncoprintDataTrack[]|null>} A promise that, if
+	 * available, resolves with a list that holds a list for each track,
+	 * or rejects if not
+	 */
 	'getGseaData': function (studyId, genesetNameList, sample_or_patient) {
 		console.log("getGseaData()...");
 		var def = new $.Deferred();
