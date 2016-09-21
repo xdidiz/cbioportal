@@ -503,11 +503,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    var clinical_attrs = utils.objectValues(State.clinical_tracks);
 	    LoadingBar.show();
 	    LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
+	    console.log("populateSampleData, loading initial data...");
 	    $.when(QuerySession.getOncoprintSampleGenomicEventData(true),
 		    ClinicalData.getSampleData(clinical_attrs))
 		    .then(function (oncoprint_data_by_line,
 				    clinical_data) {
-					
+			console.log("populateSampleData, initial data loaded...starting oncoprint...");
 			LoadingBar.msg("Loading oncoprint");
 			oncoprint.suppressRendering();
 			oncoprint.hideIds([], true);
@@ -529,6 +530,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}).then(function () {
 			    var default_profile_id = QuerySession.getDefaultGeneticProfileId();
 			    if (default_profile_id) {
+				console.log("populateSampleData, calling QuerySession.getHeatmapData()....");
 				QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample')
 				.then(function (heatmap_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
@@ -633,6 +635,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				});
 			    } else {
 				return $.when();
+			    }
+			}).then(function () {
+			    if ("geneset data is available") {
+				throw new Error("gene set data at patient level not yet supported");
 			    }
 			}).then(function () {
 			    return utils.timeoutSeparatedLoop(Object.keys(State.clinical_tracks), function(track_id, i) {
@@ -1312,16 +1318,21 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
 	var def = new $.Deferred();
 	oncoprint.setCellPaddingOn(State.cell_padding_on);
+	// get data
 	$.when(QuerySession.getOncoprintSampleGenomicEventData()
-	).then(function (oncoprint_data) {
+	).then(
+	// what to do if data retrieval works:
+	function (oncoprint_data) {
 	    State.addGeneticTracks(oncoprint_data);
 	    var default_profile_id = QuerySession.getDefaultGeneticProfileId();
-        var heatmap_processing_finished = new $.Deferred();
+	    var heatmap_processing_finished = new $.Deferred();
+	    var geneset_processing_finished = new $.Deferred();
 	    if (default_profile_id) {
 		QuerySession.getHeatmapData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample")
 		.then(function (heatmap_data) {
 		    State.addHeatmapTracks(heatmap_data);
-              heatmap_processing_finished.resolve();
+		    console.log("heatmap_processing_finished.resolve()...");
+		    heatmap_processing_finished.resolve();
 		});
 	    } else {
           heatmap_processing_finished.resolve();
@@ -1334,11 +1345,20 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
           ).done(function (geneset_data) {
               console.log("addGenesetTracks()...");
               State.addGenesetTracks(geneset_data);
+              geneset_processing_finished.resolve();
           });
 	    }
-	}).fail(function () {
+	    else {
+		geneset_processing_finished.resolve();
+	    }
+            return geneset_processing_finished.promise();
+	},
+	// what to do if data retrieval above fails
+	function() {
 	    def.reject();
-	}).then(function () {
+	}).then(
+	// this executes if geneset_processing_finished.resolve()
+	function () {
 	    (function fetchClinicalAttributes() {
 		QuerySession.getClinicalAttributes().then(function (attrs) {
 		    State.unused_clinical_attributes = attrs;
@@ -1351,9 +1371,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    })();
 	})
 	return def.promise();
-    })().then(function () {
+    })().then(
+    // this should execute if def.resolve()
+    function () {
 	console.log("initOncoprint, calling State.setDataType()...");
-	// ! in some cases this is being executed BEFORE addHeatmapTracks above... !
         var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 	    
         $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), QuerySession.getCaseUIDMap(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients, case_uid_map) {
