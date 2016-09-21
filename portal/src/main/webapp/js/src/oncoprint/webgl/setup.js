@@ -407,13 +407,14 @@ var utils = {
         var clinical_attrs = utils.objectValues(State.clinical_tracks);
         LoadingBar.show();
         LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
+        console.log("populateSampleData, loading initial data...");
         $.when(QuerySession.getOncoprintSampleGenomicEventData(),
         QuerySession.getUnalteredSamples(),
         ClinicalData.getSampleData(clinical_attrs))
         .then(function (oncoprint_data_by_line,
         unaltered_samples,
         clinical_data) {
-
+          console.log("populateSampleData, initial data loaded...starting oncoprint...");
           if (State.unaltered_cases_hidden) {
             oncoprint.hideIds(unaltered_samples, true);
           }
@@ -435,6 +436,7 @@ var utils = {
           }).then(function() {
             var default_profile_id = QuerySession.getDefaultGeneticProfileId();
             if (default_profile_id) {
+              console.log("populateSampleData, calling QuerySession.getHeatmapData()....");
               QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample')
               .then(function (heatmap_data_by_line) {
                 return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
@@ -538,6 +540,10 @@ var utils = {
               });
             } else {
               return $.when();
+            }
+          }).then(function() {
+            if ("geneset data is available") {
+              throw new Error("gene set data at patient level not yet supported");
             }
           }).then(function() {
             return utils.timeoutSeparatedLoop(Object.keys(State.clinical_tracks), function(track_id, i) {
@@ -694,7 +700,7 @@ var utils = {
               setSortOrder(QuerySession.getSampleIds());
             }
             updateAlteredPercentIndicator(this);
-            console.log("setDataType, calling populatePatientData()...");
+            console.log("setDataType, calling populateSampleData()...");
             return populateSampleData();
           } else if (sample_or_patient === 'patient') {
             this.using_sample_data = false;
@@ -1100,16 +1106,21 @@ var utils = {
       LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
       var def = new $.Deferred();
       oncoprint.setCellPaddingOn(State.cell_padding_on);
+      // get data
       $.when(QuerySession.getWebServiceGenomicEventData(),
       QuerySession.getOncoprintSampleGenomicEventData()
-      ).then(function (ws_data, oncoprint_data) {
+      ).then(
+      // what to do if data retrieval works: 
+      function (ws_data, oncoprint_data) {
         State.addGeneticTracks(oncoprint_data);
         var default_profile_id = QuerySession.getDefaultGeneticProfileId();
         var heatmap_processing_finished = new $.Deferred();
+        var geneset_processing_finished = new $.Deferred();
         if (default_profile_id) {
           QuerySession.getHeatmapData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample")
             .then(function (heatmap_data) {
               State.addHeatmapTracks(heatmap_data);
+              console.log("heatmap_processing_finished.resolve()...");
               heatmap_processing_finished.resolve();
             });
         } else {
@@ -1123,11 +1134,21 @@ var utils = {
           ).done(function (geneset_data) {
         	  console.log("addGenesetTracks()...");
               State.addGenesetTracks(geneset_data);
+              geneset_processing_finished.resolve();
           });
         }
-      }).fail(function() {
+        else {
+        	geneset_processing_finished.resolve();
+        }
+        	
+        return geneset_processing_finished.promise();
+      },
+      // what to do if data retrieval above fails
+      function() {
         def.reject();
-      }).then(function() {
+      }).then(
+      // this executes if geneset_processing_finished.resolve()
+      function() {
         var url_clinical_attrs = URL.getInitUsedClinicalAttrs() || [];
         if (url_clinical_attrs.length > 0) {
           $(toolbar_selector + ' #oncoprint-diagram-showlegend-icon').show();
@@ -1153,9 +1174,10 @@ var utils = {
         def.reject();
       });
       return def.promise();
-    })().then(function() {
+    })().then(
+    // this should execute if def.resolve()
+    function() {
       console.log("initOncoprint, calling State.setDataType()...");
-      // ! in some cases this is being executed BEFORE addHeatmapTracks above... ! 
       var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 
       $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients) {
