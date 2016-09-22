@@ -576,6 +576,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				LoadingBar.update((i + Object.keys(State.heatmap_tracks).length + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
 			    });
 			}).then(function () {
+        	// ! this is called AFTER oncoprint tracks, but BEFORE the heatmap tracks !!?
 			    oncoprint.keepSorted();
 			    if (State.unaltered_cases_hidden) {
 				oncoprint.hideIds(State.getUnalteredIds(), true);
