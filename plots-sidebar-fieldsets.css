@@ -1,0 +1,18 @@
+#plots-sidebar legend {
+    background-color: white;
+    color: grey;
+    display: table;
+    border: 0;
+    width: auto;
+    font-size: 12px;
+    margin: -6px 15px 15px;
+    padding: 5px;
+    font-family: verdana,arial,sans-serif;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 12px;
+    text-align: justify;
+}
+#plots-sidebar fieldset {
+    padding: 0;
+}
