@@ -1322,16 +1322,22 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	return State.addAndPopulateClinicalTracks(attr);
     };
 
-    (function initOncoprint() {
-	LoadingBar.show();
-	LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
-	var def = new $.Deferred();
-	oncoprint.setCellPaddingOn(State.cell_padding_on);
-	// get data
-	$.when(QuerySession.getOncoprintSampleGenomicEventData()
-	).then(
-	// what to do if data retrieval works:
-	function (oncoprint_data) {
+    (/**
+      * Initializes the OncoPrint tracks.
+      *
+      * @returns {Promise} - promise that gets fulfilled when the
+      * initialization process is complete, or rejected if data could not be retrieved.
+      */
+     function initOncoprint() {
+	/**
+	 * Initializes heatmap tracks if applicable.
+	 *
+	 * @param oncoprint_data - data promised by
+	 * initDataManager().getOncoprintSampleGenomicEventData()
+	 * @returns {Promise} - promise that gets fulfilled when the track group
+	 * is either rendered or found not applicable.
+	 */
+	var initHeatmapTracks = function (oncoprint_data) {
 	    State.addGeneticTracks(oncoprint_data);
 	    var default_profile_id = QuerySession.getDefaultGeneticProfileId();
 	    var heatmap_processing_finished = new $.Deferred();
@@ -1344,31 +1350,43 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    heatmap_processing_finished.resolve();
 		});
 	    } else {
-          heatmap_processing_finished.resolve();
-        }
-        if ("geneset data is available") {
-          console.log("initOncoprint, calling getGseaData()...");
-          $.when(
-                QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
-                heatmap_processing_finished
-          ).done(function (geneset_data) {
-              console.log("addGenesetTracks()...");
-              State.addGenesetTracks(geneset_data);
-              geneset_processing_finished.resolve();
-          });
+		heatmap_processing_finished.resolve();
+	    }
+	    if ("geneset data is available") {
+		console.log("initHeatmapTracks, calling getGseaData()...");
+		$.when(
+		    QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
+		    heatmap_processing_finished
+		).done(function (geneset_data) {
+		    console.log("addGenesetTracks()...");
+		    State.addGenesetTracks(geneset_data);
+		    geneset_processing_finished.resolve(oncoprint_data);
+		});
 	    }
 	    else {
-		geneset_processing_finished.resolve();
+		geneset_processing_finished.resolve(oncoprint_data);
 	    }
-            return geneset_processing_finished.promise();
-	},
-	// what to do if data retrieval above fails
-	function() {
+	    return geneset_processing_finished.promise();
+	}
+
+	LoadingBar.show();
+	LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
+	var def = new $.Deferred();
+	oncoprint.setCellPaddingOn(State.cell_padding_on);
+	// get data
+	$.when(QuerySession.getOncoprintSampleGenomicEventData()
+	).then(
+	function (oncoprint_data) {
+	    console.log("initOncoprint, calling initHeatmapTracks")
+	    return initHeatmapTracks(oncoprint_data);
+	}, function() {
 	    def.reject();
+	    return null;
 	}).then(
-	// this executes if geneset_processing_finished.resolve()
+	// this executes if heatmap rendering has finished or aborted
 	function () {
 	    (function fetchClinicalAttributes() {
+		console.log("initOncoprint, fetching clinical attributes")
 		QuerySession.getClinicalAttributes().then(function (attrs) {
 		    State.unused_clinical_attributes = attrs;
 		    State.clinical_attributes_fetched.resolve();
@@ -1381,9 +1399,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	})
 	return def.promise();
     })().then(
-    // this should execute if def.resolve()
+    // this executes if initOncoprint's promise resolves
     function () {
-	console.log("initOncoprint, calling State.setDataType()...");
+	console.log("post initOncoprint, calling State.setDataType()...");
         var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 	    
         $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), QuerySession.getCaseUIDMap(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients, case_uid_map) {
