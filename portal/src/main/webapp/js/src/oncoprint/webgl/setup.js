@@ -1110,17 +1110,25 @@ var utils = {
       return State.addAndPopulateClinicalTracks(attr);
     };
 
-    (function initOncoprint() {
-      LoadingBar.show();
-      LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
-      var def = new $.Deferred();
-      oncoprint.setCellPaddingOn(State.cell_padding_on);
-      // get data
-      $.when(QuerySession.getWebServiceGenomicEventData(),
-          QuerySession.getOncoprintSampleGenomicEventData()
-      ).then(
-      // what to do if data retrieval works: 
-      function (ws_data, oncoprint_data) {
+    (/**
+      * Initializes the OncoPrint tracks.
+      *
+      * @returns {Promise} - promise that gets fulfilled when the
+      * initialization process is complete, or rejected if data could not be retrieved.
+      */
+     function initOncoprint() {
+
+      /**
+       * Renders heatmap tracks if applicable.
+       *
+       * @param ws_data - data promised by
+       * initDataManager().getWebServiceGenomicEventData()
+       * @param oncoprint_data - data promised by
+       * initDataManager().getOncoprintSampleGenomicEventData()
+       * @returns {Promise} - promise that gets fulfilled when the track group
+       * is either rendered or found not applicable.
+       */
+      var renderHeatmapTracks = function (ws_data, oncoprint_data) {
         State.addGeneticTracks(oncoprint_data);
         var default_profile_id = QuerySession.getDefaultGeneticProfileId();
         var heatmap_processing_finished = new $.Deferred();
@@ -1141,22 +1149,32 @@ var utils = {
                 QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
           ).done(function (geneset_data) {
-        	  console.log("addGenesetTracks()...");
+              console.log("addGenesetTracks()...");
               State.addGenesetTracks(geneset_data);
-              geneset_processing_finished.resolve();
+              geneset_processing_finished.resolve(ws_data, oncoprint_data);
           });
         }
         else {
-        	geneset_processing_finished.resolve();
+          geneset_processing_finished.resolve(ws_data, oncoprint_data);
         }
-        	
         return geneset_processing_finished.promise();
-      },
-      // what to do if data retrieval above fails
-      function() {
-        def.reject();
+      }
+
+      LoadingBar.show();
+      LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
+      var def = new $.Deferred();
+      oncoprint.setCellPaddingOn(State.cell_padding_on);
+      // get data
+      $.when(QuerySession.getWebServiceGenomicEventData(),
+          QuerySession.getOncoprintSampleGenomicEventData()
+      ).then(
+        function (ws_data, oncoprint_data) {
+          return renderHeatmapTracks(ws_data, oncoprint_data);
+        }, function() {
+          def.reject();
+          return null;
       }).then(
-      // this executes if geneset_processing_finished.resolve()
+        // this executes if heatmap rendering has finished or aborted
       function() {
         var url_clinical_attrs = URL.getInitUsedClinicalAttrs() || [];
         if (url_clinical_attrs.length > 0) {
