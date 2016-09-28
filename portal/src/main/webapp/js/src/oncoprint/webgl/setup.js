@@ -1144,7 +1144,7 @@ var utils = {
           heatmap_processing_finished.resolve();
         }
         if ("geneset data is available") {
-          console.log("initOncoprint, calling getGseaData()...");
+          console.log("renderHeatmapTracks, calling getGseaData()...");
           $.when(
                 QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
@@ -1159,23 +1159,10 @@ var utils = {
         }
         return geneset_processing_finished.promise();
       }
-
-      LoadingBar.show();
-      LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
-      var def = new $.Deferred();
-      oncoprint.setCellPaddingOn(State.cell_padding_on);
-      // get data
-      $.when(QuerySession.getWebServiceGenomicEventData(),
-          QuerySession.getOncoprintSampleGenomicEventData()
-      ).then(
-        function (ws_data, oncoprint_data) {
-          return renderHeatmapTracks(ws_data, oncoprint_data);
-        }, function() {
-          def.reject();
-          return null;
-      }).then(
-        // this executes if heatmap rendering has finished or aborted
-      function() {
+      /**
+       * Renders clinical data tracks and resolves initOncoPrint's deferred.
+       */
+      var renderClinicalTracks = function () {
         var url_clinical_attrs = URL.getInitUsedClinicalAttrs() || [];
         if (url_clinical_attrs.length > 0) {
           $(toolbar_selector + ' #oncoprint-diagram-showlegend-icon').show();
@@ -1197,6 +1184,27 @@ var utils = {
         } else {
           def.resolve();
         }
+      }
+
+      LoadingBar.show();
+      LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
+      var def = new $.Deferred();
+      oncoprint.setCellPaddingOn(State.cell_padding_on);
+      // get data
+      $.when(QuerySession.getWebServiceGenomicEventData(),
+          QuerySession.getOncoprintSampleGenomicEventData()
+      ).then(
+        function (ws_data, oncoprint_data) {
+          console.log("initOncoprint, calling renderHeatmapTracks")
+          return renderHeatmapTracks(ws_data, oncoprint_data);
+        }, function() {
+          def.reject();
+          return null;
+      }).then(
+        // this executes if heatmap rendering has finished or been skipped
+        function () {
+          console.log("initOncoprint, calling renderClinicalTracks")
+          return renderClinicalTracks();
       }).fail(function() {
         def.reject();
       });
