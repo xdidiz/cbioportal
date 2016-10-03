@@ -48,8 +48,8 @@ import cbioportal_common
 
 # Only supported reference genome build number and name
 # nb: keep this in synch with MutationDataUtils.getNcbiBuild
-NCBI_BUILD_NUMBER = 38 #Mouse
-GENOMIC_BUILD_NAME = 'GRCm38' #Mouse
+NCBI_BUILD_NUMBER = 38 #Mouse NCBI build name
+GENOMIC_BUILD_NAME = 'mm10' #Mouse UCSC build name
 
 # study-specific globals
 DEFINED_SAMPLE_IDS = None
@@ -2059,10 +2059,10 @@ class GisticGenesValidator(Validator):
         """Initialize a GisticGenesValidator with the given parameters."""
         super(GisticGenesValidator, self).__init__(*args, **kwargs)
         # checkLine() expects particular values here, for the 'amp' column
-        if not self.meta_dict['reference_genome_id'].startswith('hg'):
+        if not self.meta_dict['reference_genome_id'].startswith('mm'):
             raise RuntimeError(
                     "GisticGenesValidator requires the metadata field "
-                    "reference_genome_id to start with 'hg'")
+                    "reference_genome_id to start with 'mm'")
         if self.meta_dict['genetic_alteration_type'] not in (
                 'GISTIC_GENES_AMP', 'GISTIC_GENES_DEL'):
             raise RuntimeError(

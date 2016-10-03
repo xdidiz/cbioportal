@@ -37,7 +37,8 @@ public class CopyNumberSegmentFile
     public static enum ReferenceGenomeId
     {
         hg18("hg18"),
-        hg19("hg19");
+        hg19("hg19"),
+        mm10("mm10"); //Added mouse genome id
 
         private String propertyName;
         
