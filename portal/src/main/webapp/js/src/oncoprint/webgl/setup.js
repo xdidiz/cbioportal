@@ -1119,7 +1119,7 @@ var utils = {
      function initOncoprint() {
 
       /**
-       * Renders heatmap tracks if applicable.
+       * Initializes heatmap tracks if applicable.
        *
        * @param ws_data - data promised by
        * initDataManager().getWebServiceGenomicEventData()
@@ -1128,7 +1128,7 @@ var utils = {
        * @returns {Promise} - promise that gets fulfilled when the track group
        * is either rendered or found not applicable.
        */
-      var renderHeatmapTracks = function (ws_data, oncoprint_data) {
+      var initHeatmapTracks = function (ws_data, oncoprint_data) {
         State.addGeneticTracks(oncoprint_data);
         var default_profile_id = QuerySession.getDefaultGeneticProfileId();
         var heatmap_processing_finished = new $.Deferred();
@@ -1144,7 +1144,7 @@ var utils = {
           heatmap_processing_finished.resolve();
         }
         if ("geneset data is available") {
-          console.log("renderHeatmapTracks, calling getGseaData()...");
+          console.log("initHeatmapTracks, calling getGseaData()...");
           $.when(
                 QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), "sample"),
                 heatmap_processing_finished
@@ -1160,9 +1160,9 @@ var utils = {
         return geneset_processing_finished.promise();
       }
       /**
-       * Renders clinical data tracks and resolves initOncoPrint's deferred.
+       * Initializes clinical data tracks and resolves initOncoPrint's deferred.
        */
-      var renderClinicalTracks = function () {
+      var initClinicalTracks = function () {
         var url_clinical_attrs = URL.getInitUsedClinicalAttrs() || [];
         if (url_clinical_attrs.length > 0) {
           $(toolbar_selector + ' #oncoprint-diagram-showlegend-icon').show();
@@ -1195,24 +1195,24 @@ var utils = {
           QuerySession.getOncoprintSampleGenomicEventData()
       ).then(
         function (ws_data, oncoprint_data) {
-          console.log("initOncoprint, calling renderHeatmapTracks")
-          return renderHeatmapTracks(ws_data, oncoprint_data);
+          console.log("initOncoprint, calling initHeatmapTracks")
+          return initHeatmapTracks(ws_data, oncoprint_data);
         }, function() {
           def.reject();
           return null;
       }).then(
         // this executes if heatmap rendering has finished or been skipped
         function () {
-          console.log("initOncoprint, calling renderClinicalTracks")
-          return renderClinicalTracks();
+          console.log("initOncoprint, calling initClinicalTracks")
+          return initClinicalTracks();
       }).fail(function() {
         def.reject();
       });
       return def.promise();
     })().then(
-    // this should execute if def.resolve()
+    // this executes if initOncoprint's promise resolves
     function() {
-      console.log("initOncoprint, calling State.setDataType()...");
+      console.log("post initOncoprint, calling State.setDataType()...");
       var populate_data_promise = State.setDataType(State.using_sample_data ? 'sample' : 'patient');
 
       $.when(QuerySession.getPatientIds(), QuerySession.getAlteredSamples(), QuerySession.getAlteredPatients(), populate_data_promise).then(function(patient_ids, altered_samples, altered_patients) {
