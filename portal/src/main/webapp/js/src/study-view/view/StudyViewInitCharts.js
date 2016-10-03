@@ -206,7 +206,7 @@ var StudyViewInitCharts = (function(){
                     _studyDesc = "from " + _keys.length + " patients";
                 }
             }else if(_dataType === "NUMBER"){
-                if(selectedCol(_attr_id) && _createdChartsNum < 21  && _keys.length > 1){
+                if(_createdChartsNum < 21  && _keys.length > 1){
                     bar.push(_attr[i]);
                 }
                 varType[_attr_id] = "bar";
