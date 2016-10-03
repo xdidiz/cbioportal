@@ -440,6 +440,7 @@ var utils = {
               QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample')
               .then(function (heatmap_data_by_line) {
                 return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
+                  console.log("heatmap data retrieved, setting track data");
                   var hm_id = State.heatmap_tracks[hm_line];
                   oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'sample');
                   oncoprint.setTrackTooltipFn(hm_id, tooltip_utils.makeHeatmapTrackTooltip(QuerySession.getDefaultGeneticProfileId(), 'sample', true));
@@ -482,6 +483,7 @@ var utils = {
             });
           }).then(function () {
         	// ! this is called AFTER oncoprint tracks, but BEFORE the heatmap tracks !!?
+            console.log("sample data populated, releasing rendering");
             oncoprint.keepSorted();
             oncoprint.releaseRendering();
             LoadingBar.msg("");
