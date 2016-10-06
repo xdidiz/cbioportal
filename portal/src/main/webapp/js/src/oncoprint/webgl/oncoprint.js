@@ -325,6 +325,14 @@ var Oncoprint = (function () {
 	return this.model.getVertZoom();
     }
 
+    /**
+     * Sets the data and column key for an Oncoprint track.
+     *
+     * @param track_id - the ID that identifies the track
+     * @param {Object[]} data - the list of data for the cells
+     * @param {string} data_id_key - whether the columns are indexed by sample
+     * or by patient
+     */
     Oncoprint.prototype.setTrackData = function (track_id, data, data_id_key) {
 	this.model.setTrackData(track_id, data, data_id_key);
 	this.cell_view.setTrackData(this.model, track_id);
