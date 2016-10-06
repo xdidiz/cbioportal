@@ -534,7 +534,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample')
 				.then(function (heatmap_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
-                  console.log("heatmap data retrieved, setting track data");
+					console.log("heatmap data retrieved, populating sample data for track " + heatmap_data_by_line[hm_line].hugo_gene_symbol);
 					var hm_id = State.heatmap_tracks[hm_line];
 					oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'sample');
 					oncoprint.setTrackTooltipFn(hm_id, tooltip_utils.makeHeatmapTrackTooltip(QuerySession.getDefaultGeneticProfileId(), 'sample', true));
@@ -550,6 +550,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample')
 				.then(function (geneset_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
+					console.log("GSEA data retrieved, populating sample data for track " + geneset_data_by_line[hm_line].gs_name);
 					var hm_id = State.geneset_tracks[hm_line];
 					oncoprint.setTrackData(hm_id, geneset_data_by_line[hm_line].oncoprint_data, 'sample');
                   oncoprint.setTrackTooltipFn(hm_id, function(d) {
@@ -571,6 +572,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                         }).then(function () {
 			    return utils.timeoutSeparatedLoop(Object.keys(State.clinical_tracks), function(track_id, i) {
 				var attr = State.clinical_tracks[track_id];
+				console.log("populating sample data for clinical track " + attr.attr_id);
 				oncoprint.setTrackData(track_id, clinical_data[attr.attr_id], 'uid');
 				oncoprint.setTrackTooltipFn(track_id, tooltip_utils.makeClinicalTrackTooltip(attr, 'sample', true));
 				oncoprint.setTrackInfo(track_id, "");
@@ -906,6 +908,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    var new_hm_id = oncoprint.addTracks([track_params])[0];
 		    hm_ids.push(new_hm_id);
 		    State.heatmap_tracks[i] = new_hm_id;
+		    // ???: wouldn't this always be State.heatmap_track[0]? <fedde-s 2016-10-06>
 		    if (State.first_heatmap_track === null) {
 			State.first_heatmap_track = new_hm_id;
 		    } else {
@@ -1345,6 +1348,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    var heatmap_processing_finished = new $.Deferred();
 	    var geneset_processing_finished = new $.Deferred();
 	    if (default_profile_id) {
+		console.log("initHeatmapTracks, calling getHeatmapData()...");
 		QuerySession.getHeatmapData(QuerySession.getDefaultGeneticProfileId(), QuerySession.getQueryGenes(), "sample")
 		.then(function (heatmap_data) {
 		    State.addHeatmapTracks(heatmap_data);
