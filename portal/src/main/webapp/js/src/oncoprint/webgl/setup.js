@@ -531,8 +531,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    var default_profile_id = QuerySession.getDefaultGeneticProfileId();
 			    if (default_profile_id) {
 				console.log("populateSampleData, calling QuerySession.getHeatmapData()....");
-				QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample')
-				.then(function (heatmap_data_by_line) {
+              return QuerySession.getHeatmapData(default_profile_id, QuerySession.getQueryGenes(), 'sample'
+              ).then(function (heatmap_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
 					console.log("heatmap data retrieved, populating sample data for track " + heatmap_data_by_line[hm_line].hugo_gene_symbol);
 					var hm_id = State.heatmap_tracks[hm_line];
@@ -547,8 +547,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}).then(function () {
 			    if ("geneset data is available") {
 				console.log("populateSampleData, calling getGseaData()...");
-				QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample')
-				.then(function (geneset_data_by_line) {
+              return QuerySession.getGseaData("hoi", QuerySession.getQueryGenes(), 'sample'
+              ).then(function (geneset_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(hm_line, i) {
 					console.log("GSEA data retrieved, populating sample data for track " + geneset_data_by_line[hm_line].gs_name);
 					var hm_id = State.geneset_tracks[hm_line];
@@ -579,7 +579,6 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				LoadingBar.update((i + Object.keys(State.heatmap_tracks).length + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
 			    });
 			}).then(function () {
-        	// ! this is called AFTER oncoprint tracks, but BEFORE the heatmap tracks !!?
             console.log("sample data populated, releasing rendering");
 			    oncoprint.keepSorted();
 			    if (State.unaltered_cases_hidden) {
