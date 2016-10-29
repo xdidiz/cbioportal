@@ -32,6 +32,7 @@
 
 package org.mskcc.cbio.portal.scripts;
 
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.CanonicalGene;
 import org.mskcc.cbio.portal.util.*;
@@ -81,16 +82,33 @@ public class ImportGeneData extends ConsoleRunnable {
                 String locusTag = parts[3];
                 String strAliases = parts[4];
                 //String strXrefs = parts[5];
-                String cytoband = parts[7];
+                String strCytoband = parts[7];
                 //String desc = parts[8];
                 String type = parts[9];
                 String mainSymbol = parts[10]; // use 10 instead of 2 since column 2 may have duplication
                 Set<String> aliases = new HashSet<String>();
+                List<String> cytobands = new ArrayList<String>();
+                String cytoband = new String();
                 if (!locusTag.equals("-")) {
                     aliases.add(locusTag);
                 }
                 if (!strAliases.equals("-")) {
                     aliases.addAll(Arrays.asList(strAliases.split("\\|")));
+                }
+                if (!strCytoband.equals("-")) {
+                    cytobands.addAll(Arrays.asList(strCytoband.split("\\|")));
+                    for (String i : cytobands) {
+                    	if (!i.contains("cM")) {
+                    		if (cytobands.size() <= 2) {
+                    			cytoband = i;
+                    		}
+                    		else {
+                    			if (i.contains("A") || i.contains("B") || i.contains("C") || i.contains("D") || i.contains("E") || i.contains("F") || i.contains("G") || i.contains("H")) {
+                    				cytoband = i;
+                    			}
+                    		}
+                    	}
+                    }
                 }
                 
                 if (geneSymbol.startsWith("MIR") && type.equalsIgnoreCase("miscRNA")) {
@@ -238,7 +256,7 @@ public class ImportGeneData extends ConsoleRunnable {
      * @throws DaoException
      */
     
-    public static void importGeneLength(File geneFile) throws IOException, DaoException {
+    public static void importGeneLength(File geneFile, boolean ifEnsembl) throws IOException, DaoException {
     	//Set the variables needed for the method
         FileReader reader = new FileReader(geneFile);
         BufferedReader buf = new BufferedReader(reader);
@@ -301,7 +319,12 @@ public class ImportGeneData extends ConsoleRunnable {
                     }	
                     /// If there is a switch
                     else {
-                    	geneUpdated = updateLength(previousSymbol, previousChrom, loci);
+                        if (ifEnsembl) {
+                        	geneUpdated = updateEnsemblLength(previousEnsembl, previousChrom, loci);
+                        }
+                        else {
+                            geneUpdated = updateLength(previousSymbol, previousChrom, loci);
+                        }
                     	if (geneUpdated) {
                     		nrGenesUpdated++;
                     	}
@@ -319,7 +342,12 @@ public class ImportGeneData extends ConsoleRunnable {
       
         /// Write the last gene
         /// First check if the gene exists in the database
-        geneUpdated = updateLength(previousSymbol, previousChrom, loci);
+        if (ifEnsembl) {
+        	geneUpdated = updateEnsemblLength(previousEnsembl, previousChrom, loci);
+        }
+        else {
+            geneUpdated = updateLength(previousSymbol, previousChrom, loci);
+        }
     	if (geneUpdated) {
     		nrGenesUpdated++;
     	}
@@ -365,6 +393,62 @@ public class ImportGeneData extends ConsoleRunnable {
         	/// If there is a cytoband in database, check if cytoband-chr matches input-chr
         	else {
             	String cbChr = "chr"+cytoband.split(" |\\|")[0]; //changed to mouse cytobands
+            	if (cbChr.equals(chromosome)) { //Update the length only if the chromosome matches
+            		gene.setLength(length);
+            		daoGeneOptimized.updateGene(gene);
+            		lengthUpdated = true;
+            	}
+            	else {
+            		ProgressMonitor.logWarning("Cytoband does not match, gene not saved (likely another version of gene in gtf has correct chr and is saved)");
+            	}
+            }
+        }
+        return lengthUpdated;
+    }
+    
+    /**
+     * This method receives an Ensembl ID and a list of loci (should be from the same gene), and with that it retrieves the database gene and it calculates the length
+     * of all its exons contained in loci. If the symbol is non-ambiguous, or the chromosome reported does not match the cytoband of the database gene, then length is not updated.
+     * The method reports a boolean stating if the gene length has been updated or not.
+     * 
+     * @param symbol
+     * @param chromosome
+     * @param loci
+     * @return
+     * @throws IOException
+     * @throws DaoException
+     */
+    public static boolean updateEnsemblLength(String ensemblId, String chromosome, List<long[]> loci) throws IOException, DaoException {
+    	DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
+    	boolean lengthUpdated = false;
+    	String id = ensemblId;
+    	/// Transform the ensemblId into the Id from the database
+    	int dotIndex = ensemblId.indexOf(".");
+    	if (dotIndex != -1) {
+    		id = ensemblId.substring(0,dotIndex);
+    	}
+    	Long realId = Long.parseLong(99+ensemblId.substring(11,id.length()));
+    	/// Check if the gene is in the database
+    	CanonicalGene gene = daoGeneOptimized.getGene(realId); //Identify unambiguously the gene (with the symbol and the chromosome)
+    	
+    	/// If it's not in the database, don't add it
+        if (!(gene==null)) {
+        	/// Calc length
+            int length = calculateGeneLength(loci);
+            
+            /// Obtain cytoband
+        	String cytoband = gene.getCytoband();
+        	
+        	/// If there is no cytoband in the database, just write it (can also be an overwrite)
+        	if (cytoband == null) {
+        		gene.setLength(length);
+        		daoGeneOptimized.updateGene(gene);
+        		lengthUpdated = true;
+        	}
+        	
+        	/// If there is a cytoband in database, check if cytoband-chr matches input-chr
+        	else {
+            	String cbChr = "chr"+cytoband.split(" ")[0]; //changed to mouse cytobands
             	if (cbChr.equals(chromosome)) { //Update the length only if the chromosome matches
             		gene.setLength(length);
             		daoGeneOptimized.updateGene(gene);
@@ -447,6 +531,7 @@ public class ImportGeneData extends ConsoleRunnable {
 	 		parser.accepts( "supp-genes", "alternative genes file" ).withRequiredArg().describedAs( "supp-genes.txt" ).ofType( String.class );
 	 		parser.accepts( "microrna", "microrna file" ).withRequiredArg().describedAs( "microrna.txt" ).ofType( String.class );
 	 		parser.accepts( "gtf", "gtf file for calculating and storing gene lengths" ).withRequiredArg().describedAs( "gencode.<version>.annotation.gtf" ).ofType( String.class );
+	 		parser.accepts( "gtf-ensembl", "gtf file for calculating and storing gene lengths in a database with Ensembl IDs").withRequiredArg().describedAs( "gencode.<version>.annotation.gtf" ).ofType( String.class );
 	
 	 		String progName = "importGenes";
 	 		OptionSet options = null;
@@ -501,7 +586,15 @@ public class ImportGeneData extends ConsoleRunnable {
 	            numLines = FileUtil.getNumLines(lociFile);
 	            System.out.println(" --> total number of lines:  " + numLines);
 	            ProgressMonitor.setMaxValue(numLines);
-	            ImportGeneData.importGeneLength(lociFile);
+	            ImportGeneData.importGeneLength(lociFile, false);
+	        }
+	        if(options.has("gtf-ensembl")) {
+		        File lociFile = new File((String) options.valueOf("gtf-ensembl"));
+		        System.out.println("Reading loci data from:  " + lociFile.getAbsolutePath());
+		        numLines = FileUtil.getNumLines(lociFile);
+		        System.out.println(" --> total number of lines:  " + numLines);
+		        ProgressMonitor.setMaxValue(numLines);
+		        ImportGeneData.importGeneLength(lociFile, true);
 	        }
 	        MySQLbulkLoader.flushAll();
             System.err.println("Done. Restart tomcat to make sure the cache is replaced with the new data.");
