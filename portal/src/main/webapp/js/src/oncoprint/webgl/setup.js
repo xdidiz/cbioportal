@@ -525,14 +525,17 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    oncoprint.setTrackInfo(track_id, utils.proportionToPercentString(track_data.filter(oncoprintDatumIsAltered).length/window.QuerySession.getSampleIds().length));
 			    oncoprint.setTrackTooltipFn(track_id, tooltip_utils.makeGeneticTrackTooltip('sample', true));
 			    LoadingBar.update(i / total_tracks_to_add);
-			}).then(QuerySession.getDefaultHeatmapProfile.bind(QuerySession))
+			})
+			.then(QuerySession.getDefaultHeatmapProfile.bind(QuerySession))
 			.then(function (heatmap_profile_id) {
+				QuerySession.getCaseUIDMap().then(
+						function(case_uid_map) {
 			    if (heatmap_profile_id !== null) {
-				return QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), 'sample')
+				return QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), 'sample', case_uid_map)
 				.then(function (heatmap_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
 					var hm_id = State.heatmap_tracks[hm_line];
-					oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'sample');
+					oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'uid');
 					oncoprint.setTrackTooltipFn(hm_id, tooltip_utils.makeHeatmapTrackTooltip(heatmap_profile_id, 'sample', true));
 					LoadingBar.update((i + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
 				    });
@@ -540,7 +543,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    } else {
 				return $.when();
 			    }
-			}).then(function () {
+			})}).then(function () {
 			    return utils.timeoutSeparatedLoop(Object.keys(State.clinical_tracks), function(track_id, i) {
 				var attr = State.clinical_tracks[track_id];
 				oncoprint.setTrackData(track_id, clinical_data[attr.attr_id], 'uid');
@@ -596,12 +599,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    LoadingBar.update(i / total_tracks_to_add);
 			}).then(QuerySession.getDefaultHeatmapProfile.bind(QuerySession))
 			.then(function (heatmap_profile_id) {
+				QuerySession.getCaseUIDMap().then(
+						function(case_uid_map) {
 			    if (heatmap_profile_id !== null) {
-				return QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), 'patient')
+				return QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), 'patient', case_uid_map)
 				.then(function (heatmap_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.heatmap_tracks), function(hm_line, i) {
 					var hm_id = State.heatmap_tracks[hm_line];
-					oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'patient');
+					oncoprint.setTrackData(hm_id, heatmap_data_by_line[hm_line].oncoprint_data, 'uid');
 					oncoprint.setTrackTooltipFn(hm_id, tooltip_utils.makeHeatmapTrackTooltip(heatmap_profile_id, 'patient', true));
 					LoadingBar.update((i + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
 				    });
@@ -609,7 +614,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    } else {
 				return $.when();
 			    }
-			}).then(function () {
+			})}).then(function () {
 			    return utils.timeoutSeparatedLoop(Object.keys(State.clinical_tracks), function(track_id, i) {
 				var attr = State.clinical_tracks[track_id];
 				oncoprint.setTrackData(track_id, clinical_data[attr.attr_id], 'uid');
@@ -857,7 +862,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    //'color_range': ['rgba(0,0,255,1)', 'rgba(255,0,0,1)'],
 			    'null_color': 'rgba(211,211,211,1)'
 			},
-			//'track_padding': 0,
+			'track_padding': 0, //set to zero to remove vertical space between tracks
 			'label': heatmap_data_by_line[i].hugo_gene_symbol,
 			'target_group': 2,
 			//'sortCmpFn': function(d1, d2) {return 0;},
@@ -1257,15 +1262,17 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                QuerySession.getDefaultHeatmapProfile()
 	).then(function (oncoprint_data, heatmap_profile_id) {
 	    State.addGeneticTracks(oncoprint_data);
+	    QuerySession.getCaseUIDMap().then(
+				function(case_uid_map) {
 	    if (heatmap_profile_id !== null) {
-		QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), "sample")
+		QuerySession.getHeatmapData(heatmap_profile_id, QuerySession.getQueryGenes(), "sample", case_uid_map)
 		.then(function (heatmap_data) {
 		    State.addHeatmapTracks(heatmap_data);
 		});
 	    } else {
 		return $.when();
 	    }
-	}).fail(function () {
+	})}).fail(function () {
 	    def.reject();
 	}).then(function () {
 	    (function fetchClinicalAttributes() {

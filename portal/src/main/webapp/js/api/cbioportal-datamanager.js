@@ -1126,7 +1126,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 	},
 	// make new functions for heatmap to bypass OQL filters and handle continuous data
 	//
-	'getHeatmapData': function (genetic_profile_id, genes, sample_or_patient) {
+	'getHeatmapData': function (genetic_profile_id, genes, sample_or_patient, case_uid_map) {
 	    var def = new $.Deferred();
 	    var self = this;
 	    var sample_ids = self.getSampleIds();
@@ -1146,7 +1146,9 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 			var id = sample_ids[j];
 			interim_data[gene][id] = {};
 			interim_data[gene][id]["hugo_gene_symbol"] = gene;
-			interim_data[gene][id][sample_or_patient] = (sample_or_patient === "patient" ? sample_to_patient_map[id] : id);
+			//get uid from map, using either sample id or patient id:
+			var uid = case_uid_map[self.getCancerStudyIds()[0]][(sample_or_patient === "patient" ? sample_to_patient_map[id] : id)];
+			interim_data[gene][id]["uid"] = uid;
 			interim_data[gene][id]["profile_data"] = null;
 		    }
 		}
