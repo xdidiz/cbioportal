@@ -104,6 +104,10 @@ public class GeneticAlterationType {
            return PROTEIN_ARRAY_PROTEIN_LEVEL;
         } else if (type.equals(PROTEIN_ARRAY_PHOSPHORYLATION.toString())) {
            return PROTEIN_ARRAY_PHOSPHORYLATION;
+        } else if (type.equals(GSVA_SCORES.toString())) {
+        	return GSVA_SCORES;
+        } else if (type.equals(GSVA_PVALUES.toString())) {
+        	return GSVA_PVALUES;
         } else {
             throw new NullPointerException("Cannot find: '" + type + "'");
         }
@@ -180,4 +184,16 @@ public class GeneticAlterationType {
      */
     public static final GeneticAlterationType PROTEIN_ARRAY_PHOSPHORYLATION
             = new GeneticAlterationType("PROTEIN_ARRAY_PHOSPHORYLATION");
+    
+    /**
+     * GSVA scores alteration type.
+     */
+    public static final GeneticAlterationType GSVA_SCORES
+            = new GeneticAlterationType("GSVA_SCORES");
+    /**
+     * GSVA P values alteration type.
+     */
+    public static final GeneticAlterationType GSVA_PVALUES
+            = new GeneticAlterationType("GSVA_PVALUES");
+    
 }

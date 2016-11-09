@@ -52,7 +52,8 @@ var PROFILE_COPY_NUMBER_ALTERATION = "PROFILE_COPY_NUMBER_ALTERATION"
 var PROFILE_MRNA_EXPRESSION = "PROFILE_MRNA_EXPRESSION";
 var PROFILE_PROTEIN = "PROFILE_PROTEIN";
 var PROFILE_PROTEIN_EXPRESSION = "PROFILE_PROTEIN_EXPRESSION";
-var PROFILE_METHYLATION = "PROFILE_METHYLATION"
+var PROFILE_METHYLATION = "PROFILE_METHYLATION";
+var PROFILE_GSVA_SCORES = "PROFILE_GSVA_SCORES";
 
 var caseSetSelectionOverriddenByUser = false;
 var selectedStudiesStorageKey = "cbioportal_selected_studies";
@@ -491,6 +492,7 @@ function updateDefaultCaseList() {
     var mutSelect = $("input.PROFILE_MUTATION_EXTENDED[type=checkbox]").prop('checked');
     var cnaSelect = $("input.PROFILE_COPY_NUMBER_ALTERATION[type=checkbox]").prop('checked');
     var expSelect = $("input.PROFILE_MRNA_EXPRESSION[type=checkbox]").prop('checked');
+    var gsvaSelect = $("input.PROFILE_GSVA_SCORES[type=checkbox]").prop('checked');
     var rppaSelect = $("input.PROFILE_PROTEIN_EXPRESSION[type=checkbox]").prop('checked');
     var selectedCancerStudy = $('#select_single_study').val();
     var defaultCaseList = selectedCancerStudy+"_all";
@@ -515,6 +517,8 @@ function updateDefaultCaseList() {
         defaultCaseList = selectedCancerStudy+"_3way_complete";
     } else if (!mutSelect && !cnaSelect && !expSelect && rppaSelect) {
         defaultCaseList = selectedCancerStudy+"_rppa";
+    } else if (gsvaSelect) {
+    	defaultCaseList = selectedCancerStudy+"_gsva_scores";
     }
     
     $('#select_case_set').val(defaultCaseList);
@@ -638,6 +642,7 @@ function updateCancerStudyInformation() {
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION_BINARY", PROFILE_METHYLATION, "DNA Methylation");
     //addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN, "Protein Level");
     addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN_EXPRESSION, "Protein/phosphoprotein level");
+    addGenomicProfiles(cancer_study.genomic_profiles, "GSVA_SCORES", PROFILE_GSVA_SCORES, "Gene Set Variation Analysis scores")
 
 
     //  if no genomic profiles available, set message and disable submit button
