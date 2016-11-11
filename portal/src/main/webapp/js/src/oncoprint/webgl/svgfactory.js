@@ -115,7 +115,7 @@ module.exports = {
     defs: function() {
 	return makeSVGElement('defs');
     },
-    gradient: function(mesh, colorFn) {
+    gradient: function(colorFn) {
 	var gradient = makeSVGElement('linearGradient', {
 	    'id': 'gradient'+gradientId(),
 	    'x1':0,
@@ -123,10 +123,10 @@ module.exports = {
 	    'x2':1,
 	    'y2':0
 	});
-	for (var i=0; i<=mesh; i++) {
-	    var color = extractColor(colorFn(i/mesh));
+	for (var i=0; i<=100; i++) {
+	    var color = extractColor(colorFn(i/100));
 	    gradient.appendChild(makeSVGElement('stop', {
-		'offset': Math.round(i*100/mesh) + "%",
+		'offset': i + '%',
 		'stop-color':color.rgb,
 		'stop-opacity': color.opacity
 	    }));

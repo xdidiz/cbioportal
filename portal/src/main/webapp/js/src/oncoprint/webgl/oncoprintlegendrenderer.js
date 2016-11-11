@@ -160,7 +160,7 @@ var OncoprintLegendView = (function() {
 		var num_digit_multiplier = Math.pow(10, num_decimal_digits);
 		return Math.round(x * num_digit_multiplier) / num_digit_multiplier;
 	    });
-	    var gradient = svgfactory.gradient(100, config.colorFn);
+	    var gradient = svgfactory.gradient(config.colorFn);
 	    var gradient_id = gradient.getAttribute("id");
 	    target_defs.appendChild(gradient);
 	    root.appendChild(svgfactory.text(display_range[0], 0, 0, 12, 'Arial', 'normal'));
