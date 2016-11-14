@@ -38,17 +38,8 @@
 <div class="query_step_section">
     <span class="step_header">Enter Gene Set:</span>
 
-    <script language="javascript" type="text/javascript">
-
-    function popitup(url) {
-        newwindow=window.open(url,'OncoSpecLangInstructions','height=1000,width=1000,left=400,top=0,scrollbars=yes');
-        if (window.focus) {newwindow.focus()}
-        return false;
-    }
-    </script>
-
     <% if (localTabIndex.equals(QueryBuilder.TAB_VISUALIZE)) { %>
-        <% out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='onco_query_lang_desc.jsp' onclick='return popitup('onco_query_lang_desc.jsp')'>Advanced: Onco Query Language (OQL)</a></span>"); %>
+        <% out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id='oql_link' href='onco_query_lang_desc.jsp'>Advanced: Onco Query Language (OQL)</a></span>"); %>
     <% } %>
     
     <div style='padding-top:10px;padding-bottom:5px;'>
@@ -63,6 +54,10 @@
     <script type="text/javascript">
         $(document).ready(function() {
             GeneSymbolValidator.initialize();
+            $("#oql_link").click(function(event) {
+            	event.preventDefault();
+            	window.open('onco_query_lang_desc.jsp');
+            });
         });
     </script>
 
