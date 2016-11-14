@@ -284,16 +284,19 @@
                             var tempArr = _.map(histData, function(e){return e.caseSetLength;});
                             var maxtotalSample = Math.max.apply(null, tempArr);  
                             var maxYAxis = 0;
-                            switch($("#yAxis").val()) {
-                                case "Frequency":
-                                    maxYAxis = Math.min(calculateFrequency(histData[0], 0, "all") + .05, 1.0);
-
-                                    break;
-                                case "Count":
-                                    
-                                    maxYAxis = histData[0].alterations["all"];
-
-                                    break; // keep the order
+                            //get the maxYAxis, if there is data, otherwise leave as 0:
+                            if (histData.length > 1) {
+	                            switch($("#yAxis").val()) {
+	                                case "Frequency":
+	                                    maxYAxis = Math.min(calculateFrequency(histData[0], 0, "all") + .05, 1.0);
+	
+	                                    break;
+	                                case "Count":
+	                                    
+	                                    maxYAxis = histData[0].alterations["all"];
+	
+	                                    break; // keep the order
+	                            }
                             }
 
                             var yScale = d3.scale.linear()
