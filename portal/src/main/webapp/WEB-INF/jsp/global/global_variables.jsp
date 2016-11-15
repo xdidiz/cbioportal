@@ -350,7 +350,7 @@ $(document).ready(function() {
             $("#oncoprint_num_of_altered_cases").append(altered_samples.length);
             $("#oncoprint_percentage_of_altered_cases").append(altered_samples_percentage);
             if (patientIdArray.length !== _sampleIds.length) {
-                $("#switchPatientSample").show();
+                $("#switchPatientSample").hide();// show();  hiding this button for now. The functionality is alredy implemented in the oncoprint menu. Completely removing this button causes problems. In release 1.3.2 the button is there, but is not working there either.
             }
             
         });
