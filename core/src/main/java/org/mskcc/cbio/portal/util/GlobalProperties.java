@@ -205,6 +205,8 @@ public class GlobalProperties {
     
     public static final String DISABLED_TABS = "disabled_tabs";
     
+    public static final String BITLY_USER = "bitly.user";
+    
     private static Log LOG = LogFactory.getLog(GlobalProperties.class);
     private static Properties properties = initializeProperties();
 
@@ -723,6 +725,15 @@ public class GlobalProperties {
             return false;
         }
         return Boolean.parseBoolean(recacheStudyAfterUpdate);
+    }
+    
+    public static String getBitlyUser() {
+        String bitlyUser = properties.getProperty(BITLY_USER);
+        if (bitlyUser == null || bitlyUser.trim().equals(""))
+        {
+            return null;
+        }
+        return bitlyUser;
     }
     
     public static String getDbVersion() {

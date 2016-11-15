@@ -298,9 +298,12 @@
             <br/>
             <br/>
 
+	<% if (GlobalProperties.getBitlyUser() != null) { %>
             If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> service below:<BR>
             <BR><button type="button" id="bitly-generator">Shorten URL</button>
             <div id='bitly'></div>
+        <% } %>
+
         </div>
 
     </div>

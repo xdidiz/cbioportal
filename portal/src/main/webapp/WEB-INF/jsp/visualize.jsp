@@ -215,9 +215,11 @@
                 out.println ("<h4>Right click</b> on the link below to bookmark your results or send by email:</h4><br><a id='bookmark-link' href='#'>" + request.getAttribute
                         (QueryBuilder.ATTRIBUTE_URL_BEFORE_FORWARDING) + "?...</a>");
                 out.println("<br><br>");
-                out.println("If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> service below:<BR>");
-                out.println("<BR><button type='button' id='bitly-generator'>Shorten URL</button>");
-                out.println("<div id='bitly'></div>");
+                if (GlobalProperties.getBitlyUser() != null) {
+	                out.println("If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> service below:<BR>");
+	                out.println("<BR><button type='button' id='bitly-generator'>Shorten URL</button>");
+	                out.println("<div id='bitly'></div>");
+                }
             }
 
             out.println("</div>");
