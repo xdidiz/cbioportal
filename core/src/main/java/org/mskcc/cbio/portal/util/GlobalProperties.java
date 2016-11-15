@@ -222,6 +222,7 @@ public class GlobalProperties {
     public static final String CIS_USER = "cis.user";
     public static final String DISABLED_TABS = "disabled_tabs";
     public static final String DARWIN_REGEX = "darwin.regex";
+    public static final String BITLY_USER = "bitly.user";
     
     public static final String PRIORITY_STUDIES = "priority_studies";
     public static final String SPECIES = "species";
@@ -809,6 +810,15 @@ public class GlobalProperties {
         return Boolean.parseBoolean(recacheStudyAfterUpdate);
     }
     
+    public static String getBitlyUser() {
+        String bitlyUser = properties.getProperty(BITLY_USER);
+        if (bitlyUser == null || bitlyUser.trim().equals(""))
+        {
+            return null;
+        }
+        return bitlyUser;
+    }
+
     public static String getDbVersion() {
         String version = properties.getProperty(DB_VERSION);
         if (version == null)
