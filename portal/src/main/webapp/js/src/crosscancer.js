@@ -750,7 +750,10 @@
                                     $(this).text(fixFloat($(this).text() * 100, 1) + "%" );
                                 });
 
-                            var genes = _.last(histData).genes;
+                            var genes = [];
+                            if (histData.length > 0) {
+                            	genes = _.last(histData).genes;
+                            }
                             window.ccQueriedGenes =  genes;
                             var numOfGenes = genes.length;
                             var numOfStudies = histDataOrg.length;
@@ -1588,9 +1591,9 @@
                     this.$el.html(this.template(thatModel));
                     var ulEl = this.$el.find("#not-shown-studies");
                     _.each(thatModel.hiddenStudies, function(hiddenStudy) {
-                        ulEl.append(
-                            _.template($("#studies-with-no-data-item-tmpl").html(),
-                            thatModel.metaData.cancer_studies[hiddenStudy.studyId])
+                    	var tmpl = _.template($("#studies-with-no-data-item-tmpl").html());
+                    	ulEl.append(
+                        		tmpl({name: thatModel.metaData.cancer_studies[hiddenStudy.studyId].name})
                         );
                     });
                 }
