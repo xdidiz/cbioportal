@@ -216,5 +216,13 @@ table.dataTable th:active {
 .dataTables_scrollBody {
 	*margin-top: -1px;
 	-webkit-overflow-scrolling: touch;
+	overflow-y: scroll;
+	overflow-y: hidden;
 }
 
+.dataTables_scrollBody {
+	*margin-top: -1px;
+	-webkit-overflow-scrolling: touch;
+	overflow-y: scroll!important;
+	overflow-x: hidden!important;
+}
