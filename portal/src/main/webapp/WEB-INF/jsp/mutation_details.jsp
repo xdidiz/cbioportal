@@ -92,6 +92,10 @@
                 }
             },
             view: {
+                vis3d: {
+	                // use https for all portal instances
+                    pdbUri: "https://files.rcsb.org/view/"
+                },       
                 mutationTable: {
                     columnRender: {
                         annotation: function (datum) {

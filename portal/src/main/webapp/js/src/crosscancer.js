@@ -1247,7 +1247,11 @@
 			                        }
 		                        },
 		                        view: {
-			                        mutationDiagram: {
+                                    vis3d: {
+                                    	// use https for all portal instances
+                                        pdbUri: "https://files.rcsb.org/view/"
+                                    },
+                                    mutationDiagram: {
 				                        showStats: true
 			                        },
 			                        mutationTable: {
