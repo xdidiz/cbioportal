@@ -6,12 +6,12 @@ public class GeneticData implements Serializable {
 
     private Integer geneticProfileId;
     private String geneticProfileStableId;
-    private Integer entrezGeneId;
+    private Integer geneticEntityId;
     private Integer sampleId;
     private String sampleStableId;
     private String value;
     private GeneticProfile geneticProfile;
-    private Gene gene;
+    private GeneticEntity geneticEntity;
     private Sample sample;
 
     public Integer getGeneticProfileId() {
@@ -30,14 +30,14 @@ public class GeneticData implements Serializable {
         this.geneticProfileStableId = geneticProfileStableId;
     }
 
-    public Integer getEntrezGeneId() {
-        return entrezGeneId;
+    public Integer getGeneticEntityId() {
+        return geneticEntityId;
     }
 
-    public void setEntrezGeneId(Integer entrezGeneId) {
-        this.entrezGeneId = entrezGeneId;
+    public void setGeneticEntityId(Integer geneticEntityId) {
+        this.geneticEntityId = geneticEntityId;
     }
-
+    
     public Integer getSampleId() {
         return sampleId;
     }
@@ -70,12 +70,12 @@ public class GeneticData implements Serializable {
         this.geneticProfile = geneticProfile;
     }
 
-    public Gene getGene() {
-        return gene;
+    public GeneticEntity getGeneticEntity() {
+        return geneticEntity;
     }
 
-    public void setGene(Gene gene) {
-        this.gene = gene;
+    public void setGeneticEntity(GeneticEntity geneticEntity) {
+        this.geneticEntity = geneticEntity;
     }
 
     public Sample getSample() {
