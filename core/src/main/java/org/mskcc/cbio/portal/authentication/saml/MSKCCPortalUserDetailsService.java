@@ -36,6 +36,8 @@ package org.mskcc.cbio.portal.authentication.saml;
 import org.mskcc.cbio.portal.model.User;
 import org.mskcc.cbio.portal.model.UserAuthorities;
 import org.mskcc.cbio.portal.dao.PortalUserDAO;
+import org.opensaml.saml2.core.Attribute;
+
 import org.mskcc.cbio.portal.authentication.PortalUserDetails;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 
@@ -105,6 +107,22 @@ public class MSKCCPortalUserDetailsService implements SAMLUserDetailsService
 		// get userid and name
         String userid = credential.getAttributeAsString("/UserAttribute[@ldap:targetAttribute=\"mail\"]");
         String name = credential.getAttributeAsString("/UserAttribute[@ldap:targetAttribute=\"displayName\"]");
+        
+        //log info / debug:
+        for (Attribute cAttribute : credential.getAttributes()) {
+        	log.info("kkk - " + cAttribute.toString());
+        	log.info("kkk - " + cAttribute.getName());
+        	log.info("kkk - " + credential.getAttributeAsString(cAttribute.getName()));
+        	if (userid == null && cAttribute.getName().equals("mail"))
+        	{
+        		userid = credential.getAttributeAsString(cAttribute.getName());
+        	}
+        	else if (name == null && cAttribute.getName().equals("displayName"))
+        	{
+        		name = credential.getAttributeAsString(cAttribute.getName());
+        	}
+        	
+        }
 
 		// check if this user exists in our backend db
 		try {
@@ -125,6 +143,10 @@ public class MSKCCPortalUserDetailsService implements SAMLUserDetailsService
                         grantedAuthorities.addAll(getDefaultGrantedAuthorities(userid));
                     }
                     toReturn = new PortalUserDetails(userid, grantedAuthorities);
+                    toReturn.setEmail(userid);
+                    toReturn.setName(userid);
+                } else {
+                	toReturn = new PortalUserDetails(userid, AuthorityUtils.createAuthorityList(new String[0]));
                     toReturn.setEmail(userid);
                     toReturn.setName(userid);
                 }
@@ -185,3 +207,4 @@ public class MSKCCPortalUserDetailsService implements SAMLUserDetailsService
 
     }
 }
+
