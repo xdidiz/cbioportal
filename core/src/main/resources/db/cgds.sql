@@ -90,6 +90,11 @@ DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `cancer_study`;
 DROP TABLE IF EXISTS `type_of_cancer`;
 DROP TABLE IF EXISTS `genetic_entity`;
+DROP TABLE IF EXISTS `geneset`;
+DROP TABLE IF EXISTS `geneset_gene`;
+DROP TABLE IF EXISTS `geneset_hierarchy`;
+DROP TABLE IF EXISTS `geneset_hierarchy_parent`;
+DROP TABLE IF EXISTS `genetic_profile_link`;
 
 -- --------------------------------------------------------
 CREATE TABLE `type_of_cancer` (
@@ -204,6 +209,60 @@ CREATE TABLE `gene_alias` (
   `GENE_ALIAS` varchar(255) NOT NULL,
   PRIMARY KEY (`ENTREZ_GENE_ID`,`GENE_ALIAS`),
   FOREIGN KEY (`ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`)
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `geneset` (
+  `ID` INT(11) NOT NULL,
+  `GENETIC_ENTITY_ID` INT NOT NULL,
+  `EXTERNAL_ID` VARCHAR(100) NOT NULL,
+  `NAME_SHORT` VARCHAR(100) NOT NULL,
+  `NAME` VARCHAR(300) NOT NULL,
+  `REF_LINK` VARCHAR(65535) CHARACTER SET 'ascii' NULL,
+  `VERSION` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE INDEX `NAME_SHORT_UNIQUE` (`NAME_SHORT` ASC),
+  UNIQUE INDEX `EXTERNAL_ID_COLL_UNIQUE` (`EXTERNAL_ID` ASC),
+  UNIQUE INDEX `GENETIC_ENTITY_ID_UNIQUE` (`GENETIC_ENTITY_ID` ASC),
+  FOREIGN KEY (`GENETIC_ENTITY_ID`) REFERENCES `genetic_entity` (`ID`) ON DELETE CASCADE
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `geneset_gene` (
+  `GENESET_ID` INT(11) NOT NULL,
+  `ENTREZ_GENE_ID` INT(11) NOT NULL,
+  PRIMARY KEY (`GENESET_ID`, `ENTREZ_GENE_ID`),
+  FOREIGN KEY (`ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`GENESET_ID`) REFERENCES `geneset` (`ID`) ON DELETE CASCADE
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `geneset_hierarchy` (
+  `NODE_ID` BIGINT(20) NOT NULL,
+  `NODE_NAME` VARCHAR(200) NOT NULL,
+  `PARENT_ID` BIGINT NULL DEFAULT NULL,
+  PRIMARY KEY (`NODE_ID`),
+  UNIQUE INDEX `NODE_NAME_UNIQUE` (`NODE_NAME` ASC, `PARENT_ID` ASC)
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `geneset_hierarchy_parent` (
+  `NODE_ID` BIGINT NOT NULL,
+  `GENESET_ID` INT NOT NULL,
+  PRIMARY KEY (`NODE_ID`, `GENESET_ID`),
+  FOREIGN KEY (`NODE_ID`) REFERENCES `geneset_hierarchy` (`NODE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`GENESET_ID`) REFERENCES `geneset` (`ID`) ON DELETE CASCADE
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `genetic_profile_link` (
+  `REFERRING_GENETIC_PROFILE_ID` INT NOT NULL,
+  `REFERRED_GENETIC_PROFILE_ID` INT NOT NULL,
+  `REFERENCE_TYPE` VARCHAR(45) NULL, -- COMMENT 'Values: AGGREGATION (e.g. for GSVA) or STATISTIC (e.g. for Z-SCORES)
+  PRIMARY KEY (`REFERRING_GENETIC_PROFILE_ID`, `REFERRED_GENETIC_PROFILE_ID`),
+  FOREIGN KEY (`REFERRING_GENETIC_PROFILE_ID` , `REFERRED_GENETIC_PROFILE_ID`) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID` , `GENETIC_PROFILE_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
 );
 
 -- --------------------------------------------------------
@@ -705,4 +764,4 @@ CREATE TABLE `info` (
   `DB_SCHEMA_VERSION` varchar(24)
 ) DEFAULT CHARSET=utf8;
 -- THIS MUST BE KEPT IN SYNC WITH db.version PROPERTY IN pom.xml
-INSERT INTO info VALUES ('2.0.0');
+INSERT INTO info VALUES ('2.1.0');
