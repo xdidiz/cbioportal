@@ -34,9 +34,13 @@ package org.mskcc.cbio.portal.dao;
 
 import java.util.*;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.mskcc.cbio.portal.repository.MutationRepositoryLegacy;
 import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.model.converter.MutationModelConverter;
+import org.mskcc.cbio.portal.persistence.MutationMapperLegacy;
+import org.mskcc.cbio.portal.repository.MutationRepositoryLegacy;
+import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneticEntity.EntityType;
+import org.cbioportal.service.GeneticDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,11 +58,14 @@ public class GeneticAlterationUtil {
     private static final String NAN = "NaN";
     private static MutationRepositoryLegacy mutationRepositoryLegacy;
     private static MutationModelConverter mutationModelConverter;
+    private static GeneticDataService geneticDataService;
 
     @Autowired
-    public GeneticAlterationUtil(MutationRepositoryLegacy mutationRepositoryLegacy, MutationModelConverter mutationModelConverter) {
+    public GeneticAlterationUtil(MutationRepositoryLegacy mutationRepositoryLegacy, MutationModelConverter mutationModelConverter,
+        		GeneticDataService geneticDataService) {
         GeneticAlterationUtil.mutationRepositoryLegacy = mutationRepositoryLegacy;
         GeneticAlterationUtil.mutationModelConverter = mutationModelConverter;
+        GeneticAlterationUtil.geneticDataService = geneticDataService;
     }
 
     /**
@@ -70,6 +77,8 @@ public class GeneticAlterationUtil {
      * @param targetGeneticProfile      Target Genetic Profile.
      * @return Array List of String values.
      * @throws DaoException Database Error.
+     * 
+     * Note: this will be deprecated as soon as new getGeneticDataRow() below is fully implemented supporting MUTATION api as well.
      */
     public static ArrayList<String> getGeneticAlterationDataRow(Gene targetGene,
                                                                 List<Integer> targetSampleList,
@@ -111,6 +120,54 @@ public class GeneticAlterationUtil {
             }
         }
         return dataRow;
+    }
+ 
+    /**
+     * Similar to getGeneticAlterationDataRow above, but generic to any entity type, supporting only 
+     * alteration data that is stored in genetic_alteration table (so not MUTATION data - for MUTATION data use the 
+     * old getGeneticAlterationDataRow for now).
+     * Uses the new API.
+     * 
+     * @param geneticEntityStableId: gene stable id (entrezId), or geneset stable id 
+     * @param sampleIds: list of samples. This method will return the list of values in the same order.
+     * @param entityType: GENE or GENESET for example
+     * @param targetGeneticProfile: stable id of genetic profile
+     * 
+     * @return this method will return the list of values, one for each sample, 
+     * in the same order as the given list of samples.
+     * 
+     * @throws DaoException
+     */
+    public static ArrayList<String> getGeneticDataRow(String geneticEntityStableId,
+            List<String> sampleIds, EntityType entityType,
+            GeneticProfile targetGeneticProfile) throws DaoException {
+    	//TODO use if (targetGeneticProfile.getGeneticAlterationType() == GeneticAlterationType.MUTATION_EXTENDED) like
+    	//in previous getGeneticAlterationDataRow method, but here using the new API (which is still to be implemented)
+    	
+		//use new API which supports geneset query:
+    	List<GeneticData> geneticDataItems = geneticDataService.fetchGeneticDataInGeneticProfile(
+    			targetGeneticProfile.getStableId(), 
+    			entityType, 
+    			Arrays.asList(geneticEntityStableId), 
+    			sampleIds, 
+    			"SUMMARY", null, null);
+    	
+    	//make temporary hashmap with sample and value:
+    	Map<String,String> samplesAndValue = new HashMap<String,String>();
+    	for (GeneticData geneticData : geneticDataItems) {
+    		samplesAndValue.put(geneticData.getSampleStableId(), geneticData.getValue());
+    	}
+    	//make final list of values:
+    	ArrayList<String> values = new ArrayList<String>();
+    	for (String sampleId : sampleIds) {
+    		String value = samplesAndValue.get(sampleId);
+    		if (value == null) {
+    			values.add(NAN);
+            } else {
+            	values.add(value);
+            }
+    	}
+    	return values;
     }
     
     public static ArrayList<String> getBestCorrelatedProteinArrayDataRow(int cancerStudyId,
