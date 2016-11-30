@@ -49,8 +49,8 @@
 var PROFILE_MUTATION = "PROFILE_MUTATION";
 var PROFILE_MUTATION_EXTENDED = "PROFILE_MUTATION_EXTENDED";
 var PROFILE_COPY_NUMBER_ALTERATION = "PROFILE_COPY_NUMBER_ALTERATION"
+var PROFILE_GSVA_SCORES = "PROFILE_GSVA_SCORES"
 var PROFILE_MRNA_EXPRESSION = "PROFILE_MRNA_EXPRESSION";
-var PROFILE_PROTEIN = "PROFILE_PROTEIN";
 var PROFILE_PROTEIN_EXPRESSION = "PROFILE_PROTEIN_EXPRESSION";
 var PROFILE_METHYLATION = "PROFILE_METHYLATION"
 
@@ -491,6 +491,7 @@ function updateDefaultCaseList() {
     var mutSelect = $("input.PROFILE_MUTATION_EXTENDED[type=checkbox]").prop('checked');
     var cnaSelect = $("input.PROFILE_COPY_NUMBER_ALTERATION[type=checkbox]").prop('checked');
     var expSelect = $("input.PROFILE_MRNA_EXPRESSION[type=checkbox]").prop('checked');
+    var gsvaSelect = $("input.PROFILE_GSVA_SCORES[type=checkbox]").prop('checked');
     var rppaSelect = $("input.PROFILE_PROTEIN_EXPRESSION[type=checkbox]").prop('checked');
     var selectedCancerStudy = $('#select_single_study').val();
     var defaultCaseList = selectedCancerStudy+"_all";
@@ -515,6 +516,8 @@ function updateDefaultCaseList() {
         defaultCaseList = selectedCancerStudy+"_3way_complete";
     } else if (!mutSelect && !cnaSelect && !expSelect && rppaSelect) {
         defaultCaseList = selectedCancerStudy+"_rppa";
+    } else if (gsvaSelect) {
+        defaultCaseList = selectedCancerStudy+"_gsva_scores";
     }
     
     $('#select_case_set').val(defaultCaseList);
@@ -569,10 +572,12 @@ function toggleThresholdPanel(profileClicked, profile, threshold_div) {
 // toggle:
 //      gistic button
 //      mutsig button
+//		gsva button
 // according to the cancer_study
 function toggleByCancerStudy(cancer_study) {
     var mutsig = $('#toggle_mutsig_dialog');
-    var gistic = $('#toggle_gistic_dialog_button');
+    var gistic = $('#toggle_gistic_dialog');
+    var gsva = $('#toggle_gsva_dialog');
     if (cancer_study.has_mutsig_data) {
         mutsig.show();
     } else {
@@ -582,6 +587,11 @@ function toggleByCancerStudy(cancer_study) {
         gistic.show();
     } else {
         gistic.hide();
+    }
+    if (cancer_study.has_gsva_data) {
+        gsva.show();
+    } else {
+    	gsva.hide();
     }
 }
 
@@ -633,6 +643,7 @@ function updateCancerStudyInformation() {
     addGenomicProfiles(cancer_study.genomic_profiles, "MUTATION", PROFILE_MUTATION, "Mutation");
     addGenomicProfiles(cancer_study.genomic_profiles, "MUTATION_EXTENDED", PROFILE_MUTATION_EXTENDED, "Mutation");
     addGenomicProfiles(cancer_study.genomic_profiles, "COPY_NUMBER_ALTERATION", PROFILE_COPY_NUMBER_ALTERATION, "Copy Number");
+    addGenomicProfiles(cancer_study.genomic_profiles, "GSVA", PROFILE_GSVA_SCORES, "GSVA Scores");
     addGenomicProfiles(cancer_study.genomic_profiles, "MRNA_EXPRESSION", PROFILE_MRNA_EXPRESSION, "mRNA Expression");
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION", PROFILE_METHYLATION, "DNA Methylation");
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION_BINARY", PROFILE_METHYLATION, "DNA Methylation");

@@ -52,7 +52,8 @@ var d3_class = {
 
 var vals = {
     data_type : {
-        genetic: "genetic_profile",
+        gene: "gene",
+        gene_set: "gene_set",
         clin: "clinical_attribute"
     },
     profile_type : {
@@ -60,7 +61,9 @@ var vals = {
         "COPY_NUMBER_ALTERATION": "Copy Number",
         "MRNA_EXPRESSION": "mRNA",
         "PROTEIN_LEVEL": "Protein Level",
-        "METHYLATION": "DNA Methylation"
+        "METHYLATION": "DNA Methylation",
+        "GSVA_SCORE": "GSVA Scores",
+        "P-VALUE": "P-values"
     }
 };
 
@@ -69,7 +72,9 @@ var genetic_profile_type_priority_list = [ //from low to high
     "METHYLATION",
     "PROTEIN_LEVEL",
     "COPY_NUMBER_ALTERATION",
-    "MRNA_EXPRESSION"    
+    "MRNA_EXPRESSION",
+    "GSVA_SCORE",
+    "P-VALUE"
 ];
 
 var genetic_profile_name_priority_list = [ //from low to high
