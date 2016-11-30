@@ -171,6 +171,74 @@ public final class DaoGeneticProfile {
         return byStableId.get(stableId);
     }
 
+    /**
+     * This method returns the genetic profiles that are referred by to the given referringGeneticProfile.
+     *  
+     * @param referringGeneticProfile: the referred genetic profile
+     * @return
+     * @throws DaoException
+     */
+    public static ArrayList<GeneticProfile> getGeneticProfilesReferredBy(GeneticProfile referringGeneticProfile) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            ArrayList<GeneticProfile> result = new ArrayList<GeneticProfile>();
+            con = JdbcUtil.getDbConnection(DaoGene.class);
+            pstmt = con.prepareStatement
+                    ("SELECT * FROM genetic_profile " + 
+                    "where  " +
+                    "GENETIC_PROFILE_ID in  " +
+                      "(SELECT REFERRED_GENETIC_PROFILE_ID " + 
+                        "FROM genetic_profile_link where REFERRING_GENETIC_PROFILE_ID = ?)");
+            pstmt.setInt(1, referringGeneticProfile.getGeneticProfileId());
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                GeneticProfile profileType = extractGeneticProfile(rs);
+                result.add(profileType);
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneticProfile.class, con, pstmt, rs);
+        }
+    }
+    
+    /**
+     * This method returns the genetic profiles that are referring to the given referredGeneticProfile.
+     *  
+     * @param referredGeneticProfile: the referred genetic profile
+     * @return
+     * @throws DaoException
+     */
+    public static ArrayList<GeneticProfile> getGeneticProfilesReferringTo(GeneticProfile referredGeneticProfile) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            ArrayList<GeneticProfile> result = new ArrayList<GeneticProfile>();
+            con = JdbcUtil.getDbConnection(DaoGene.class);
+            pstmt = con.prepareStatement
+                    ("SELECT * FROM genetic_profile " + 
+                    "where  " +
+                    "GENETIC_PROFILE_ID in  " +
+                      "(SELECT REFERRING_GENETIC_PROFILE_ID " + 
+                        "FROM genetic_profile_link where REFERRED_GENETIC_PROFILE_ID = ?)");
+            pstmt.setInt(1, referredGeneticProfile.getGeneticProfileId());
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                GeneticProfile profileType = extractGeneticProfile(rs);
+                result.add(profileType);
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneticProfile.class, con, pstmt, rs);
+        }
+    }
+    
     public static GeneticProfile getGeneticProfileById(int geneticProfileId) {
         return byInternalId.get(geneticProfileId);
     }
