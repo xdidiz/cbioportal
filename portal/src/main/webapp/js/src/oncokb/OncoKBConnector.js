@@ -979,14 +979,16 @@ OncoKB.Instance.prototype = {
                 civicVariant.description = result.description;
 
                 // Aggregate evidence items per type
-                civicVariant.evidence = {
-                    "Predictive": 0,
-                    "Prognostic": 0,
-                    "Diagnostic": 0
-                };
+                civicVariant.evidence = {};
                 var evidence = civicVariant.evidence;
                 result.evidence_items.forEach(function (evidenceItem) {
-                    evidence[evidenceItem.evidence_type] += 1;
+                    var evidenceType = evidenceItem.evidence_type;
+                    if (evidence.hasOwnProperty(evidenceType)) {
+                        evidence[evidenceType] += 1;
+                    }
+                    else {
+                        evidence[evidenceType] = 1;
+                    }
                 });
                 deferred.resolve();
             })
@@ -1218,20 +1220,22 @@ OncoKB.Instance.prototype = {
                                             // Use apply, because when doesn't seem to support arrays
                                             $.when.apply($, promises)
                                             .done(function () {
-
+                                                
                                                 var mainMatchingCivicVariant = matchingCivicVariants[0];
-                                                var numDiagnostic = mainMatchingCivicVariant.evidence['Diagnostic'];
-                                                var numPredictive = mainMatchingCivicVariant.evidence['Predictive'];
-                                                var numPrognostic = mainMatchingCivicVariant.evidence['Prognostic'];
                                                 
                                                 var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
                                                     '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
                                                 var civicHTML = '<div class="civic-qtip">' +
-                                                    '<a href="' + url + '" target="_blank">CIVIC</a> has ' +
-                                                    numDiagnostic + ' diagnostic, ' +
-                                                    numPredictive + ' predictive, and ' +
-                                                    numPrognostic + ' prognostic entries for this variant.';
+                                                    '<a href="' + url + '" target="_blank">CIVIC</a> entries: ';
                                                 
+                                                // List number of entries by type
+                                                var entries = [];
+                                                $.each(mainMatchingCivicVariant.evidence, function(key, value) {
+                                                    entries.push(key.toLowerCase() + ': ' + value);
+                                                });
+                                                civicHTML += entries.join(', ') + '.';
+                                                
+                                                // Append list with matching variant descriptions
                                                 civicHTML += "<ul>";
                                                 matchingCivicVariants.forEach(function(civicVariant) {
                                                     var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
