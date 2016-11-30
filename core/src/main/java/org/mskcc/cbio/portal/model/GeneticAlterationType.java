@@ -80,6 +80,8 @@ public class GeneticAlterationType {
             throw new IllegalArgumentException("type is null");
         } else if (type.equals(COPY_NUMBER_ALTERATION.toString())) {
             return COPY_NUMBER_ALTERATION;
+        } else if (type.equals(GSVA_SCORES.toString())) {
+            return GSVA_SCORES;
         } else if (type.equals(MRNA_EXPRESSION.toString())) {
             return MRNA_EXPRESSION;
         } else if (type.equals(MRNA_EXPRESSION_NORMALS.toString())) {
@@ -126,6 +128,12 @@ public class GeneticAlterationType {
      */
     public static final GeneticAlterationType COPY_NUMBER_ALTERATION
             = new GeneticAlterationType("COPY_NUMBER_ALTERATION");
+
+    /**
+     * GSVA alteration type.
+     */
+    public static final GeneticAlterationType GSVA_SCORES
+            = new GeneticAlterationType("GSVA_SCORES");
 
     /**
      * microRNA expression alteration type.
