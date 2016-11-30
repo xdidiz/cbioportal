@@ -132,9 +132,10 @@ show.oncokb=true
 # Enable Chang's hotspot list (true, false)
 show.hotspot=true
 
-## Configuration of CIVIC data display
-# Enable Civic variant annotation (true, false)
-show.civic=true
+# Enable Civic variant annotation. Set to empty if you want to disable Civic annotation.
+civic.url=https://civic.genome.wustl.edu/api/
+#TODO: remove:
+civic.show=true
 # Base directory for CIVIC data, expects files as in the April 2016 release,
 # named base_dir + PREFIX + {"ClinicalEvidenceSummaries.tsv", ...}.  If
 # empty then the files shipping with cBioPortal (April 2016) will be used.

@@ -86,6 +86,11 @@ public class ProxyController
         }
         this.enableOncokb = property;
     }
+
+  private String civicURL;
+  @Value("${civic.url:https://civic.genome.wustl.edu/api/}")
+  public void setCivicURL(String property) { this.civicURL = property; }
+
   // This is a general proxy for future use.
   // Please modify and improve it as needed with your best expertise. The author does not have fully understanding
   // of JAVA proxy when creating this proxy.
@@ -196,4 +201,18 @@ public class ProxyController
 
     return responseEntity.getBody();
   }
+
+    @RequestMapping(value="/civicGenes/{id}", method = RequestMethod.GET)
+    public @ResponseBody String getCivicGenes(@PathVariable String id, @RequestParam("identifier_type") String identifier_type,
+                                              @RequestBody String body, HttpMethod method,
+                                              HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, IOException {
+        return respProxy(civicURL + "genes/" + id + "?identifier_type=" + identifier_type, method, body, response);
+    }
+
+    @RequestMapping(value="/civicVariants/{id}", method = RequestMethod.GET)
+    public @ResponseBody String getCivicVariants(@PathVariable String id, @RequestBody String body, HttpMethod method,
+                                                 HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, IOException {
+        return respProxy(civicURL + "variants/" + id, method, body, response);
+    }
+
 }

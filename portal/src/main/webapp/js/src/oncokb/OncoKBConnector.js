@@ -164,6 +164,10 @@ var OncoKB = (function(_, $) {
         this.evidenceTypes = 'GENE_SUMMARY,GENE_BACKGROUND,ONCOGENIC,MUTATION_EFFECT,VUS,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY';
         this.evidenceLevels = ['LEVEL_1', 'LEVEL_2A', 'LEVEL_2B', 'LEVEL_3A', 'LEVEL_3B', 'LEVEL_R1'];
         this.variants = {};
+        this.civicGeneId = null;
+        // An object with key-object pairs, where the key is the name of the variant and 
+        // the object contains information about the variant, such as the id
+        this.civicVariants = {};
         this.evidence = {};
         this.id = id || 'OncoKB-Instance-' + new Date().getTime();
         this.variantUniqueIds = {}; // Unique variant list.
@@ -887,7 +891,33 @@ OncoKB.Instance.prototype = {
             }
             self.dataReady = true;
 
-            deferred.resolve();
+
+            $.ajax({
+                type: 'GET',
+                url: 'api-legacy/proxy/civicGenes/' + self.id,
+                dataType: 'json',
+                contentType: 'application/json',
+                data: {
+                    identifier_type: 'entrez_symbol'
+                }
+            }).done(function(result) {
+                if (_.isString(result)) {
+                    result = $.parseJSON(result);
+                }
+                
+                if (result.variants && result.variants.length > 0) {
+                    self.civicGeneId = result.id
+                    result.variants.forEach(function(variant) {
+                        self.civicVariants[variant.name] = {
+                            id: variant.id,
+                            name: variant.name
+                        };
+                    });
+                }
+                deferred.resolve();
+            });
+                    
+            
         })
             .fail(function() {
                 console.log('POST failed.');
@@ -918,6 +948,54 @@ OncoKB.Instance.prototype = {
     },
     getVariantUniqueIds: function(oncokbId) {
         return this.variantUniqueIds[oncokbId];
+    },
+    getMatchingCivicVariants: function(proteinChange) {
+        var matchingCivicVariants = [];
+        var civicVariant = this.civicVariants[proteinChange];
+        if (typeof civicVariant !== 'undefined') {
+            matchingCivicVariants.push(civicVariant);
+        }
+        return matchingCivicVariants;
+    },
+    getCivicVariant: function(civicVariant) {
+        var deferred = $.Deferred();
+        var self = this;
+
+        if (civicVariant.description) {
+            // Variant info has already been loaded
+            deferred.resolve();
+        }
+        else {
+            $.ajax({
+                type: 'GET',
+                url: 'api-legacy/proxy/civicVariants/' + civicVariant.id,
+                dataType: 'json',
+                contentType: 'application/json'
+            })
+            .done(function (result) {
+                if (_.isString(result)) {
+                    result = $.parseJSON(result);
+                }
+                civicVariant.description = result.description;
+
+                // Aggregate evidence items per type
+                civicVariant.evidence = {
+                    "Predictive": 0,
+                    "Prognostic": 0,
+                    "Diagnostic": 0
+                };
+                var evidence = civicVariant.evidence;
+                result.evidence_items.forEach(function (evidenceItem) {
+                    evidence[evidenceItem.evidence_type] += 1;
+                });
+                deferred.resolve();
+            })
+            .fail(function () {
+                deferred.reject();
+            });
+        }
+
+        return deferred.promise();
     },
     getEvidence: function(oncokbId) {
         var deferred = $.Deferred();
@@ -1107,6 +1185,74 @@ OncoKB.Instance.prototype = {
             }
 
             if (typeof  type === 'undefined' || type === 'alteration') {
+                $(target).find('.annotation-item.civic').each(function() {
+                    var proteinChange = $(this).attr('proteinChange');
+                    $(this).empty(); // remove spinner image
+                    if (proteinChange != null) {
+                        
+                        // Get matching civic variants
+                        var matchingCivicVariants = self.getMatchingCivicVariants(proteinChange);
+                        
+                        if (matchingCivicVariants.length > 0) {
+                            $(this).append('<i class="civic-image"></i>');
+                            $(this).one('mouseenter', function () {
+                                $(this).qtip({
+                                    content: {text: '<span><img src="images/loader.gif" alt="loading" /></span>'},
+                                    show: {ready: true},
+                                    hide: {fixed: true, delay: 500},
+                                    style: {
+                                        classes: 'qtip-light qtip-shadow oncokb-card-qtip',
+                                        tip: true
+                                    },
+                                    position: {
+                                        my: 'center left',
+                                        at: 'center right'
+                                    },
+                                    events: {
+                                        render: function (event, api) {
+                                            var civicVariant = matchingCivicVariants[0];
+                                            
+                                            // Load variant information for all matching civicVariants,
+                                            // after which we construct the html for the qtip
+                                            var promises = matchingCivicVariants.map(self.getCivicVariant, self);
+                                            // Use apply, because when doesn't seem to support arrays
+                                            $.when.apply($, promises)
+                                            .done(function () {
+
+                                                var mainMatchingCivicVariant = matchingCivicVariants[0];
+                                                var numDiagnostic = mainMatchingCivicVariant.evidence['Diagnostic'];
+                                                var numPredictive = mainMatchingCivicVariant.evidence['Predictive'];
+                                                var numPrognostic = mainMatchingCivicVariant.evidence['Prognostic'];
+                                                
+                                                var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
+                                                    '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
+                                                var civicHTML = '<div class="civic-qtip">' +
+                                                    '<a href="' + url + '" target="_blank">CIVIC</a> has ' +
+                                                    numDiagnostic + ' diagnostic, ' +
+                                                    numPredictive + ' predictive, and ' +
+                                                    numPrognostic + ' prognostic entries for this variant.';
+                                                
+                                                civicHTML += "<ul>";
+                                                matchingCivicVariants.forEach(function(civicVariant) {
+                                                    var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
+                                                        '/summary/variants/' + civicVariant.id + '/summary#variant';
+                                                    civicHTML += '<li>' + civicVariant.name + ': ' + civicVariant.description +
+                                                            ' <a href="' + url + '" target="_blank">More information.</a></li>'
+                                                });
+                                                civicHTML += "</ul>";
+                                                
+                                                civicHTML += 'More and updated information in <a href="' + url + '" target="_blank">CIVIC</a>.';
+                                                civicHTML += "</div>";
+                                                api.set('content.title', 'Civic Variants')
+                                                api.set('content.text', civicHTML);
+                                            });
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+                });
                 $(target).find('.oncokb_alteration').each(function() {
                     var oncokbId = $(this).attr('oncokbId');
 

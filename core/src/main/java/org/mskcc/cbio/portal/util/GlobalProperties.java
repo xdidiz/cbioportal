@@ -219,7 +219,9 @@ public class GlobalProperties {
     
     public static final String PRIORITY_STUDIES = "priority_studies";
     
-    public static final String SHOW_CIVIC = "show.civic";
+    public static final String CIVIC_SHOW = "civic.show";
+    public static final String CIVIC_URL = "civic.url";
+    //TODO: remove:
     public static final String CIVIC_PATH_BASE = "civic.path_base";
     public static final String CIVIC_PATH_PREFIX = "civic.path_prefix";
 
@@ -725,6 +727,34 @@ public class GlobalProperties {
         return "";
     }
 
+    public static String getCivicUrl()
+    {
+        String civicUrl = properties.getProperty(CIVIC_URL);
+
+        // This only applies if there is no oncokb.url property in the portal.properties file.
+        // Empty string should be used if you want to disable the OncoKB annotation.
+        if(civicUrl == null) {
+            civicUrl = "https://civic.genome.wustl.edu/api/";
+        }
+
+        //Test connection of CIVIC website.
+        if(!civicUrl.isEmpty()) {
+
+            try {
+                URL url = new URL(civicUrl + "genes");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                if(conn.getResponseCode() != 200) {
+                    civicUrl = "";
+                }
+                conn.disconnect();
+                return civicUrl;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+        return "";
+    }
+
     public static boolean showHotspot() {
         String hotspot = properties.getProperty(SHOW_HOTSPOT);
         if (hotspot==null) {
@@ -739,7 +769,7 @@ public class GlobalProperties {
     }
 
     public static boolean showCivic() {
-        String civic = properties.getProperty(SHOW_CIVIC);
+        String civic = properties.getProperty(CIVIC_SHOW);
         if (civic == null)
             return true;  // show CIVIC by default
 

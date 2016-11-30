@@ -95,7 +95,9 @@ String oncokbUrl = (String)GlobalProperties.getOncoKBApiUrl();
 String oncokbGeneStatus = (String)GlobalProperties.getOncoKBGeneStatus();
 
 boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
-boolean showCivic = (Boolean) GlobalProperties.showCivic();
+boolean showCivic = (Boolean) GlobalProperties.showCivic(); //TODO remove
+
+String civicUrl = (String)GlobalProperties.getCivicUrl();
 
 //String drugType = xssUtil.getCleanerInput(request, "drug_type");
 String drugType = request.getParameter("drug_type");

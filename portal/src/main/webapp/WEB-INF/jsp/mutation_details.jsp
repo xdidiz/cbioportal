@@ -52,8 +52,8 @@
     <span class='annotation-item chang_hotspot' alt='{{changHotspotAlt}}'>
         <img width='14' height='14' src='images/cancer-hotspots.svg' alt='Recurrent Hotspot Symbol'>
     </span>
-    <span class='annotation-item civic' alt='{{civicAlt}}'>
-        <img width='14' height='14' src='images/civic-logo.png'>
+    <span class='annotation-item civic' proteinChange='{{proteinChange}}'>
+        <img width='14' height='14' src='images/ajax-loader.gif' alt='Civic Variant Entry'>
     </span>
 </script>
 
@@ -111,6 +111,7 @@
                             var mutation = datum.mutation;
                             var vars = {};
                             vars.oncokbId = mutation.get("mutationSid");
+                            vars.proteinChange = mutation.get("proteinChange");
                             vars.mcgAlt = '';
                             vars.changHotspotAlt = '';
                             vars.civicAlt = '';
@@ -130,6 +131,8 @@
                                 datum.table.requestColumnData("annotation");
                             }
                             
+                            
+                            // TODO: remove:
                             if (showCivic && (mutation.civicVariantSummaries.length > 0 ||
                                         mutation.civicClinicalEvidenceStats.length > 0)) {
                                 var variantSummaries = mutation.civicVariantSummaries;

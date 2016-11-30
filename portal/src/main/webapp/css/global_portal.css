@@ -1713,3 +1713,13 @@ ul.ui-autocomplete li.ui-menu-item { font-size: 0.6em; text-align: left; }
 .qtip-civic ul {
     padding-left: 10px;
 }
+
+.civic-image {
+    background-image: url("../images/civic-logo.png");
+    width: 16px;
+    height: 16px;
+    line-height: 24px;
+    margin-top: 4px;
+    margin-left: 4px;
+    display: block !important;
+}
