@@ -102,13 +102,14 @@ public class GetProfileDataJSON extends HttpServlet  {
         String cancerStudyIdentifier = httpServletRequest.getParameter("cancer_study_id");
         String sampleSetId = httpServletRequest.getParameter("case_set_id");
         String sampleIdsKey = httpServletRequest.getParameter("case_ids_key");
-        String rawGeneIdList;
+        String rawGeneticEntityIdList;
         if (httpServletRequest instanceof XssRequestWrapper) {
-            rawGeneIdList = ((XssRequestWrapper)httpServletRequest).getRawParameter("gene_list");
+            rawGeneticEntityIdList = ((XssRequestWrapper)httpServletRequest).getRawParameter("genetic_entity_list");
         } else {
-            rawGeneIdList = httpServletRequest.getParameter("gene_list");
+            rawGeneticEntityIdList = httpServletRequest.getParameter("genetic_entity_list");
         }
-        String[] geneIdList = rawGeneIdList.split("\\s+");
+
+        String[] geneticEntityIdList = rawGeneticEntityIdList.split("\\s+");
         String[] geneticProfileIds = httpServletRequest.getParameter("genetic_profile_id").split("\\s+");
         String forceDownload = httpServletRequest.getParameter("force_download");
         String format = httpServletRequest.getParameter("format");
@@ -152,10 +153,10 @@ public class GetProfileDataJSON extends HttpServlet  {
             List<String> stableSampleIds = InternalIdUtil.getStableSampleIds(internalSampleIds);
 
             //Get profile data
-            for (String geneId: geneIdList) {
+            for (String geneticEntityId: geneticEntityIdList) { //PA
 
                 DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-                Gene gene = daoGene.getGene(geneId);
+                Gene gene = daoGene.getGene(geneticEntityId);
 
                 JsonNode tmpGeneObj = mapper.createObjectNode();
 
@@ -193,7 +194,7 @@ public class GetProfileDataJSON extends HttpServlet  {
                     ((ObjectNode)tmpGeneObj).put(stableSampleId, tmpObjMap.get(stableSampleId));
                 }
 
-                ((ObjectNode)result).put(geneId, tmpGeneObj);
+                ((ObjectNode)result).put(geneticEntityId, tmpGeneObj);
 
             }
         } catch (DaoException e) {
@@ -208,7 +209,7 @@ public class GetProfileDataJSON extends HttpServlet  {
             String result_str = "";
             if (format.equals("tab")) {
                 String sampleId_str = "GENE_ID" + "\t" + "COMMON" + "\t";
-                Iterator<String> sampleIds = result.get(geneIdList[0]).getFieldNames();
+                Iterator<String> sampleIds = result.get(geneticEntityIdList[0]).getFieldNames();
                 while (sampleIds.hasNext()) {
                     sampleId_str += sampleIds.next() + "\t";
                 }
@@ -247,16 +248,16 @@ public class GetProfileDataJSON extends HttpServlet  {
                     gene_str += gene.getEntrezGeneId() + "\t";
                 }
                 gene_str += "\n" + "COMMON" + "\t";
-                for(String geneId : geneIdList) {
+                for(String geneId : geneticEntityIdList) {
                     gene_str += geneId + "\t";
                 }
                 gene_str += "\n";
 
-                Iterator<String> sampleIds = result.get(geneIdList[0]).getFieldNames();
+                Iterator<String> sampleIds = result.get(geneticEntityIdList[0]).getFieldNames();
                 while (sampleIds.hasNext()) {
                     String sampleId = sampleIds.next();
                     val_str += sampleId + "\t";
-                    for (String geneId : geneIdList) {
+                    for (String geneId : geneticEntityIdList) {
                        String _val = result.get(geneId).get(sampleId).get(geneticProfileIds[0]).toString();
                         _val = _val.replaceAll("\"", "");
                         val_str += _val + "\t";

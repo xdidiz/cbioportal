@@ -54,12 +54,16 @@
     <div style='padding-top:10px;padding-bottom:5px;'>
         <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Gene Set"></select>
     </div>
-        
+
     <div style="padding-bottom:5px;margin-left:-3px;">
-        <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select From Recurrently Mutated Genes (MutSig)</button>
-        <button id="toggle_gistic_dialog_button" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
+        <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select from Recurrently Mutated Genes (MutSig)</button>
+        <button id="toggle_gistic_dialog" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
     </div>
 
+	<div style="padding-bottom:5px;margin-left:-3px;">
+        <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em;">Select Gene Sets scored with GSVA</button>
+	</div>
+	
     <script type="text/javascript">
         $(document).ready(function() {
             GeneSymbolValidator.initialize();
@@ -83,5 +87,5 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Alia
 
 </div>
 <script type='text/javascript'>
-$('#toggle_gistic_dialog_button').button();
+$('#toggle_gistic_dialog').button();
 </script>

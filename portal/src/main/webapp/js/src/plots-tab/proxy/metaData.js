@@ -15,6 +15,7 @@ var metaData = (function() {
             description: ""
         },
         geneticProfiles = {},
+        geneSets = {},
         clinicalAttrs = [],
         retrieve_status = -1; //data not yet retrieved (-1), retrieved (1)
 
@@ -46,23 +47,35 @@ var metaData = (function() {
 
         var _tmp_id_arr = []; //temporary instore profile id
         var _profile_arr = [];
+        var _geneSets_arr = [];
         for (var gene in profileMetaDataResult) { //merge all genetic profiles from all queried genes
             var _gene_obj = profileMetaDataResult[gene];
             for (var _profile_name in _gene_obj) {
                 var obj = _gene_obj[_profile_name];
-                if ($.inArray(obj.STABLE_ID, _tmp_id_arr) === -1) {
-                    var _datum = jQuery.extend(true, {}, datum_genetic_profile_meta);
-                    _datum.type = obj.GENETIC_ALTERATION_TYPE;
-                    _datum.id = obj.STABLE_ID;
-                    _datum.name = obj.NAME;
-                    _datum.description = obj.DESCRIPTION;    
-                    _profile_arr.push(_datum);
-                    _tmp_id_arr.push(obj.STABLE_ID);
+                if ($.inArray(obj.STABLE_ID, _tmp_id_arr) === -1)  {
+	            	if (obj.GENETIC_ALTERATION_TYPE === "GSVA") {
+	            		var _datum = jQuery.extend(true, {}, datum_genetic_profile_meta);
+	                    _datum.type = obj.GENETIC_ALTERATION_TYPE;
+	                    _datum.id = obj.STABLE_ID;
+	                    _datum.name = obj.NAME;
+	                    _datum.description = obj.DESCRIPTION;    
+	                    _geneSets_arr.push(_datum);
+	                    _tmp_id_arr.push(obj.STABLE_ID);
+	            	} else {
+	                    var _datum = jQuery.extend(true, {}, datum_genetic_profile_meta);
+	                    _datum.type = obj.GENETIC_ALTERATION_TYPE;
+	                    _datum.id = obj.STABLE_ID;
+	                    _datum.name = obj.NAME;
+	                    _datum.description = obj.DESCRIPTION;    
+	                    _profile_arr.push(_datum);
+	                    _tmp_id_arr.push(obj.STABLE_ID);
+	            	}
                 }
             }
         }
         for (var gene in profileMetaDataResult) {
-            geneticProfiles[gene] = _profile_arr;
+           geneticProfiles[gene] = _profile_arr;
+           geneSets[gene] = _geneSets_arr;
         }
         
         $.each(clinicalAttrMetaDataResult, function(index, obj) {
@@ -141,11 +154,22 @@ var metaData = (function() {
         getGeneticProfilesMeta: function(_gene) {
             return geneticProfiles[_gene];
         },
+        getGeneSetsMeta: function(_gene) {
+            return geneSets[_gene];
+        },
         getRetrieveStatus: function() {
             return retrieve_status;
         },
         getProfileDescription: function(_gene, attr_id) {
             $.each(metaData.getGeneticProfilesMeta(_gene), function(index, obj) {
+                if (obj.id === attr_id) {
+                    _result = obj.description;
+                }
+            });
+            return _result;
+        },
+        getGeneSetsDescription: function(_gene, attr_id) {
+            $.each(metaData.getGeneSetsMeta(_gene), function(index, obj) {
                 if (obj.id === attr_id) {
                     _result = obj.description;
                 }

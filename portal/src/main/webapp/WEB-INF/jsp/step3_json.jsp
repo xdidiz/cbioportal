@@ -112,7 +112,7 @@
 					<button id="cancel_mutsig" title="Cancel">Cancel</button>
 					<button id="select_mutsig" class="tabs-button" title="Use these mutsig genes">Select</button>
 		</div>
-    </div>
+    </div>    
     <script type="text/javascript" src="js/src/gistic.js?<%=GlobalProperties.getAppVersion()%>"></script>
     <div id="gistic_dialog" title="Recurrent Copy Number Alterations (Gistic)" style="font-size:11px; text-align:left; .ui-dialog {padding:0em;};">
         <div id='gistic_loading'><img id='loader-img' src="images/ajax-loader.gif" alt='loading'/></div>
@@ -178,6 +178,15 @@
             },
     });
     </script>
+    <script type="text/javascript" src="js/src/gsva.js?<%=GlobalProperties.getAppVersion()%>"></script>
+    <div id="gsva_dialog" title="Gene Sets scored with GSVA" class='display' style="font-size: 11px; .ui-dialog {padding: 0em;};">
+        <img id='loader-img' src="images/ajax-loader.gif" alt='loading'/>
+        This is an unfinished pop-up. In the future, you could select gene sets here. For now, if you press the "Select" button, 3 mock gene sets will be displayed in the query box for testing purposes.
+		<div id="gsva_dialog_footer" style="float: right;">
+					<button id="cancel_gsva" title="Cancel">Cancel</button>
+					<button id="select_gsva" class="tabs-button" title="Use these GSVA gene sets">Select</button>
+		</div>
+    </div>
 <%
 String customCaseListStyle = "none";
 // Output step 3 form validation error
