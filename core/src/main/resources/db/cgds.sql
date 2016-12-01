@@ -77,9 +77,11 @@ DROP TABLE IF EXISTS `gene_panel_list`;
 DROP TABLE IF EXISTS `gene_panel`;
 DROP TABLE IF EXISTS `genetic_profile_samples`;
 DROP TABLE IF EXISTS `genetic_alteration`;
+DROP TABLE IF EXISTS `genetic_profile_link`;
 DROP TABLE IF EXISTS `genetic_profile`;
 DROP TABLE IF EXISTS `uniprot_id_mapping`;
 DROP TABLE IF EXISTS `gene_alias`;
+DROP TABLE IF EXISTS `geneset_gene`;
 DROP TABLE IF EXISTS `gene`;
 DROP TABLE IF EXISTS `sample_list_list`;
 DROP TABLE IF EXISTS `sample_list`;
@@ -90,11 +92,9 @@ DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `cancer_study`;
 DROP TABLE IF EXISTS `type_of_cancer`;
 DROP TABLE IF EXISTS `genetic_entity`;
-DROP TABLE IF EXISTS `geneset`;
-DROP TABLE IF EXISTS `geneset_gene`;
+DROP TABLE IF EXISTS `geneset_hierarchy_leaf`;
 DROP TABLE IF EXISTS `geneset_hierarchy`;
-DROP TABLE IF EXISTS `geneset_hierarchy_parent`;
-DROP TABLE IF EXISTS `genetic_profile_link`;
+DROP TABLE IF EXISTS `geneset`;
 
 -- --------------------------------------------------------
 CREATE TABLE `type_of_cancer` (
@@ -218,7 +218,7 @@ CREATE TABLE `geneset` (
   `EXTERNAL_ID` VARCHAR(100) NOT NULL,
   `NAME_SHORT` VARCHAR(100) NOT NULL,
   `NAME` VARCHAR(300) NOT NULL,
-  `REF_LINK` VARCHAR(65535) CHARACTER SET 'ascii' NULL,
+  `REF_LINK` TEXT CHARACTER SET 'ascii' NULL,
   `VERSION` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE INDEX `NAME_SHORT_UNIQUE` (`NAME_SHORT` ASC),
@@ -246,7 +246,7 @@ CREATE TABLE `geneset_hierarchy` (
 );
 
 -- --------------------------------------------------------
-CREATE TABLE `geneset_hierarchy_parent` (
+CREATE TABLE `geneset_hierarchy_leaf` (
   `NODE_ID` BIGINT NOT NULL,
   `GENESET_ID` INT NOT NULL,
   PRIMARY KEY (`NODE_ID`, `GENESET_ID`),
@@ -260,9 +260,8 @@ CREATE TABLE `genetic_profile_link` (
   `REFERRED_GENETIC_PROFILE_ID` INT NOT NULL,
   `REFERENCE_TYPE` VARCHAR(45) NULL, -- COMMENT 'Values: AGGREGATION (e.g. for GSVA) or STATISTIC (e.g. for Z-SCORES)
   PRIMARY KEY (`REFERRING_GENETIC_PROFILE_ID`, `REFERRED_GENETIC_PROFILE_ID`),
-  FOREIGN KEY (`REFERRING_GENETIC_PROFILE_ID` , `REFERRED_GENETIC_PROFILE_ID`) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID` , `GENETIC_PROFILE_ID`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION
+  FOREIGN KEY (`REFERRING_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (`REFERRED_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 -- --------------------------------------------------------
