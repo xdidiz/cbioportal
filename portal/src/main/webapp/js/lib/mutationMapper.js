@@ -6561,8 +6561,6 @@ var MutationModel = Backbone.Model.extend({
 		this.cna = attributes.cna;
 		this.myCancerGenome = attributes.myCancerGenome;
 		this.isHotspot = attributes.isHotspot;
-		this.civicVariantSummaries = attributes.civicVariantSummaries;
-		this.civicClinicalEvidenceStats = attributes.civicClinicalEvidenceStats;
 	},
 	url: function() {
 		// TODO implement this to get the data from a web service

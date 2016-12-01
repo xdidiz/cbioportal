@@ -221,9 +221,6 @@ public class GlobalProperties {
     
     public static final String SHOW_CIVIC = "show.civic";
     public static final String CIVIC_URL = "civic.url";
-    //TODO: remove:
-    public static final String CIVIC_PATH_BASE = "civic.path_base";
-    public static final String CIVIC_PATH_PREFIX = "civic.path_prefix";
 
     private static Log LOG = LogFactory.getLog(GlobalProperties.class);
     private static Properties properties = initializeProperties();
@@ -773,22 +770,6 @@ public class GlobalProperties {
         if (showCivic == null || showCivic.isEmpty())
             return true;  // show CIVIC by default
         return Boolean.parseBoolean(showCivic);
-    }
-
-    public static String civicPathBase() {
-        String civic = properties.getProperty(CIVIC_PATH_BASE);
-        if (civic == null || civic.isEmpty())
-            return null;
-        else
-            return civic;
-    }
-
-    public static String civicPathPrefix() {
-        String civic = properties.getProperty(CIVIC_PATH_PREFIX);
-        if (civic == null || civic.isEmpty())
-            return null;
-        else
-            return civic;
     }
 
     public static boolean filterGroupsByAppName() {

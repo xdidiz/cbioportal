@@ -114,7 +114,6 @@
                             vars.proteinChange = mutation.get("proteinChange");
                             vars.mcgAlt = '';
                             vars.changHotspotAlt = '';
-                            vars.civicAlt = '';
 
                             if (enableMyCancerGenome &&
                                 mutation.get("myCancerGenome") instanceof Array && 
@@ -129,49 +128,6 @@
                             if (_.isUndefined(mutation.get("oncokb")))
                             {
                                 datum.table.requestColumnData("annotation");
-                            }
-                            
-                            
-                            // TODO: remove:
-                            if (showCivic && (mutation.civicVariantSummaries.length > 0 ||
-                                        mutation.civicClinicalEvidenceStats.length > 0)) {
-                                var variantSummaries = mutation.civicVariantSummaries;
-                                var clinicalEvidenceStats = mutation.civicClinicalEvidenceStats;
-
-                                if ($(variantSummaries).size() == 0 && $(clinicalEvidenceStats).size() == 0)
-                                    return;
-
-                                // Get summary counts for clinical evidence
-                                var numDiagnostic = 0;
-                                var numPrognostic = 0;
-                                var numPredictive = 0;
-                                if ($(clinicalEvidenceStats).size() > 0) {
-                                    numDiagnostic = clinicalEvidenceStats[0].numDiagnostic;
-                                    numPrognostic = clinicalEvidenceStats[0].numPrognostic;
-                                    numPrognostic = clinicalEvidenceStats[0].numPrognostic;
-                                }
-
-                                // Link out to CIVIC
-                                var variantCivicUrl = "https://civic.genome.wustl.edu/#/home";
-                                if ($(variantSummaries).size())
-                                    variantCivicUrl = variantSummaries[0].variantCivicUrl;
-
-                                civicHTML = "<div>";
-                                civicHTML += "<a href=\"" + variantCivicUrl + "\" target=\"_blank\">CIVIC</a> has ";
-                                civicHTML += numDiagnostic + " diagnostic, " + numPredictive + " predictive, and ";
-                                civicHTML += numPrognostic + " prognostic entries for this variant.";
-                                if ($(variantSummaries).size() > 0)
-                                    civicHTML += "Variant Summaries: <ul>";
-                                $(variantSummaries).each(function(key, info) {
-                                    civicHTML += "<li>" + info.summary + "</li>";
-                                });
-                                if ($(variantSummaries).size() > 0) {
-                                    civicHTML += "</ul>";
-                                    civicHTML += "More and updated information in <a href=\"" + variantCivicUrl + "\" target=\"_blank\">CIVIC</a>.";
-                                }
-                                civicHTML += "</div>";
-
-                                vars.civicAlt = civicHTML;
                             }
 
                             var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_annotation_template");
@@ -200,7 +156,6 @@
                             $(selector).find('span.oncokb').remove();
                             $(selector).find('span.mcg[alt=""]').empty();
                             $(selector).find('span.chang_hotspot[alt=""]').empty();
-                            $(selector).find('span.civic[alt=""]').empty();
                             $(selector).find('span.mutation-table-additional-protein-change[alt=""]').remove();
                             $(selector).find('span.mcg').one('mouseenter', function () {
                                 $(this).qtip({
@@ -219,16 +174,6 @@
                                     show: {event: "mouseover", ready: true},
                                     hide: {fixed: true, delay: 100, event: "mouseout"},
                                     style: {classes: 'qtip-light qtip-rounded qtip-wide'},
-                                    position: {my: 'top left', at: 'bottom center', viewport: $(window)}
-                                });
-                            });
-
-                            $(selector).find('span.civic').one('mouseenter', function () {
-                                $(this).qtip({
-                                    content: {attr: 'alt'},
-                                    show: {event: "mouseover", ready: true},
-                                    hide: {fixed: true, delay: 100, event: "mouseout"},
-                                    style: {classes: 'qtip-civic qtip-light qtip-rounded qtip-wide'},
                                     position: {my: 'top left', at: 'bottom center', viewport: $(window)}
                                 });
                             });
@@ -303,7 +248,6 @@
                             annotation: function (selector, helper) {
                                 $(selector).find('span.mcg[alt=""]').empty();
                                 $(selector).find('span.chang_hotspot[alt=""]').empty();
-                                $(selector).find('span.civic[alt=""]').empty();
                                 oncokbInstanceManager.getInstance(helper.gene).addEvents(selector, 'column');
                                 oncokbInstanceManager.getInstance(helper.gene).addEvents(selector, 'alteration');
 
@@ -327,16 +271,6 @@
                                         position: {my: 'top left', at: 'bottom center', viewport: $(window)}
                                     });
                                 });
-
-                                $(selector).find('span.civic').one('mouseenter', function () {
-                                    $(this).qtip({
-                                        content: {attr: 'alt'},
-                                        show: {event: "mouseover", ready: true},
-                                        hide: {fixed: true, delay: 100, event: "mouseout"},
-                                        style: {classes: 'qtip-civic qtip-light qtip-rounded qtip-wide'},
-                                        position: {my: 'top left', at: 'bottom center', viewport: $(window)}
-                                    });
-                                });
                             }
                         },
                         additionalData: {
@@ -353,7 +287,6 @@
                                             _mutation.proteinChange,
                                             _mutation.tumorType ? _mutation.tumorType : _mutation.cancerType, 
                                             _mutation.mutationType, _mutation.cosmicCount, _mutation.isHotspot,
-                                            _mutation.civicVariantSummaries, _mutation.civicClinicalEvidenceStats,
                                             _mutation.proteinPosStart, _mutation.proteinPosEnd);
                                     });
                                     oncokbInstance.getIndicator().done(function () {
