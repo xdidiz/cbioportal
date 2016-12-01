@@ -58,6 +58,10 @@
     <div style="padding-bottom:5px;margin-left:-3px;">
         <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select From Recurrently Mutated Genes (MutSig)</button>
         <button id="toggle_gistic_dialog_button" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
+        
+    
+    <div style="padding-bottom:5px;margin-left:-3px;">
+    	<button id="toggle_gsva_button" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets Showing Significant Enriched Expression Activity (GSVA)</button>
     </div>
 
     <script type="text/javascript">

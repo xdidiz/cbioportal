@@ -431,6 +431,9 @@ public class CancerStudy {
     public boolean hasGisticData() throws DaoException {
         return DaoGistic.hasGistic(this);
     }
+    public boolean hasGsvaData() throws DaoException {
+        return DaoGsva.hasGsva(this);
+    }
     
     public boolean hasSurvivalData() throws DaoException {
         Set<String> attrs = DaoClinicalData.getDistinctParameters(studyID);

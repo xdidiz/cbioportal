@@ -573,10 +573,12 @@ function toggleThresholdPanel(profileClicked, profile, threshold_div) {
 // toggle:
 //      gistic button
 //      mutsig button
+//		gsva button
 // according to the cancer_study
 function toggleByCancerStudy(cancer_study) {
     var mutsig = $('#toggle_mutsig_dialog');
     var gistic = $('#toggle_gistic_dialog_button');
+    var gsva = $('#toggle_gsva_button')
     if (cancer_study.has_mutsig_data) {
         mutsig.show();
     } else {
@@ -586,6 +588,11 @@ function toggleByCancerStudy(cancer_study) {
         gistic.show();
     } else {
         gistic.hide();
+    }
+    if (cancer_study.has_gsva_data) {
+    	gsva.show();
+    } else {
+    	gsva.hide();
     }
 }
 
