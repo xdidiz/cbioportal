@@ -47,6 +47,7 @@ class MetaFileTypes(object):
     CASE_LIST = 'case_list'
     MUTATION_SIGNIFICANCE = 'meta_mutsig'
     GSVA_SCORES = 'meta_gsva_scores'
+    GSVA_PVALUES = 'meta_gsva_pvalues'
 
 # fields allowed in each meta file type, maps to True if required
 META_FIELD_MAP = {
@@ -204,6 +205,16 @@ META_FIELD_MAP = {
         'profile_name': True,
         'profile_description': True,
         'data_filename': True
+     },
+    MetaFileTypes.GSVA_PVALUES: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'source_stable_id': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True
      }
 }
 
@@ -222,6 +233,7 @@ IMPORTER_CLASSNAME_BY_META_TYPE = {
     MetaFileTypes.FUSION: "org.mskcc.cbio.portal.scripts.ImportProfileData",
     MetaFileTypes.RPPA: "org.mskcc.cbio.portal.scripts.ImportProfileData",
     MetaFileTypes.GSVA_SCORES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+    MetaFileTypes.GSVA_PVALUES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
     MetaFileTypes.GISTIC_GENES: "org.mskcc.cbio.portal.scripts.ImportGisticData",
     MetaFileTypes.TIMELINE: "org.mskcc.cbio.portal.scripts.ImportTimelineData",
     MetaFileTypes.CASE_LIST: IMPORT_CASE_LIST_CLASS,
@@ -454,7 +466,8 @@ def get_meta_file_type(metaDictionary, logger, filename):
         ("PROTEIN_LEVEL", "LOG2-VALUE"): MetaFileTypes.RPPA,
         ("PROTEIN_LEVEL", "Z-SCORE"): MetaFileTypes.RPPA,
         # gsva
-        ("GSVA_SCORES", "Z-SCORE"): MetaFileTypes.GSVA_SCORES,
+        ("GSVA_SCORES", "GSVA_SCORE"): MetaFileTypes.GSVA_SCORES,
+        ("GSVA_PVALUES", "P-VALUE"): MetaFileTypes.GSVA_PVALUES,        
         # cna
         ("COPY_NUMBER_ALTERATION", "DISCRETE"): MetaFileTypes.CNA,
         ("COPY_NUMBER_ALTERATION", "CONTINUOUS"): MetaFileTypes.CNA_CONTINUOUS, 

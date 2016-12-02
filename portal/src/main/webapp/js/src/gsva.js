@@ -21,7 +21,7 @@
 
 
 // variable for the return DOM object returned by dataTable library
-var DATATABLE_FORMATTED = -1;
+//var DATATABLE_FORMATTED = -1;
 
 // what is the previous cancer study that has been selected?
 // this way we don't have to repeat queries
@@ -59,18 +59,18 @@ var initGsvaDialogue = function() {
         $('#gsva_dialog').dialog('close');
 
         // clear all checks
-        $('.Gsva :checkbox').attr('checked', false);
+//        $('.Gsva :checkbox').attr('checked', false);
     });
 
     // bind UI for gsva table -> gene list
     $('#select_gsva').click(updateGeneList);
 
     // bind UI for gene list -> gsva table
-    $('#gene_list').change( function() {
-        if ($('gsva_dialog').dialog('isOpen')) {
-            updateGsvaTable();
-        }
-    });
+//    $('#gene_list').change( function() {
+//        if ($('gsva_dialog').dialog('isOpen')) {
+//            updateGsvaTable();
+//        }
+//    });
 
     listenCancerStudy();
 };
@@ -144,16 +144,16 @@ var promptGsvaTable = function() {
     var data = {'selected_cancer_type': cancerStudyId };
 
     // reset the gsva table if it has already been formatted
-    if (DATATABLE_FORMATTED !== -1) {
-
-        // remove dataTables formatting
-        DATATABLE_FORMATTED.fnDestroy();
-
-        // delete all elements
-        $('.Gsva tbody').empty();
-    }
-        $('#gsva_dialog').children().hide();
-        $('#gsva_dialog #loader-img').show();
+//    if (DATATABLE_FORMATTED !== -1) {
+//
+//        // remove dataTables formatting
+//        DATATABLE_FORMATTED.fnDestroy();
+//
+//        // delete all elements
+//        $('.Gsva tbody').empty();
+//    }
+//        $('#gsva_dialog').children().hide();
+//        $('#gsva_dialog #loader-img').show();
 
 //    // do AJAX
 //    $.get('Gsva.json', data, function(gsvas) {
