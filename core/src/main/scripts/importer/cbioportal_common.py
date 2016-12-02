@@ -466,7 +466,7 @@ def get_meta_file_type(metaDictionary, logger, filename):
         ("PROTEIN_LEVEL", "LOG2-VALUE"): MetaFileTypes.RPPA,
         ("PROTEIN_LEVEL", "Z-SCORE"): MetaFileTypes.RPPA,
         # gsva
-        ("GSVA_SCORES", "GSVA_SCORE"): MetaFileTypes.GSVA_SCORES,
+        ("GSVA_SCORES", "GSVA-SCORE"): MetaFileTypes.GSVA_SCORES,
         ("GSVA_PVALUES", "P-VALUE"): MetaFileTypes.GSVA_PVALUES,        
         # cna
         ("COPY_NUMBER_ALTERATION", "DISCRETE"): MetaFileTypes.CNA,
