@@ -54,7 +54,7 @@ public class GeneticDataControllerTest {
     @Test
     public void  getAllGenesDefaultProjection() throws Exception {
 
-    	List<GeneticData> geneticDataList = new ArrayList<GeneticData>();//TODO createGeneList();
+    	List<GeneticData> geneticDataList = createGeneticDataList();
 
         Mockito.when(geneticDataService.getAllGeneticDataInGeneticProfile(Mockito.anyString(), 
         		Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(geneticDataList);
@@ -83,8 +83,14 @@ public class GeneticDataControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].cytoband").value(CYTOBAND_2))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].length").value(LENGTH_2))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].chromosome").value(CHROMOSOME_2));*/
-
     }
 
+	private List<GeneticData> createGeneticDataList() {
+		// TODO use something similar to GeneticDataServiceImplTest.getSimpleFlatGeneticDataItem...
+		return null;
+	}
+
+    
+    
 
 }
