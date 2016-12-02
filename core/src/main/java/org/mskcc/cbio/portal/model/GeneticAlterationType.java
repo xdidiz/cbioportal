@@ -82,6 +82,8 @@ public class GeneticAlterationType {
             return COPY_NUMBER_ALTERATION;
         } else if (type.equals(GSVA_SCORES.toString())) {
             return GSVA_SCORES;
+        } else if (type.equals(GSVA_PVALUES.toString())) {
+        	return GSVA_PVALUES;
         } else if (type.equals(MRNA_EXPRESSION.toString())) {
             return MRNA_EXPRESSION;
         } else if (type.equals(MRNA_EXPRESSION_NORMALS.toString())) {
@@ -135,6 +137,12 @@ public class GeneticAlterationType {
     public static final GeneticAlterationType GSVA_SCORES
             = new GeneticAlterationType("GSVA_SCORES");
 
+    /**
+     * GSVA P-values alteration type.
+     */
+    public static final GeneticAlterationType GSVA_PVALUES
+            = new GeneticAlterationType("GSVA_PVALUES");
+    
     /**
      * microRNA expression alteration type.
      */
