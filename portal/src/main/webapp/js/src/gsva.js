@@ -1,6 +1,3 @@
-// variable for the return DOM object returned by dataTable library
-var DATATABLE_FORMATTED = -1;
-
 // what is the previous cancer study that has been selected?
 // this way we don't have to repeat queries
 var CANCER_STUDY_SELECTED = -1;
