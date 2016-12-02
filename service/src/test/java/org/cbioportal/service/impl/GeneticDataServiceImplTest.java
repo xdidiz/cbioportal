@@ -122,7 +122,7 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
     	//SAMPLE_2:
     	//   GENE_1 value: 34.99
     	//   GENE_2 value: 15.09
-    	List<GeneticData> expectedGeneticDataList = new ArrayList<>();
+    	List<GeneticData> expectedGeneticDataList = new ArrayList<GeneticData>();
         expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_1", "GENE_1", "0.2"));
         expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_2", "GENE_1", "34.99"));
         expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_1", "GENE_2", "0.89"));

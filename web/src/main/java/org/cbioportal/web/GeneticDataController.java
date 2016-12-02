@@ -10,6 +10,7 @@ import org.cbioportal.web.parameter.Projection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,7 +54,7 @@ public class GeneticDataController {
         throw new UnsupportedOperationException();
     }
 
-    @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/genetic-data", method = RequestMethod.GET)
+    @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/genetic-data", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all genetic data in a genetic profile")
     public ResponseEntity<List<GeneticData>> getAllGeneticDataInGeneticProfile(
     		@ApiParam(required = true, value = "Genetic profile ID, e.g. acc_tcga_mrna")
