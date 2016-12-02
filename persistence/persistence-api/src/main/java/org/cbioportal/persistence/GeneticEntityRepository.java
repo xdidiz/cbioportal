@@ -32,11 +32,11 @@
 package org.cbioportal.persistence;
 
 import org.cbioportal.model.GeneticEntity;
-import org.cbioportal.model.GeneticEntity.EntityTypes;
+import org.cbioportal.model.GeneticEntity.EntityType;
 
 public interface GeneticEntityRepository {
 
-	GeneticEntity getGeneticEntity(String entityStableId, EntityTypes gene);
+	GeneticEntity getGeneticEntity(String entityStableId, EntityType gene);
 	
-	GeneticEntity getGeneticEntity(Integer entityId, EntityTypes gene);
+	GeneticEntity getGeneticEntity(Integer entityId, EntityType gene);
 }

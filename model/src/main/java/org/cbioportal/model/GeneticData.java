@@ -7,6 +7,7 @@ public class GeneticData implements Serializable {
     private Integer geneticProfileId;
     private String geneticProfileStableId;
     private Integer geneticEntityId;
+    private String entityStableId;
     private Integer sampleId;
     private String sampleStableId;
     private String value;
@@ -37,6 +38,14 @@ public class GeneticData implements Serializable {
     public void setGeneticEntityId(Integer geneticEntityId) {
         this.geneticEntityId = geneticEntityId;
     }
+    
+    public String getGeneticEntityStableId() {
+		return entityStableId;
+	}
+    
+	public void setGeneticEntityStableId(String entityStableId) {
+		this.entityStableId = entityStableId;
+	}
     
     public Integer getSampleId() {
         return sampleId;
@@ -85,4 +94,30 @@ public class GeneticData implements Serializable {
     public void setSample(Sample sample) {
         this.sample = sample;
     }
+
+    /**
+     * Compare based on the fields that should always be filled
+     */
+	@Override
+	public boolean equals(Object o){
+	    if (o == null) return false;
+	    if (o == this) return true;
+	    if (!(o instanceof GeneticData))return false;
+	    GeneticData other = (GeneticData)o;
+	    
+		boolean result = true;
+		result = this.getGeneticEntityId().equals(other.getGeneticEntityId()) && result;
+		result = this.getGeneticEntityStableId().equals(other.getGeneticEntityStableId()) && result;
+		
+		result = this.getGeneticProfileId().equals(other.getGeneticProfileId()) && result;
+		result = this.getGeneticProfileStableId().equals(other.getGeneticProfileStableId()) && result;
+		
+		result = this.getSampleId().equals(other.getSampleId()) && result;
+		result = this.getSampleStableId().equals(other.getSampleStableId()) && result;
+		
+		result = this.getValue().equals(other.getValue()) && result;
+		
+		return result;
+	}
+	
 }

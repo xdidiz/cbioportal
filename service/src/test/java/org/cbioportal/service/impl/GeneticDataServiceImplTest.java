@@ -1,16 +1,23 @@
 package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.model.GeneticDataSamples;
 import org.cbioportal.model.GeneticDataValues;
 import org.cbioportal.model.GeneticEntity;
 import org.cbioportal.model.GeneticProfile;
+import org.cbioportal.model.Sample;
+import org.cbioportal.model.GeneticProfile.GeneticAlterationType;
 import org.cbioportal.persistence.GeneticDataRepository;
+import org.cbioportal.persistence.GeneticEntityRepository;
 import org.cbioportal.persistence.GeneticProfileRepository;
+import org.cbioportal.persistence.SampleRepository;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -32,27 +39,60 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
     
     @Mock
     private GeneticProfileRepository geneticProfileRepository;
+    
+    @Mock
+    private SampleRepository sampleRepository;
 
+    //test data
+    private String geneticProfileStableId = "acc_tcga_mrna";
+    private String studyId = "acc_tcga";
+
+	/**
+	 * This is executed n times, for each of the n test methods below:
+	 * @throws DaoException
+	 */
+    @Before 
+    public void setUp() {
+    	//genes in this test
+    	Gene gene1 = new Gene();
+    	gene1.setEntityId(1);
+    	gene1.setEntityStableId("GENE_1");
+    	Mockito.when(geneticEntityRepository.getGeneticEntity("GENE_1", GeneticEntity.EntityType.GENE)).thenReturn(gene1);
+    	Mockito.when(geneticEntityRepository.getGeneticEntity(1, GeneticEntity.EntityType.GENE)).thenReturn(gene1);
+    	Gene gene2 = new Gene();
+    	gene2.setEntityId(2);
+    	gene2.setEntityStableId("GENE_2");
+    	Mockito.when(geneticEntityRepository.getGeneticEntity("GENE_2", GeneticEntity.EntityType.GENE)).thenReturn(gene2);
+    	Mockito.when(geneticEntityRepository.getGeneticEntity(2, GeneticEntity.EntityType.GENE)).thenReturn(gene2);
+    	
+        //stub for genetic profile
+        GeneticProfile dummyGeneticProfile = new GeneticProfile();
+        dummyGeneticProfile.setStableId(geneticProfileStableId);
+        dummyGeneticProfile.setGeneticProfileId(1);
+        dummyGeneticProfile.setCancerStudyIdentifier(studyId);
+        dummyGeneticProfile.setGeneticAlterationType(GeneticAlterationType.MRNA_EXPRESSION);
+        Mockito.when(geneticProfileRepository.getGeneticProfile(geneticProfileStableId)).thenReturn(dummyGeneticProfile);
+        
+        //stub for samples
+        Sample sample1 = new Sample();
+    	sample1.setInternalId(1);
+    	sample1.setStableId("SAMPLE_1");
+    	Mockito.when(sampleRepository.getSampleInStudy(studyId, "SAMPLE_1")).thenReturn(sample1);
+    	Sample sample2 = new Sample();
+    	sample2.setInternalId(2);
+    	sample2.setStableId("SAMPLE_2");
+    	Mockito.when(sampleRepository.getSampleInStudy(studyId, "SAMPLE_2")).thenReturn(sample2);
+    	Mockito.when(sampleRepository.fetchSamplesInSameStudyByInternalIds(studyId, Arrays.asList(1,2), null)).thenReturn(
+    			Arrays.asList(sample1, sample2));
+    	
+	}
 
     @Test
     public void getAllGeneticDataInGeneticProfile() throws Exception {
-
-        String geneticProfileId = "acc_tcga_mrna";
-        //stub this
-        GeneticProfile dummyGeneticProfile = new GeneticProfile();
-        dummyGeneticProfile.setStableId(geneticProfileId);
-        dummyGeneticProfile.setGeneticProfileId(1);
-        Mockito.when(geneticProfileRepository.getGeneticProfile(geneticProfileId)).thenReturn(dummyGeneticProfile);
-        //call
-        GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
-
-        //stub the samples to be returned by repository method: 
-        GeneticDataSamples samples = new GeneticDataSamples();
-        samples.setGeneticProfileId(geneticProfile.getGeneticProfileId());
-        samples.setOrderedSamplesList("SAMPLE_1,SAMPLE_2");
-        Mockito.when(geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileId, PAGE_SIZE, PAGE_NUMBER)).thenReturn(samples);
+    	
+        GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileStableId);
         
-        //stub the genet list and values to be returned by repository method:
+        //stub the genet list and values to be returned by repository methods that will be used by the method being tested here:
         List<GeneticDataValues> geneListAndValues = new ArrayList<GeneticDataValues>();
         geneListAndValues.add(new GeneticDataValues());
         geneListAndValues.get(0).setGeneticEntityId(1);
@@ -62,30 +102,39 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         geneListAndValues.get(1).setGeneticEntityId(2);
         geneListAndValues.get(1).setGeneticProfileId(geneticProfile.getGeneticProfileId());
         geneListAndValues.get(1).setOrderedValuesList("0.89,15.09");
-        Mockito.when(geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, PAGE_SIZE, PAGE_NUMBER)).thenReturn(geneListAndValues);
+        Mockito.when(geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileStableId, null, PAGE_SIZE, PAGE_NUMBER)).thenReturn(geneListAndValues);
         
-    	//call the service getAllGeneticDataInGeneticProfile and check if it correctly combines GeneticDataSamples and GeneticDataValues
+        //stub the samples to be returned by repository method: 
+        GeneticDataSamples samples = new GeneticDataSamples();
+        samples.setGeneticProfileId(geneticProfile.getGeneticProfileId());
+        samples.setOrderedSamplesList("1,2"); //these are ids for SAMPLE_1,SAMPLE_2
+        Mockito.when(geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileStableId, PAGE_SIZE, PAGE_NUMBER)).thenReturn(samples);
+        
+    	//call the method to be tested: getAllGeneticDataInGeneticProfile 
+        //and check if it correctly combines GeneticDataSamples and GeneticDataValues
         //into the corresponding list of GeneticData elements:
-    	List<GeneticData> result = geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileId,  PROJECTION,  PAGE_SIZE, PAGE_NUMBER);
+    	List<GeneticData> result = geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileStableId,  PROJECTION,  PAGE_SIZE, PAGE_NUMBER);
     	
     	//what we expect: 2 samples x 2 genetic entities = 4 GeneticData items:
     	//SAMPLE_1:
-    	//   entity id 1 value: 0.2
-    	//   entity id 2 value: 0.89
+    	//   GENE_1 value: 0.2
+    	//   GENE_2 value: 0.89
     	//SAMPLE_2:
-    	//   entity id 1 value: 34.99
-    	//   entity id 2 value: 15.09
-        List<GeneticData> expectedGeneticDataList = new ArrayList<>();
-        expectedGeneticDataList.add(getGeneticDataItem());
+    	//   GENE_1 value: 34.99
+    	//   GENE_2 value: 15.09
+    	List<GeneticData> expectedGeneticDataList = new ArrayList<>();
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_1", "GENE_1", "0.2"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_2", "GENE_1", "34.99"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_1", "GENE_2", "0.89"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_2", "GENE_2", "15.09"));
 
         Assert.assertEquals(expectedGeneticDataList, result);
     }
 
-    private GeneticData getSimpleFlatGeneticDataItem(String entityStableId, String geneticProfileStableId){
+    private GeneticData getSimpleFlatGeneticDataItem(String sampleStableId, String entityStableId, String value){
     	GeneticData item = new GeneticData();
-    	
-    	GeneticEntity geneticEntity = geneticEntityRepository.getGeneticEntity(entityStableId);
-    	// geneticEntity.setEntityType(entityType); not used for now...or we would have to add it to GeneticDataValues and GeneticDataSamples
+
+    	GeneticEntity geneticEntity = geneticEntityRepository.getGeneticEntity(entityStableId, GeneticEntity.EntityType.GENE);
     	//item.setGeneticEntity(geneticEntity);
     	item.setGeneticEntityId(geneticEntity.getEntityId());
     	item.setGeneticEntityStableId(entityStableId);
@@ -95,7 +144,12 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
     	item.setGeneticProfileId(geneticProfile.getGeneticProfileId());
     	item.setGeneticProfileStableId(geneticProfile.getStableId());
     	
+    	Sample sample = sampleRepository.getSampleInStudy(studyId, sampleStableId); //TODO stub this one
     	//item.setSample(sample);
+    	item.setSampleId(sample.getInternalId());
+    	item.setSampleStableId(sampleStableId);
+    	
+    	item.setValue(value);
     	
     	return item;
     }

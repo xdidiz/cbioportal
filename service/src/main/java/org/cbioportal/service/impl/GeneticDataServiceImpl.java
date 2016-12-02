@@ -24,13 +24,23 @@
 package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.model.GeneticDataSamples;
 import org.cbioportal.model.GeneticDataValues;
+import org.cbioportal.model.GeneticEntity;
+import org.cbioportal.model.GeneticProfile;
+import org.cbioportal.model.GeneticProfile.GeneticAlterationType;
+import org.cbioportal.model.Sample;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.GeneticDataRepository;
+import org.cbioportal.persistence.GeneticEntityRepository;
+import org.cbioportal.persistence.GeneticProfileRepository;
+import org.cbioportal.persistence.SampleRepository;
 import org.cbioportal.service.GeneticDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,30 +50,108 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 
     @Autowired
     private GeneticDataRepository geneticDataRepository;
-
+    
+    @Autowired
+    private GeneticProfileRepository geneticProfileRepository;
+    
+    @Autowired
+    private GeneticEntityRepository geneticEntityRepository;
+    
+    @Autowired
+    private SampleRepository sampleRepository;
+    
+    
     @Override
     public List<GeneticData> getAllGeneticDataInGeneticProfile(String geneticProfileId, String projectionName, Integer pageSize,
 			Integer pageNumber) {
     	//get samples:
     	GeneticDataSamples samples = geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileId, pageSize, pageNumber);
     	//get list of genes and respective sample values:
-    	List<GeneticDataValues> geneListAndValues =  geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, pageSize, pageNumber);
+    	List<GeneticDataValues> geneticItemListAndValues =  geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, pageSize, pageNumber);
+    	
+    	//get genetic profile info:
+    	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
     	
     	//iterate over geneListAndValues and samples and match items together, 
     	//producing the final list of GeneticData items:
     	List<GeneticData> result = new ArrayList<GeneticData>();
-    	//TODO - something similar to  https://github.com/cBioPortal/cbioportal/blob/master/business/src/main/java/org/mskcc/cbio/portal/service/ApiService.java#L492
-    	//PA write a unit test
-    	
-    	
-    	
-    	//push -f
+    	//merge the values and samples into a list of GeneticData items:
+    	String[] sampleInternalIdsList = samples.getOrderedSamplesList().split(",");
+    	Map<Integer,Sample> sampleIdToStableIdMap = getSampleStableIdsList(geneticProfile, sampleInternalIdsList);
+    	for (GeneticDataValues geneDataValues : geneticItemListAndValues) {
+    		String[] values = geneDataValues.getOrderedValuesList().split(",");
+    		for (int i = 0; i < values.length; i++) {
+    			String value = values[i];
+    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
+    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
+    					geneDataValues.getGeneticEntityId(), value);
+    			result.add(geneticDataItem);
+    		}
+    	}
         return result;
     }
     
-    @Override
+    private Map<Integer,Sample> getSampleStableIdsList(GeneticProfile geneticProfile, String[] sampleInternalIdsList) {
+    	
+    	List<Integer> sampleInternalIds = new ArrayList<Integer>();
+    	for (String internalId : sampleInternalIdsList) {
+    		sampleInternalIds.add(Integer.parseInt(internalId));
+    	}
+    	
+    	List<Sample> samples = sampleRepository.fetchSamplesInSameStudyByInternalIds(geneticProfile.getCancerStudyIdentifier(), sampleInternalIds, null);
+    	Map<Integer,Sample> sampleIdToStableIdMap = new HashMap<Integer,Sample>();
+    	for (Sample sample : samples) {
+    		sampleIdToStableIdMap.put(sample.getInternalId(), sample);
+    	}
+    	return sampleIdToStableIdMap;    
+	}
+
+	@Override
     public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
         return geneticDataRepository.getMetaGeneticDataInGeneticProfile(geneticProfileId);
     }
 
+    
+    
+    private GeneticData getSimpleFlatGeneticDataItem(GeneticProfile geneticProfile, Sample sample, Integer entityId, String value){
+    	GeneticData item = new GeneticData();
+    	
+    	GeneticEntity geneticEntity;
+    	
+    	List<GeneticAlterationType> geneBasedTypes = Arrays.asList(GeneticAlterationType.MICRO_RNA_EXPRESSION,
+    			GeneticAlterationType.MRNA_EXPRESSION,
+    			GeneticAlterationType.MRNA_EXPRESSION_NORMALS,
+    			GeneticAlterationType.RNA_EXPRESSION,
+    			GeneticAlterationType.METHYLATION,
+    			GeneticAlterationType.METHYLATION_BINARY,
+    			GeneticAlterationType.PHOSPHORYLATION, //TODO - this will be "protein based" at some point, not gene based
+    			GeneticAlterationType.PROTEIN_LEVEL, //TODO - this will be "protein based" at some point, not gene based
+    			GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL, //TODO - remove? I think this is not used anymore...
+    			GeneticAlterationType.PROTEIN_ARRAY_PHOSPHORYLATION); //TODO - remove? I think this is not used anymore...
+    	
+    	if (geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) { 
+    		geneticEntity = geneticEntityRepository.getGeneticEntity(entityId, GeneticEntity.EntityType.GENE);
+    	}
+    	else {
+    		throw new UnsupportedOperationException("the profile type '" + geneticProfile.getGeneticAlterationType() + 
+    				"' is not(yet) supported via this api...");
+    	}
+    	
+    	//item.setGeneticEntity(geneticEntity);
+    	item.setGeneticEntityId(entityId);
+    	item.setGeneticEntityStableId(geneticEntity.getEntityStableId());
+    	
+    	//item.setGeneticProfile(geneticProfile);
+    	item.setGeneticProfileId(geneticProfile.getGeneticProfileId());
+    	item.setGeneticProfileStableId(geneticProfile.getStableId());
+    	
+    	//item.setSample(sample);
+    	item.setSampleId(sample.getInternalId());
+    	item.setSampleStableId(sample.getStableId());
+    	
+    	item.setValue(value);
+    	
+    	return item;
+    }
+    
 }

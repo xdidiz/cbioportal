@@ -23,48 +23,39 @@
 
 package org.cbioportal.persistence.mybatis;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.cbioportal.model.GeneticDataSamples;
-import org.cbioportal.model.GeneticDataValues;
-import org.cbioportal.model.meta.BaseMeta;
-import org.cbioportal.persistence.GeneticDataRepository;
-import org.cbioportal.persistence.mybatis.util.OffsetCalculator;
+import org.cbioportal.model.GeneticEntity;
+import org.cbioportal.model.GeneticEntity.EntityType;
+import org.cbioportal.persistence.GeneticEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class GeneticDataMyBatisRepository implements GeneticDataRepository {
+public class GeneticEntityMyBatisRepository implements GeneticEntityRepository {
 
     @Autowired
-    private GeneticDataMapper geneticDataMapper;
-    @Autowired
-    private OffsetCalculator offsetCalculator;
+    private GeneMapper geneMapper;
 
     @Override
-    public List<GeneticDataValues> getGeneticDataValuesInGeneticProfile(String geneticProfileId, List<Integer> geneticEntityIds, Integer pageSize,
-			Integer pageNumber) {
-    	//get values csv:
-        return geneticDataMapper.getGeneticDataValues(Arrays.asList(geneticProfileId), geneticEntityIds, pageSize, 
-                offsetCalculator.calculate(pageSize, pageNumber));
+    public GeneticEntity getGeneticEntity(String entityStableId, EntityType type) {
+    	if (type.equals(EntityType.GENE)) {
+    		//TODO - use a global cache that is initialized on startup with all gene x entity id mappings
+    		return geneMapper.getGeneByHugoGeneSymbol(entityStableId, null); 
+    	}
+    	else {
+    		throw new UnsupportedOperationException("not implemented yet for other entities");
+    	}
+    		
     }
-
+	
     @Override
-    public GeneticDataSamples getGeneticDataSamplesInGeneticProfile(String geneticProfileId, Integer pageSize,
-			Integer pageNumber) {
-    	//get values csv:
-        List<GeneticDataSamples> result = geneticDataMapper.getGeneticDataSamples(Arrays.asList(geneticProfileId), pageSize, 
-                offsetCalculator.calculate(pageSize, pageNumber));
-        if (result != null) {
-        	return result.get(0);
-        }
-        return null;
-    }
+    public GeneticEntity getGeneticEntity(Integer entityId, EntityType type) {
+    	if (type.equals(EntityType.GENE)) {
+    		return geneMapper.getGeneByGeneticEntityId(entityId, null); 
+    	}
+    	else {
+    		throw new UnsupportedOperationException("not implemented yet for other entities");
+    	}
+    }	
+	
     
-    @Override
-    public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
-    
-    	return geneticDataMapper.getMetaGeneticData(Arrays.asList(geneticProfileId));
-    }
 }

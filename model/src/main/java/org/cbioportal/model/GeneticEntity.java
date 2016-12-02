@@ -27,22 +27,38 @@ import java.io.Serializable;
 
 public class GeneticEntity implements Serializable  {
 
+	public static enum EntityType
+    {
+        GENE,
+        GENE_SET,
+        PHOSPHOPROTEIN;
+    }
+	
 	private Integer entityId;
-    private String entityType;
+	private String entityStableId;
+    private EntityType entityType;
 
     public Integer getEntityId() {
         return entityId;
     }
 
-    public void setEntityType(Integer entityId) {
+    public void setEntityId(Integer entityId) {
         this.entityId = entityId;
     }
     
-    public String getEntityType() {
+    public String getEntityStableId() {
+        return entityStableId;
+    }
+
+    public void setEntityStableId(String entityStableId) {
+        this.entityStableId = entityStableId;
+    }
+    
+    public EntityType getEntityType() {
         return entityType;
     }
 
-    public void setEntityType(String entityType) {
+    public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
     }
     

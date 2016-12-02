@@ -55,6 +55,15 @@
         FROM gene
         WHERE gene.HUGO_GENE_SYMBOL = #{hugoGeneSymbol}
     </select>
+    
+    <select id="getGeneByGeneticEntityId" resultType="org.cbioportal.model.Gene">
+        SELECT
+        <include refid="select">
+            <property name="prefix" value=""/>
+        </include>
+        FROM gene
+        WHERE gene.GENETIC_ENTITY_ID = #{geneticEntityId}
+    </select>
 
     <select id="getAliasesOfGeneByEntrezGeneId" resultType="string">
         SELECT

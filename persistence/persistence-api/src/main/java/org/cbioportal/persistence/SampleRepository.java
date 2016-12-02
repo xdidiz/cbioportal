@@ -13,13 +13,15 @@ public interface SampleRepository {
     BaseMeta getMetaSamplesInStudy(String studyId);
 
     Sample getSampleInStudy(String studyId, String sampleId);
-
+    
     List<Sample> getAllSamplesOfPatientInStudy(String studyId, String patientId, String projection, Integer pageSize,
                                                Integer pageNumber, String sortBy, String direction);
 
     BaseMeta getMetaSamplesOfPatientInStudy(String studyId, String patientId);
 
     List<Sample> fetchSamples(List<String> studyIds, List<String> sampleIds, String projection);
-
+    
     BaseMeta fetchMetaSamples(List<String> studyIds, List<String> sampleIds);
+
+	List<Sample> fetchSamplesInSameStudyByInternalIds(String studyId, List<Integer> sampleIds, String projection);
 }

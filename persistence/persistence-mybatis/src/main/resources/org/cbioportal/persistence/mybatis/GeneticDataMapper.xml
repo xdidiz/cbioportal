@@ -15,7 +15,7 @@
 
     <sql id="where">
         <where>
-           GENETIC_PROFILE_ID IN (
+           genetic_profile.STABLE_ID IN (
 	           <foreach index="i" collection="geneticProfileIds" separator=",">
 	           	#{geneticProfileIds[${i}]}
 	           </foreach>
@@ -28,6 +28,7 @@
           genetic_alteration.GENETIC_ENTITY_ID as "geneticEntityId",
           genetic_alteration.VALUES AS "orderedValuesList"
         FROM genetic_alteration
+        INNER JOIN genetic_profile ON genetic_profile.GENETIC_PROFILE_ID = genetic_alteration.GENETIC_PROFILE_ID
         <include refid="where"/>
         <if test="geneticEntityIds != null">
            AND genetic_alteration.GENETIC_ENTITY_ID IN (
@@ -48,6 +49,7 @@
         SELECT genetic_profile_samples.GENETIC_PROFILE_ID as "geneticProfileId", 
           genetic_profile_samples.ORDERED_SAMPLE_LIST as "orderedSamplesList"
         FROM genetic_profile_samples
+        INNER JOIN genetic_profile ON genetic_profile.GENETIC_PROFILE_ID = genetic_profile_samples.GENETIC_PROFILE_ID
         <include refid="where"/>
         <if test="limit != null and limit != 0">
 	    <!-- add specific ordering, in case limit and offset are used -->

@@ -36,8 +36,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class GeneticDataMyBatisRepository implements GeneticDataRepository {
-
-    @Autowired
+	@Autowired
     private GeneticDataMapper geneticDataMapper;
     @Autowired
     private OffsetCalculator offsetCalculator;
@@ -61,10 +60,12 @@ public class GeneticDataMyBatisRepository implements GeneticDataRepository {
         }
         return null;
     }
+
+	@Override
+	public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
-    @Override
-    public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
-    
-    	return geneticDataMapper.getMetaGeneticData(Arrays.asList(geneticProfileId));
-    }
+
 }
