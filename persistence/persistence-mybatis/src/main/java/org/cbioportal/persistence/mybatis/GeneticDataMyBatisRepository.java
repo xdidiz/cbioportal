@@ -55,7 +55,7 @@ public class GeneticDataMyBatisRepository implements GeneticDataRepository {
     	//get values csv:
         List<GeneticDataSamples> result = geneticDataMapper.getGeneticDataSamples(Arrays.asList(geneticProfileId), pageSize, 
                 offsetCalculator.calculate(pageSize, pageNumber));
-        if (result != null) {
+        if (result != null && result.size() > 0) {
         	return result.get(0);
         }
         return null;
