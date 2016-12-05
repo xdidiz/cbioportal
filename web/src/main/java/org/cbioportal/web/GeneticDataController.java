@@ -2,8 +2,10 @@ package org.cbioportal.web;
 
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.service.GeneticDataService;
+import org.cbioportal.web.exception.PageSizeTooBigException;
 import org.cbioportal.web.parameter.HeaderKeyConstants;
 import org.cbioportal.web.parameter.PagingConstants;
 import org.cbioportal.web.parameter.Projection;
@@ -57,12 +59,12 @@ public class GeneticDataController {
     @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/genetic-data", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all genetic data in a genetic profile")
     public ResponseEntity<List<GeneticData>> getAllGeneticDataInGeneticProfile(
-    		@ApiParam(required = true, value = "Genetic profile ID, e.g. acc_tcga_mrna")
+    		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_mrna")
     		@PathVariable String geneticProfileId,
     		@ApiParam("Level of detail of the response, e.g. META, SUMMARY or DETAILED")
     		@RequestParam(defaultValue = "SUMMARY") Projection projection,
     		@ApiParam("Page size of the result list")
-	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,
+	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,  //TODO implement paging
 	        @ApiParam("Page number of the result list")
 	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_NUMBER) Integer pageNumber) {
 
@@ -76,6 +78,28 @@ public class GeneticDataController {
             		geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileId, projection.name(), pageSize, pageNumber), HttpStatus.OK);
         }
     }
+    
+    
+    @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Fetch genetic data items by profile Id, gene ids and sample ids")
+    public ResponseEntity<List<GeneticData>> fetchGeneticDataItems(
+    		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_mrna")
+    		@PathVariable String geneticProfileId,
+            @ApiParam(required = true, value = "The list of identifiers for the genetic entities of interest. "
+            		+ "If these are genes: list of Entrez Gene IDs and/or Hugo Gene Symbols. If these are gene sets: list of gene set identifiers")
+            @RequestBody List<String> geneticEntityIds,
+            @ApiParam(required = false, value = "Full list of samples or patients to query")
+            @RequestBody List<String> caseIds, 
+            @ApiParam(required = false, value = "Identifier of pre-defined case list with samples to query ")
+            @RequestBody String caseListId) throws PageSizeTooBigException {
+
+        //TODO 
+    	return null;
+    }
+    
+    
+    
 
     @RequestMapping(value = "/genetic-data/query", method = RequestMethod.POST)
     @ApiOperation("Query genetic data by example")
