@@ -10,8 +10,8 @@ import org.cbioportal.model.GeneticDataSamples;
 import org.cbioportal.model.GeneticDataValues;
 import org.cbioportal.model.GeneticEntity;
 import org.cbioportal.model.GeneticProfile;
-import org.cbioportal.model.Sample;
 import org.cbioportal.model.GeneticProfile.GeneticAlterationType;
+import org.cbioportal.model.Sample;
 import org.cbioportal.persistence.GeneticDataRepository;
 import org.cbioportal.persistence.GeneticEntityRepository;
 import org.cbioportal.persistence.GeneticProfileRepository;
@@ -135,17 +135,20 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
     	GeneticData item = new GeneticData();
 
     	GeneticEntity geneticEntity = geneticEntityRepository.getGeneticEntity(entityStableId, GeneticEntity.EntityType.GENE);
-    	//item.setGeneticEntity(geneticEntity);
+    	Gene entity = new Gene();
+    	entity.setEntityId(geneticEntity.getEntityId());
+		entity.setEntityStableId(entityStableId);
+		entity.setEntrezGeneId(((Gene)geneticEntity).getEntrezGeneId());
+		item.setGeneticEntity(entity);
     	item.setGeneticEntityId(geneticEntity.getEntityId());
     	item.setGeneticEntityStableId(entityStableId);
+
     	
     	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileStableId);
-    	//item.setGeneticProfile(geneticProfile);
     	item.setGeneticProfileId(geneticProfile.getGeneticProfileId());
     	item.setGeneticProfileStableId(geneticProfile.getStableId());
     	
     	Sample sample = sampleRepository.getSampleInStudy(studyId, sampleStableId); //TODO stub this one
-    	//item.setSample(sample);
     	item.setSampleId(sample.getInternalId());
     	item.setSampleStableId(sampleStableId);
     	

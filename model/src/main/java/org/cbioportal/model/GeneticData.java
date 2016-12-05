@@ -106,8 +106,11 @@ public class GeneticData implements Serializable {
 	    GeneticData other = (GeneticData)o;
 	    
 		boolean result = true;
-		result = this.getGeneticEntityId().equals(other.getGeneticEntityId()) && result;
-		result = this.getGeneticEntityStableId().equals(other.getGeneticEntityStableId()) && result;
+		//check mandatory fields for equality:
+		result = this.getGeneticEntity().getEntityId().equals(other.getGeneticEntity().getEntityId());
+		result = this.getGeneticEntity().getEntityStableId().equals(other.getGeneticEntity().getEntityStableId());
+		result = this.getGeneticEntityId().equals(other.getGeneticEntityId());
+		result = this.getGeneticEntityStableId().equals(other.getGeneticEntityStableId());
 		
 		result = this.getGeneticProfileId().equals(other.getGeneticProfileId()) && result;
 		result = this.getGeneticProfileStableId().equals(other.getGeneticProfileStableId()) && result;

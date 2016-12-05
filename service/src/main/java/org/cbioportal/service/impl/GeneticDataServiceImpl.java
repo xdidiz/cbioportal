@@ -137,15 +137,13 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     				"' is not(yet) supported via this api...");
     	}
     	
-    	//item.setGeneticEntity(geneticEntity);
+		item.setGeneticEntity(geneticEntity);
     	item.setGeneticEntityId(entityId);
     	item.setGeneticEntityStableId(geneticEntity.getEntityStableId());
     	
-    	//item.setGeneticProfile(geneticProfile);
     	item.setGeneticProfileId(geneticProfile.getGeneticProfileId());
     	item.setGeneticProfileStableId(geneticProfile.getStableId());
     	
-    	//item.setSample(sample);
     	item.setSampleId(sample.getInternalId());
     	item.setSampleStableId(sample.getStableId());
     	

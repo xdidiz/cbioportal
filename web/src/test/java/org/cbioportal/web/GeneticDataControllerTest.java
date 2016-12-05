@@ -3,6 +3,7 @@ package org.cbioportal.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cbioportal.model.Gene;
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.service.GeneticDataService;
 import org.hamcrest.Matchers;
@@ -42,6 +43,7 @@ public class GeneticDataControllerTest {
     }
 
     //test data
+    private int geneticProfileId = 1;
     private String geneticProfileStableId = "acc_tcga_mrna";
     
     @Before
@@ -59,38 +61,47 @@ public class GeneticDataControllerTest {
         Mockito.when(geneticDataService.getAllGeneticDataInGeneticProfile(Mockito.anyString(), 
         		Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(geneticDataList);
 
-        
-        //@RequestMapping(value = "/genetic-profiles/{geneticProfileId}/genetic-data", method = RequestMethod.GET)
-        //@ApiOperation("Get all genetic data in a genetic profile")
-        //public ResponseEntity<List<GeneticData>> getAllGeneticDataInGeneticProfile(
-        	//	@ApiParam(required = true, value = "Genetic profile ID, e.g. acc_tcga_mrna")
-        
         mockMvc.perform(MockMvcRequestBuilders.get("/genetic-profiles/"+ geneticProfileStableId + "/genetic-data")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(1));
-        /*
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(HUGO_GENE_SYMBOL_1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].type").value(TYPE_1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].cytoband").value(CYTOBAND_1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].length").value(LENGTH_1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].chromosome").value(CHROMOSOME_1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].entrezGeneId").value(ENTREZ_GENE_ID_2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].hugoGeneSymbol").value(HUGO_GENE_SYMBOL_2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].type").value(TYPE_2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].cytoband").value(CYTOBAND_2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].length").value(LENGTH_2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].chromosome").value(CHROMOSOME_2));*/
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(4)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].geneticEntity.entrezGeneId").value(1)); 
+
     }
 
 	private List<GeneticData> createGeneticDataList() {
-		// TODO use something similar to GeneticDataServiceImplTest.getSimpleFlatGeneticDataItem...
-		return null;
+		List<GeneticData> expectedGeneticDataList = new ArrayList<GeneticData>();
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem(1, "SAMPLE_1", 1, 1, "GENE_1", "0.2"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem(2, "SAMPLE_2", 1, 1, "GENE_1", "34.99"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem(1, "SAMPLE_1", 2, 2, "GENE_2", "0.89"));
+        expectedGeneticDataList.add(getSimpleFlatGeneticDataItem(2, "SAMPLE_2", 2, 2, "GENE_2", "15.09"));
+        
+		return expectedGeneticDataList;
 	}
 
-    
+	private GeneticData getSimpleFlatGeneticDataItem( 
+			int sampleId, String sampleStableId, 
+			int entrezGeneId, int entityId, String entityStableId, 
+			String value){
+		GeneticData item = new GeneticData();
+	
+		Gene entity = new Gene();
+		entity.setEntityId(entityId);
+		entity.setEntityStableId(entityStableId);
+		entity.setEntrezGeneId(entrezGeneId); // not totally flat because we want to set entrez id in this case as well
+		item.setGeneticEntity(entity);
+		
+		item.setGeneticProfileId(geneticProfileId);
+		item.setGeneticProfileStableId(geneticProfileStableId);
+		
+		item.setSampleId(sampleId);
+		item.setSampleStableId(sampleStableId);
+		
+		item.setValue(value);
+		
+		return item;
+	}
     
 
 }
