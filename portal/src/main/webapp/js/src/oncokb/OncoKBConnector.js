@@ -854,7 +854,7 @@ OncoKB.Instance.prototype = {
             return value;
         });
 
-        $.ajax({
+        var oncokbPromise = $.ajax({
             type: 'POST',
             url: 'api-legacy/proxy/oncokb',
             dataType: 'json',
@@ -888,38 +888,17 @@ OncoKB.Instance.prototype = {
                 });
             }
             self.dataReady = true;
-
-
-            $.ajax({
-                type: 'GET',
-                url: 'api-legacy/proxy/civicGenes/' + self.id,
-                dataType: 'json',
-                contentType: 'application/json',
-                data: {
-                    identifier_type: 'entrez_symbol'
-                }
-            }).done(function(result) {
-                if (_.isString(result)) {
-                    result = $.parseJSON(result);
-                }
-                
-                if (result.variants && result.variants.length > 0) {
-                    self.civicGeneId = result.id
-                    result.variants.forEach(function(variant) {
-                        self.civicVariants[variant.name] = {
-                            id: variant.id,
-                            name: variant.name
-                        };
-                    });
-                }
-                deferred.resolve();
-            });
-                    
-            
         })
             .fail(function() {
                 console.log('POST failed.');
                 deferred.reject();
+            });
+        
+        var civicPromise = self.getCivicGene(self.id);
+        
+        $.when(oncokbPromise, civicPromise)
+            .done(function() {
+                deferred.resolve();
             });
 
         return deferred.promise();
@@ -946,6 +925,32 @@ OncoKB.Instance.prototype = {
     },
     getVariantUniqueIds: function(oncokbId) {
         return this.variantUniqueIds[oncokbId];
+    },
+    getCivicGene: function(gene) {
+        var self = this;
+        return $.ajax({
+            type: 'GET',
+            url: 'api-legacy/proxy/civicGenes/' + gene,
+            dataType: 'json',
+            contentType: 'application/json',
+            data: {
+                identifier_type: 'entrez_symbol'
+            }
+        }).done(function(result) {
+            if (_.isString(result)) {
+                result = $.parseJSON(result);
+            }
+
+            if (result.variants && result.variants.length > 0) {
+                self.civicGeneId = result.id;
+                result.variants.forEach(function(variant) {
+                    self.civicVariants[variant.name] = {
+                        id: variant.id,
+                        name: variant.name
+                    };
+                });
+            }
+        });
     },
     getMatchingCivicVariants: function(proteinChange) {
         var matchingCivicVariants = [];
