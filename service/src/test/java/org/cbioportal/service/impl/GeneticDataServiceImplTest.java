@@ -12,6 +12,7 @@ import org.cbioportal.model.GeneticEntity;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.GeneticProfile.GeneticAlterationType;
 import org.cbioportal.model.Sample;
+import org.cbioportal.model.GeneticEntity.EntityType;
 import org.cbioportal.persistence.GeneticDataRepository;
 import org.cbioportal.persistence.GeneticEntityRepository;
 import org.cbioportal.persistence.GeneticProfileRepository;
@@ -88,7 +89,7 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
 	}
 
     @Test
-    public void getAllGeneticDataInGeneticProfile() throws Exception {
+    public void testGetAndFetchGeneticDataInGeneticProfile() throws Exception {
     	
         GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileStableId);
         
@@ -139,8 +140,18 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         //test paging:
     	result = geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileStableId,  PROJECTION,  2, PAGE_NUMBER);
     	//expect 2 items:
-    	Assert.assertEquals(2,  result.size());
-
+    	Assert.assertEquals(2, result.size());
+    	
+    	//test samples/fetch:
+    	result = geneticDataService.fetchGeneticDataInGeneticProfile(geneticProfileStableId, EntityType.GENE, Arrays.asList("1"), Arrays.asList("SAMPLE_1"),
+    			PROJECTION,  PAGE_SIZE, PAGE_NUMBER);
+    	//expect 2 items:
+    	Assert.assertEquals(2, result.size());
+    	//null test
+    	result = geneticDataService.fetchGeneticDataInGeneticProfile(geneticProfileStableId, EntityType.GENE, Arrays.asList("1"), Arrays.asList("SAMPLE_3"),
+    			PROJECTION,  PAGE_SIZE, PAGE_NUMBER);
+    	//expect 0 items:
+    	Assert.assertEquals(0, result.size());
     }
 
     private GeneticData getSimpleFlatGeneticDataItem(String sampleStableId, String entityStableId, String value){
