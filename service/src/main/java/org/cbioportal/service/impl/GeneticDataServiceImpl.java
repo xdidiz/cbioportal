@@ -26,8 +26,10 @@ package org.cbioportal.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.model.GeneticDataSamples;
@@ -72,6 +74,8 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 			GeneticAlterationType.PROTEIN_LEVEL, //TODO - this will be "protein based" at some point, not gene based
 			GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL, //TODO - remove? I think this is not used anymore...
 			GeneticAlterationType.PROTEIN_ARRAY_PHOSPHORYLATION); //TODO - remove? I think this is not used anymore...
+
+	private static final int INVALID_ENTITY_ID = -1;
     
     @Override
     public List<GeneticData> getAllGeneticDataInGeneticProfile(String geneticProfileId, String projectionName, Integer pageSize,
@@ -80,11 +84,11 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     	//get genetic profile info:
     	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
     	EntityType entityType = geneBasedTypes.contains(geneticProfile.getGeneticAlterationType()) ? EntityType.GENE: null;
-    	return getGeneticDataInGeneticProfile(geneticProfileId, entityType, null, projectionName, pageSize, pageNumber);
+    	return getGeneticDataInGeneticProfile(geneticProfileId, entityType, null, null, projectionName, pageSize, pageNumber);
     }
     
     private List<GeneticData> getGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityStableIds, 
-    		String projectionName, Integer pageSize, Integer pageNumber) {
+    		List<String> sampleStableIds, String projectionName, Integer pageSize, Integer pageNumber) {
     	
     	//get samples:  
     	//TODO ? -  pageSize, pageNumber are not really used in these 2 methods. Maybe remove for clarity? Paging is implemented manually in the loop below.
@@ -93,6 +97,7 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     	List<Integer> geneticEntityIds = getInternalEntityIds(geneticEntityStableIds, geneticEntityType); 
     	List<GeneticDataValues> geneticItemListAndValues = geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, geneticEntityIds, 
     			pageSize, pageNumber);
+    	Set<String> sampleStableIdsSet = sampleStableIds != null ? new HashSet<>(sampleStableIds) : null;
     	
     	//get genetic profile info:
     	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
@@ -115,11 +120,17 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 	    	for (GeneticDataValues geneDataValues : geneticItemListAndValues) {
 	    		String[] values = geneDataValues.getOrderedValuesList().split(",");
 	    		for (int i = 0; i < values.length; i++) {
+	    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
+	    			Sample sample = sampleIdToStableIdMap.get(sampleInternalId);
+	    			//filter samples:
+	    			//if the samples should be filtered and sample is no one of the selected samples, then continue to next one:
+	    			if (sampleStableIds != null && !sampleStableIdsSet.contains(sample.getStableId())) {
+	    				continue;
+	    			}
 	    			//if start/end are null or if the item is part of the specified page, add:
 	    			if (end == null || (itemIdx >= start && itemIdx < end)) {
 		    			String value = values[i];
-		    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
-		    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId),
+		    			GeneticData geneticDataItem = getSimpleFlatGeneticDataItem(geneticProfile, sample,
 		    					geneDataValues.getGeneticEntityId(), value);
 		    			result.add(geneticDataItem);
 	    			}
@@ -142,8 +153,12 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     			//TODO support multiple ids in 1 query, to avoid this loop and speed up a bit...although gain will be minimal since geneticEntityStableIds list length won't be larger than ~300 for now
     			GeneticEntity entity = geneticEntityRepository.getGeneticEntity(geneticEntityStableId, geneticEntityType);
     			if (entity != null) {
-    				result.add(entity.getEntityId()); //TODO what to do when entity is null? Throw error? 
+    				result.add(entity.getEntityId());
+    			} else {
+    				//TODO what to do when entity is null? Throw error? For now, add a number that maps to no entity:
+    				result.add(INVALID_ENTITY_ID);
     			}
+    			
     		}
     	}
 		return result;
@@ -224,20 +239,23 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 	@Override
 	public List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityStableIds,
 			String projectionName, Integer pageSize, Integer pageNumber) {
-		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, projectionName, pageSize, pageNumber);
+		
+		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, null, projectionName, pageSize, pageNumber);
 	}
     
 	@Override
 	public List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityStableIds,
 			String caseListId, String projectionName, Integer pageSize, Integer pageNumber) {
-		// TODO Auto-generated method stub -- for now returning all samples:
-		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, projectionName, pageSize, pageNumber);
+		//get samples for given case list:
+		List<String> caseIds = null;
+		//TODO - waiting for CaseList repository implementation. For now, returning all:
+		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, caseIds, projectionName, pageSize, pageNumber);
 	}
 
 	@Override
 	public List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityStableIds,
 			List<String> caseIds, String projectionName, Integer pageSize, Integer pageNumber) {
-		// TODO Auto-generated method stub -- for now returning all samples:
-		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, projectionName, pageSize, pageNumber);
+		
+		return getGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType, geneticEntityStableIds, caseIds, projectionName, pageSize, pageNumber);
 	}    
 }
