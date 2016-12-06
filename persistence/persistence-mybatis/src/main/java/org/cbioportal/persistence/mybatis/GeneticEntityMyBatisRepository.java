@@ -37,14 +37,21 @@ public class GeneticEntityMyBatisRepository implements GeneticEntityRepository {
 
     @Override
     public GeneticEntity getGeneticEntity(String entityStableId, EntityType type) {
+    	
     	if (type.equals(EntityType.GENE)) {
-    		//TODO - use a global cache that is initialized on startup with all gene x entity id mappings
-    		return geneMapper.getGeneByHugoGeneSymbol(entityStableId, null); 
+    		//TODO - use a global cache that is initialized on startup with all gene x entity id mappings.
+
+    		//for GENE, the stable id is Entrez, which is numeric, so convert first:
+			try {
+				int entrezGeneId = Integer.parseInt(entityStableId);
+				return geneMapper.getGeneByEntrezGeneId(entrezGeneId, null);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Entrez gene id should be a number. Given value is not valid: " + entityStableId);
+			}
     	}
     	else {
     		throw new UnsupportedOperationException("not implemented yet for other entities");
-    	}
-    		
+    	}    		
     }
 	
     @Override
@@ -55,7 +62,5 @@ public class GeneticEntityMyBatisRepository implements GeneticEntityRepository {
     	else {
     		throw new UnsupportedOperationException("not implemented yet for other entities");
     	}
-    }	
-	
-    
+    }
 }

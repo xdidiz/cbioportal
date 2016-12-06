@@ -6,7 +6,8 @@
 
     <sql id="select">
         gene.ENTREZ_GENE_ID AS "${prefix}entrezGeneId",
-        gene.HUGO_GENE_SYMBOL AS "${prefix}hugoGeneSymbol"
+        gene.HUGO_GENE_SYMBOL AS "${prefix}hugoGeneSymbol",
+        gene.GENETIC_ENTITY_ID as "${prefix}entityId"
         <if test="projection == 'SUMMARY' || projection == 'DETAILED'">
             ,
             gene.TYPE AS "${prefix}type",
