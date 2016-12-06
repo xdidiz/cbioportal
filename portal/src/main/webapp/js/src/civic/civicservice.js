@@ -1,38 +1,50 @@
 
 function CivicService() {
     
+    var civicGenes = {};
+    var finishedLoading = false;
+    
+    function retrieveAllCivicGenes() {
+        return $.ajax({
+            type: 'GET',
+            url: 'api-legacy/proxy/civicGenes/',
+            dataType: 'json',
+            contentType: 'application/json',
+        }).then(function(result) {
+            if (_.isString(result)) {
+                result = $.parseJSON(result);
+            }
+            
+            if (result.records) {
+                result.records.forEach(function(record) {
+                    if (record.variants && record.variants.length > 0) {
+                        var civicGene = {
+                            id: record.id,
+                            variants: {} 
+                        };
+                        civicGenes[record.name] = civicGene;
+                        var variants = civicGene.variants;
+                        record.variants.forEach(function(variant) {
+                            variants[variant.name] = {
+                                id: variant.id,
+                                name: variant.name
+                            };
+                        });
+                    }
+                });
+            }
+
+            finishedLoading = true;
+        });
+    }
+    
+    var promise = retrieveAllCivicGenes();
+    
     var service = {
         
         getCivicGene: function(gene) {
-            return $.ajax({
-                type: 'GET',
-                url: 'api-legacy/proxy/civicGenes/' + gene,
-                dataType: 'json',
-                contentType: 'application/json',
-                data: {
-                    identifier_type: 'entrez_symbol'
-                }
-            }).then(function(result) {
-                if (_.isString(result)) {
-                    result = $.parseJSON(result);
-                }
-
-                if (result.variants && result.variants.length > 0) {
-                    var civicGeneId = result.id;
-                    var civicVariants = {};
-                    result.variants.forEach(function(variant) {
-                        civicVariants[variant.name] = {
-                            id: variant.id,
-                            name: variant.name
-                        };
-                    });
-                    return {
-                        geneId: civicGeneId,
-                        variants: civicVariants
-                    };
-                }
-                
-                return {};
+            return promise.then(function() {
+                return civicGenes[gene];
             });
         },
         

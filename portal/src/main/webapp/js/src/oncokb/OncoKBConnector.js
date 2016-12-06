@@ -899,8 +899,10 @@ OncoKB.Instance.prototype = {
         
         $.when(oncokbPromise, civicPromise)
             .done(function(result1, civicGeneInfo) {
-                self.civicGeneId = civicGeneInfo.geneId;
-                self.civicVariants = civicGeneInfo.variants;
+                if (civicGeneInfo) {
+                    self.civicGeneId = civicGeneInfo.id;
+                    self.civicVariants = civicGeneInfo.variants;
+                }
                 deferred.resolve();
             });
 
