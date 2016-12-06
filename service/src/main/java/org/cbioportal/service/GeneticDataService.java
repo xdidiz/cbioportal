@@ -26,12 +26,22 @@ package org.cbioportal.service;
 import java.util.List;
 
 import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneticEntity.EntityType;
 import org.cbioportal.model.meta.BaseMeta;
 
 public interface GeneticDataService {
 
     BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId);
 
-	List<GeneticData> getAllGeneticDataInGeneticProfile(String geneticProfileId, String projectionName, Integer pageSize,
-			Integer pageNumber);
+	List<GeneticData> getAllGeneticDataInGeneticProfile(String geneticProfileId, 
+			String projectionName, Integer pageSize, Integer pageNumber);
+
+	List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityIds, 
+			String projectionName, Integer pageSize, Integer pageNumber);
+
+	List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityIds, String caseListId,
+			String projectionName, Integer pageSize, Integer pageNumber);
+
+	List<GeneticData> fetchGeneticDataInGeneticProfile(String geneticProfileId, EntityType geneticEntityType, List<String> geneticEntityIds, List<String> caseIds, 
+			String projectionName, Integer pageSize, Integer pageNumber);
 }

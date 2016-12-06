@@ -3,6 +3,7 @@ package org.cbioportal.web;
 import java.util.List;
 
 import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneticEntity.EntityType;
 import org.cbioportal.service.GeneticDataService;
 import org.cbioportal.web.exception.PageSizeTooBigException;
 import org.cbioportal.web.parameter.GeneticDataFilterCriteria;
@@ -40,7 +41,7 @@ public class GeneticDataController {
                                                                                                @RequestParam(defaultValue = "SUMMARY") Projection projection,
                                                                                                @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,
                                                                                                @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_NUMBER) Integer pageNumber) {
-
+    	//TODO remove? I don't think there is any use case for this method...
         throw new UnsupportedOperationException();
     }
 
@@ -52,7 +53,7 @@ public class GeneticDataController {
                                                                                                 @RequestParam(defaultValue = "SUMMARY") Projection projection,
                                                                                                 @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,
                                                                                                 @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_NUMBER) Integer pageNumber) {
-
+    	//TODO remove? I don't think there is any use case for this method...
         throw new UnsupportedOperationException();
     }
 
@@ -64,7 +65,7 @@ public class GeneticDataController {
     		@ApiParam("Level of detail of the response, e.g. META, SUMMARY or DETAILED")
     		@RequestParam(defaultValue = "SUMMARY") Projection projection,
     		@ApiParam("Page size of the result list")
-	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,  //TODO implement paging
+	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize,
 	        @ApiParam("Page number of the result list")
 	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_NUMBER) Integer pageNumber) {
 
@@ -87,21 +88,46 @@ public class GeneticDataController {
     		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_mrna")
     		@PathVariable String geneticProfileId,
             @ApiParam(required = true, value ="Entity type. Possible values: GENE or GENESET")
-    		@RequestParam(defaultValue = "GENE") String geneticEntityType,
+    		@RequestParam(defaultValue = "GENE") EntityType geneticEntityType,
+    		@ApiParam("Level of detail of the response")
+            @RequestParam(defaultValue = "SUMMARY") Projection projection,
             @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and genetic entity items (e.g. genes). "
             		+ "geneticEntityIds: The list of identifiers for the genetic entities of interest. "
             		+ "If entity type is GENE: list of Entrez Gene IDs. If entity type is GENESET: list of gene set identifiers"
             		+ "Use one of these if you want to specify a subset of samples:"
             		+ "(1) caseListId: Identifier of pre-defined case list with samples to query " 
             		+ "or (2) caseIds: custom list of samples or patients to query")
-            @RequestBody List<GeneticDataFilterCriteria> geneticDataFilterCriteria) throws PageSizeTooBigException {
+            @RequestBody GeneticDataFilterCriteria geneticDataFilterCriteria,
+            @ApiParam("Page size of the result list")
+	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize, 
+	        @ApiParam("Page number of the result list")
+	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_NUMBER) Integer pageNumber) throws PageSizeTooBigException {
 
-        //TODO 
-    	return null;
+    	if (projection == Projection.META) {
+            //HttpHeaders responseHeaders = new HttpHeaders();
+            //responseHeaders.add(HeaderKeyConstants.TOTAL_COUNT, geneticDataService.getMetaGeneticDataInGeneticProfile(geneticProfileId)
+            //        .getTotalCount().toString());
+            //return new ResponseEntity<>(responseHeaders, HttpStatus.OK); //TODO test this
+    		return null;
+        } else {
+        	if (geneticDataFilterCriteria.getCaseListId() != null && geneticDataFilterCriteria.getCaseListId().trim().length() > 0) {
+        		return new ResponseEntity<>(
+                		geneticDataService.fetchGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType,
+                				geneticDataFilterCriteria.getGeneticEntityIds(), geneticDataFilterCriteria.getCaseListId(),
+                				projection.name(), pageSize, pageNumber), HttpStatus.OK);
+        	} else if (geneticDataFilterCriteria.getCaseIds() != null) {
+        		return new ResponseEntity<>(
+                		geneticDataService.fetchGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType,
+                				geneticDataFilterCriteria.getGeneticEntityIds(), geneticDataFilterCriteria.getCaseIds(),
+                				projection.name(), pageSize, pageNumber), HttpStatus.OK);
+        	} else {
+        		return new ResponseEntity<>(
+                		geneticDataService.fetchGeneticDataInGeneticProfile(geneticProfileId, geneticEntityType,
+                				geneticDataFilterCriteria.getGeneticEntityIds(), 
+                				projection.name(), pageSize, pageNumber), HttpStatus.OK);
+        	}
+        }
     }
-    
-    
-    
 
     @RequestMapping(value = "/genetic-data/query", method = RequestMethod.POST)
     @ApiOperation("Query genetic data by example")
