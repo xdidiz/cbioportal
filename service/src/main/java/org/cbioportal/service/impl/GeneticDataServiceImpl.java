@@ -65,6 +65,7 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 			GeneticAlterationType.MRNA_EXPRESSION,
 			GeneticAlterationType.MRNA_EXPRESSION_NORMALS,
 			GeneticAlterationType.RNA_EXPRESSION,
+			GeneticAlterationType.COPY_NUMBER_ALTERATION,
 			GeneticAlterationType.METHYLATION,
 			GeneticAlterationType.METHYLATION_BINARY,
 			GeneticAlterationType.PHOSPHORYLATION, //TODO - this will be "protein based" at some point, not gene based
