@@ -119,11 +119,9 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 	    			if (end == null || (itemIdx >= start && itemIdx < end)) {
 		    			String value = values[i];
 		    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
-		    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
+		    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId),
 		    					geneDataValues.getGeneticEntityId(), value);
 		    			result.add(geneticDataItem);
-	    			} else {
-	    				break;
 	    			}
 	    			itemIdx++;
 	    		}
