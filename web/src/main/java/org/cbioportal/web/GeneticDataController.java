@@ -95,8 +95,8 @@ public class GeneticDataController {
             		+ "geneticEntityIds: The list of identifiers for the genetic entities of interest. "
             		+ "If entity type is GENE: list of Entrez Gene IDs. If entity type is GENESET: list of gene set identifiers"
             		+ "Use one of these if you want to specify a subset of samples:"
-            		+ "(1) caseListId: Identifier of pre-defined case list with samples to query " 
-            		+ "or (2) caseIds: custom list of samples or patients to query")
+            		+ "(1) caseListId: Identifier of pre-defined case list with samples to query, e.g. brca_tcga_all " 
+            		+ "or (2) caseIds: custom list of samples or patients to query, e.g. TCGA-BH-A1EO-01, TCGA-AR-A1AR-01")
             @RequestBody GeneticDataFilterCriteria geneticDataFilterCriteria,
             @ApiParam("Page size of the result list")
 	        @RequestParam(defaultValue = PagingConstants.DEFAULT_PAGE_SIZE) Integer pageSize, 
