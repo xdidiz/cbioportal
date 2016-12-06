@@ -162,13 +162,14 @@ var OncoKB = (function(_, $) {
         this.evidenceTypes = 'GENE_SUMMARY,GENE_BACKGROUND,ONCOGENIC,MUTATION_EFFECT,VUS,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY';
         this.evidenceLevels = ['LEVEL_1', 'LEVEL_2A', 'LEVEL_2B', 'LEVEL_3A', 'LEVEL_3B', 'LEVEL_R1'];
         this.variants = {};
+        this.evidence = {};
+        this.id = id || 'OncoKB-Instance-' + new Date().getTime();
+        this.variantUniqueIds = {}; // Unique variant list.
+        this.civicService = CivicService();
         this.civicGeneId = null;
         // An object with key-object pairs, where the key is the name of the variant and 
         // the object contains information about the variant, such as the id
         this.civicVariants = {};
-        this.evidence = {};
-        this.id = id || 'OncoKB-Instance-' + new Date().getTime();
-        this.variantUniqueIds = {}; // Unique variant list.
     }
 
     function EvidenceRequestItem(variant) {
@@ -894,10 +895,12 @@ OncoKB.Instance.prototype = {
                 deferred.reject();
             });
         
-        var civicPromise = self.getCivicGene(self.id);
+        var civicPromise = self.civicService.getCivicGene(self.id);
         
         $.when(oncokbPromise, civicPromise)
-            .done(function() {
+            .done(function(result1, civicGeneInfo) {
+                self.civicGeneId = civicGeneInfo.geneId;
+                self.civicVariants = civicGeneInfo.variants;
                 deferred.resolve();
             });
 
@@ -925,82 +928,6 @@ OncoKB.Instance.prototype = {
     },
     getVariantUniqueIds: function(oncokbId) {
         return this.variantUniqueIds[oncokbId];
-    },
-    getCivicGene: function(gene) {
-        var self = this;
-        return $.ajax({
-            type: 'GET',
-            url: 'api-legacy/proxy/civicGenes/' + gene,
-            dataType: 'json',
-            contentType: 'application/json',
-            data: {
-                identifier_type: 'entrez_symbol'
-            }
-        }).done(function(result) {
-            if (_.isString(result)) {
-                result = $.parseJSON(result);
-            }
-
-            if (result.variants && result.variants.length > 0) {
-                self.civicGeneId = result.id;
-                result.variants.forEach(function(variant) {
-                    self.civicVariants[variant.name] = {
-                        id: variant.id,
-                        name: variant.name
-                    };
-                });
-            }
-        });
-    },
-    getMatchingCivicVariants: function(proteinChange) {
-        var matchingCivicVariants = [];
-        var civicVariant = this.civicVariants[proteinChange];
-        if (typeof civicVariant !== 'undefined') {
-            matchingCivicVariants.push(civicVariant);
-        }
-        return matchingCivicVariants;
-    },
-    getCivicVariant: function(civicVariant) {
-        var deferred = $.Deferred();
-        var self = this;
-
-        if (civicVariant.description) {
-            // Variant info has already been loaded
-            deferred.resolve();
-        }
-        else {
-            $.ajax({
-                type: 'GET',
-                url: 'api-legacy/proxy/civicVariants/' + civicVariant.id,
-                dataType: 'json',
-                contentType: 'application/json'
-            })
-            .done(function (result) {
-                if (_.isString(result)) {
-                    result = $.parseJSON(result);
-                }
-                civicVariant.description = result.description;
-
-                // Aggregate evidence items per type
-                civicVariant.evidence = {};
-                var evidence = civicVariant.evidence;
-                result.evidence_items.forEach(function (evidenceItem) {
-                    var evidenceType = evidenceItem.evidence_type;
-                    if (evidence.hasOwnProperty(evidenceType)) {
-                        evidence[evidenceType] += 1;
-                    }
-                    else {
-                        evidence[evidenceType] = 1;
-                    }
-                });
-                deferred.resolve();
-            })
-            .fail(function () {
-                deferred.reject();
-            });
-        }
-
-        return deferred.promise();
     },
     getEvidence: function(oncokbId) {
         var deferred = $.Deferred();
@@ -1196,7 +1123,7 @@ OncoKB.Instance.prototype = {
                     if (proteinChange != null) {
                         
                         // Get matching civic variants
-                        var matchingCivicVariants = self.getMatchingCivicVariants(proteinChange);
+                        var matchingCivicVariants = self.civicService.getMatchingCivicVariants(self.civicVariants, proteinChange);
                         
                         if (matchingCivicVariants.length > 0) {
                             $(this).append('<i class="civic-image"></i>');
@@ -1219,7 +1146,7 @@ OncoKB.Instance.prototype = {
                                             
                                             // Load variant information for all matching civicVariants,
                                             // after which we construct the html for the qtip
-                                            var promises = matchingCivicVariants.map(self.getCivicVariant, self);
+                                            var promises = matchingCivicVariants.map(self.civicService.getCivicVariant, self);
                                             // Use apply, because when doesn't seem to support arrays
                                             $.when.apply($, promises)
                                             .done(function () {
