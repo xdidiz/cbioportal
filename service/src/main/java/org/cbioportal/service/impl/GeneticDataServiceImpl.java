@@ -60,11 +60,10 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     @Autowired
     private SampleRepository sampleRepository;
     
-    
     @Override
     public List<GeneticData> getAllGeneticDataInGeneticProfile(String geneticProfileId, String projectionName, Integer pageSize,
 			Integer pageNumber) {
-    	//get samples:
+    	//get samples:  //TODO ? -  pageSize, pageNumber are not really used in these 2 methods. Maybe remove for clarity? Paging is implemented manually in the loop below.
     	GeneticDataSamples samples = geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileId, pageSize, pageNumber);
     	//get list of genes and respective sample values:
     	List<GeneticDataValues> geneticItemListAndValues =  geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, pageSize, pageNumber);
@@ -72,23 +71,51 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     	//get genetic profile info:
     	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
     	
-    	//iterate over geneListAndValues and samples and match items together, 
-    	//producing the final list of GeneticData items:
     	List<GeneticData> result = new ArrayList<GeneticData>();
     	//merge the values and samples into a list of GeneticData items:
     	String[] sampleInternalIdsList = samples.getOrderedSamplesList().split(",");
     	Map<Integer,Sample> sampleIdToStableIdMap = getSampleStableIdsList(geneticProfile, sampleInternalIdsList);
+    	//variables for simple paging implementation:
+    	int itemIdx = 0;
+    	Integer start = calculateOffset(pageSize, pageNumber);
+    	Integer end = null;
+    	if (start != null) {
+    		end = start + pageSize;
+    	}
+    	//iterate over geneListAndValues and samples and match items together, 
+    	//producing the final list of GeneticData items:
     	for (GeneticDataValues geneDataValues : geneticItemListAndValues) {
     		String[] values = geneDataValues.getOrderedValuesList().split(",");
     		for (int i = 0; i < values.length; i++) {
-    			String value = values[i];
-    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
-    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
-    					geneDataValues.getGeneticEntityId(), value);
-    			result.add(geneticDataItem);
+    			//if start/end are null or if the item is part of the specified page, add:
+    			if (end == null || (itemIdx >= start && itemIdx < end)) {
+	    			String value = values[i];
+	    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
+	    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
+	    					geneDataValues.getGeneticEntityId(), value);
+	    			result.add(geneticDataItem);
+    			} else {
+    				break;
+    			}
+    			itemIdx++;
+    		}
+    		//avoid unnecessary iterations if end is specified:
+    		if (end != null && itemIdx >= end) {
+    			break;
     		}
     	}
         return result;
+    }
+    
+    /**
+     * Calculate offset.
+     * 
+     * note: this is a duplication of org.cbioportal.persistence.mybatis.util.OffsetCalculator. Alternative would be 
+     * to add the persistence.mybatis module as a dependency in service module...not really worth it just for this:
+     */
+    private Integer calculateOffset(Integer pageSize, Integer pageNumber) {
+
+        return pageSize == null || pageNumber == null ? null : pageSize * pageNumber;
     }
     
     private Map<Integer,Sample> getSampleStableIdsList(GeneticProfile geneticProfile, String[] sampleInternalIdsList) {

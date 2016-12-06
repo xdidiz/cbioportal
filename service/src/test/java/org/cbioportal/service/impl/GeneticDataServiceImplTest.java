@@ -102,18 +102,24 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         geneListAndValues.get(1).setGeneticEntityId(2);
         geneListAndValues.get(1).setGeneticProfileId(geneticProfile.getGeneticProfileId());
         geneListAndValues.get(1).setOrderedValuesList("0.89,15.09");
-        Mockito.when(geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileStableId, null, PAGE_SIZE, PAGE_NUMBER)).thenReturn(geneListAndValues);
+        //parameters don't matter much here, we want it to return geneListAndValues:
+        Mockito.when(geneticDataRepository.getGeneticDataValuesInGeneticProfile(Mockito.anyString(), Mockito.anyListOf(Integer.class), 
+        		Mockito.anyInt(), Mockito.anyInt())).thenReturn(geneListAndValues);
         
         //stub the samples to be returned by repository method: 
         GeneticDataSamples samples = new GeneticDataSamples();
         samples.setGeneticProfileId(geneticProfile.getGeneticProfileId());
         samples.setOrderedSamplesList("1,2"); //these are ids for SAMPLE_1,SAMPLE_2
-        Mockito.when(geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileStableId, PAGE_SIZE, PAGE_NUMBER)).thenReturn(samples);
+        //parameters don't matter much here, we want it to return samples list:
+        Mockito.when(geneticDataRepository.getGeneticDataSamplesInGeneticProfile(Mockito.anyString(), 
+        		Mockito.anyInt(), Mockito.anyInt())).thenReturn(samples);
         
     	//call the method to be tested: getAllGeneticDataInGeneticProfile 
         //and check if it correctly combines GeneticDataSamples and GeneticDataValues
         //into the corresponding list of GeneticData elements:
     	List<GeneticData> result = geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileStableId,  PROJECTION,  PAGE_SIZE, PAGE_NUMBER);
+    	//expect 4 items:
+    	Assert.assertEquals(4,  result.size());
     	
     	//what we expect: 2 samples x 2 genetic entities = 4 GeneticData items:
     	//SAMPLE_1:
@@ -129,6 +135,12 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         expectedGeneticDataList.add(getSimpleFlatGeneticDataItem("SAMPLE_2", "GENE_2", "15.09"));
 
         Assert.assertEquals(expectedGeneticDataList, result);
+        
+        //test paging:
+    	result = geneticDataService.getAllGeneticDataInGeneticProfile(geneticProfileStableId,  PROJECTION,  2, PAGE_NUMBER);
+    	//expect 2 items:
+    	Assert.assertEquals(2,  result.size());
+
     }
 
     private GeneticData getSimpleFlatGeneticDataItem(String sampleStableId, String entityStableId, String value){

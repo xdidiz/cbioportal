@@ -38,9 +38,11 @@
            )
         </if>
         <if test="limit != null and limit != 0">
-	    <!-- add specific ordering, in case limit and offset are used -->
+	    <!-- add specific ordering, in case limit is specified -->
 	    ORDER BY genetic_alteration.GENETIC_PROFILE_ID, genetic_alteration.GENETIC_ENTITY_ID
-            LIMIT #{limit} OFFSET #{offset}
+	    <!-- subset is done in java layer because CSV field ORDERED_SAMPLE_LIST is decomposed into
+	     many items there
+            LIMIT #{limit} OFFSET #{offset} -->
         </if>
     </select>
     
@@ -52,9 +54,11 @@
         INNER JOIN genetic_profile ON genetic_profile.GENETIC_PROFILE_ID = genetic_profile_samples.GENETIC_PROFILE_ID
         <include refid="where"/>
         <if test="limit != null and limit != 0">
-	    <!-- add specific ordering, in case limit and offset are used -->
+	    <!-- add specific ordering, in case limit is specified -->
 	    ORDER BY genetic_profile_samples.GENETIC_PROFILE_ID
-            LIMIT #{limit} OFFSET #{offset}
+	    <!-- subset is done in java layer because CSV field ORDERED_SAMPLE_LIST is decomposed into
+	     many items there
+            LIMIT #{limit} OFFSET #{offset} -->
         </if>
     </select>
 
