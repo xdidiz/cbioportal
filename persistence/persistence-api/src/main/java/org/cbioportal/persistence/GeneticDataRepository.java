@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.cbioportal.model.GeneticDataSamples;
 import org.cbioportal.model.GeneticDataValues;
-import org.cbioportal.model.meta.BaseMeta;
 
 public interface GeneticDataRepository {
 
@@ -37,5 +36,4 @@ public interface GeneticDataRepository {
     GeneticDataSamples getGeneticDataSamplesInGeneticProfile(String geneticProfileId, Integer pageSize,
 			Integer pageNumber);
 
-    BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId);
 }

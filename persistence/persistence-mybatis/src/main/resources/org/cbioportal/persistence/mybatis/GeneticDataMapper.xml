@@ -62,11 +62,5 @@
         </if>
     </select>
 
-    <select id="getMetaSamples" resultType="org.cbioportal.model.meta.BaseMeta">
-        SELECT
-        COUNT(*) AS totalCount
-        <include refid="from"/>
-        <include refid="where"/>
-    </select>
     
 </mapper>

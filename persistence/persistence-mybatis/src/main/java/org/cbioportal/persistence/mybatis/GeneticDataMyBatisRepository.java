@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.cbioportal.model.GeneticDataSamples;
 import org.cbioportal.model.GeneticDataValues;
-import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.GeneticDataRepository;
 import org.cbioportal.persistence.mybatis.util.OffsetCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,12 +59,5 @@ public class GeneticDataMyBatisRepository implements GeneticDataRepository {
         }
         return null;
     }
-
-	@Override
-	public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
 
 }

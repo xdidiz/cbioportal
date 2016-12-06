@@ -66,43 +66,46 @@ public class GeneticDataServiceImpl implements GeneticDataService {
     	//get samples:  //TODO ? -  pageSize, pageNumber are not really used in these 2 methods. Maybe remove for clarity? Paging is implemented manually in the loop below.
     	GeneticDataSamples samples = geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileId, pageSize, pageNumber);
     	//get list of genes and respective sample values:
-    	List<GeneticDataValues> geneticItemListAndValues =  geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, pageSize, pageNumber);
+    	List<GeneticDataValues> geneticItemListAndValues = geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, pageSize, pageNumber);
     	
     	//get genetic profile info:
     	GeneticProfile geneticProfile = geneticProfileRepository.getGeneticProfile(geneticProfileId);
     	
     	List<GeneticData> result = new ArrayList<GeneticData>();
-    	//merge the values and samples into a list of GeneticData items:
-    	String[] sampleInternalIdsList = samples.getOrderedSamplesList().split(",");
-    	Map<Integer,Sample> sampleIdToStableIdMap = getSampleStableIdsList(geneticProfile, sampleInternalIdsList);
-    	//variables for simple paging implementation:
-    	int itemIdx = 0;
-    	Integer start = calculateOffset(pageSize, pageNumber);
-    	Integer end = null;
-    	if (start != null) {
-    		end = start + pageSize;
-    	}
-    	//iterate over geneListAndValues and samples and match items together, 
-    	//producing the final list of GeneticData items:
-    	for (GeneticDataValues geneDataValues : geneticItemListAndValues) {
-    		String[] values = geneDataValues.getOrderedValuesList().split(",");
-    		for (int i = 0; i < values.length; i++) {
-    			//if start/end are null or if the item is part of the specified page, add:
-    			if (end == null || (itemIdx >= start && itemIdx < end)) {
-	    			String value = values[i];
-	    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
-	    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
-	    					geneDataValues.getGeneticEntityId(), value);
-	    			result.add(geneticDataItem);
-    			} else {
-    				break;
-    			}
-    			itemIdx++;
-    		}
-    		//avoid unnecessary iterations if end is specified:
-    		if (end != null && itemIdx >= end) {
-    			break;
-    		}
+    	//if any data was found:
+    	if (samples != null) {
+	    	//merge the values and samples into a list of GeneticData items:
+	    	String[] sampleInternalIdsList = samples.getOrderedSamplesList().split(",");
+	    	Map<Integer,Sample> sampleIdToStableIdMap = getSampleStableIdsList(geneticProfile, sampleInternalIdsList);
+	    	//variables for simple paging implementation:
+	    	int itemIdx = 0;
+	    	Integer start = calculateOffset(pageSize, pageNumber);
+	    	Integer end = null;
+	    	if (start != null) {
+	    		end = start + pageSize;
+	    	}
+	    	//iterate over geneListAndValues and samples and match items together, 
+	    	//producing the final list of GeneticData items:
+	    	for (GeneticDataValues geneDataValues : geneticItemListAndValues) {
+	    		String[] values = geneDataValues.getOrderedValuesList().split(",");
+	    		for (int i = 0; i < values.length; i++) {
+	    			//if start/end are null or if the item is part of the specified page, add:
+	    			if (end == null || (itemIdx >= start && itemIdx < end)) {
+		    			String value = values[i];
+		    			int sampleInternalId = Integer.parseInt(sampleInternalIdsList[i]);
+		    			GeneticData geneticDataItem =  getSimpleFlatGeneticDataItem(geneticProfile, sampleIdToStableIdMap.get(sampleInternalId), 
+		    					geneDataValues.getGeneticEntityId(), value);
+		    			result.add(geneticDataItem);
+	    			} else {
+	    				break;
+	    			}
+	    			itemIdx++;
+	    		}
+	    		//avoid unnecessary iterations if end is specified:
+	    		if (end != null && itemIdx >= end) {
+	    			break;
+	    		}
+	    	}
     	}
         return result;
     }
@@ -135,7 +138,20 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 
 	@Override
     public BaseMeta getMetaGeneticDataInGeneticProfile(String geneticProfileId) {
-        return geneticDataRepository.getMetaGeneticDataInGeneticProfile(geneticProfileId);
+		
+		//result will be samples lenght x number of gene records:
+		GeneticDataSamples samples = geneticDataRepository.getGeneticDataSamplesInGeneticProfile(geneticProfileId, null, null);
+    	//get list of genes and respective sample values:
+    	List<GeneticDataValues> geneticItemListAndValues = geneticDataRepository.getGeneticDataValuesInGeneticProfile(geneticProfileId, null, null, null);
+    	int totalCount = 0;
+    	BaseMeta meta = new BaseMeta();
+    	if (samples != null) {
+    		//nr samples x nr genetic items
+	    	totalCount = samples.getOrderedSamplesList().split(",").length * geneticItemListAndValues.size();
+    	}
+    	meta.setTotalCount(totalCount);
+		//TODO maybe implement select count(*) in repository later to make this method a bit faster?
+        return meta;
     }
 
     
