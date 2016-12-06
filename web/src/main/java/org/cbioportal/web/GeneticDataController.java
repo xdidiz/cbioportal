@@ -2,10 +2,10 @@ package org.cbioportal.web;
 
 import java.util.List;
 
-import org.cbioportal.model.Gene;
 import org.cbioportal.model.GeneticData;
 import org.cbioportal.service.GeneticDataService;
 import org.cbioportal.web.exception.PageSizeTooBigException;
+import org.cbioportal.web.parameter.GeneticDataFilterCriteria;
 import org.cbioportal.web.parameter.HeaderKeyConstants;
 import org.cbioportal.web.parameter.PagingConstants;
 import org.cbioportal.web.parameter.Projection;
@@ -86,13 +86,15 @@ public class GeneticDataController {
     public ResponseEntity<List<GeneticData>> fetchGeneticDataItems(
     		@ApiParam(required = true, value = "Genetic profile ID, e.g. brca_tcga_mrna")
     		@PathVariable String geneticProfileId,
-            @ApiParam(required = true, value = "The list of identifiers for the genetic entities of interest. "
-            		+ "If these are genes: list of Entrez Gene IDs and/or Hugo Gene Symbols. If these are gene sets: list of gene set identifiers")
-            @RequestBody List<String> geneticEntityIds,
-            @ApiParam(required = false, value = "Full list of samples or patients to query")
-            @RequestBody List<String> caseIds, 
-            @ApiParam(required = false, value = "Identifier of pre-defined case list with samples to query ")
-            @RequestBody String caseListId) throws PageSizeTooBigException {
+            @ApiParam(required = true, value ="Entity type. Possible values: GENE or GENESET")
+    		@RequestParam(defaultValue = "GENE") String geneticEntityType,
+            @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and genetic entity items (e.g. genes). "
+            		+ "geneticEntityIds: The list of identifiers for the genetic entities of interest. "
+            		+ "If entity type is GENE: list of Entrez Gene IDs. If entity type is GENESET: list of gene set identifiers"
+            		+ "Use one of these if you want to specify a subset of samples:"
+            		+ "(1) caseListId: Identifier of pre-defined case list with samples to query " 
+            		+ "or (2) caseIds: custom list of samples or patients to query")
+            @RequestBody List<GeneticDataFilterCriteria> geneticDataFilterCriteria) throws PageSizeTooBigException {
 
         //TODO 
     	return null;
