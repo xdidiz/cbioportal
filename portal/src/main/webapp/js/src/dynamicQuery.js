@@ -643,7 +643,7 @@ function updateCancerStudyInformation() {
     addGenomicProfiles(cancer_study.genomic_profiles, "MUTATION", PROFILE_MUTATION, "Mutation");
     addGenomicProfiles(cancer_study.genomic_profiles, "MUTATION_EXTENDED", PROFILE_MUTATION_EXTENDED, "Mutation");
     addGenomicProfiles(cancer_study.genomic_profiles, "COPY_NUMBER_ALTERATION", PROFILE_COPY_NUMBER_ALTERATION, "Copy Number");
-    addGenomicProfiles(cancer_study.genomic_profiles, "GSVA_SCORES", PROFILE_GSVA_SCORES, "GSVA Scores");
+    addGenomicProfiles(cancer_study.genomic_profiles, "GSVA", PROFILE_GSVA_SCORES, "GSVA Scores");
     addGenomicProfiles(cancer_study.genomic_profiles, "MRNA_EXPRESSION", PROFILE_MRNA_EXPRESSION, "mRNA Expression");
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION", PROFILE_METHYLATION, "DNA Methylation");
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION_BINARY", PROFILE_METHYLATION, "DNA Methylation");

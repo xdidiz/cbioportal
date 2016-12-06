@@ -65,7 +65,7 @@ public class DaoGsva {
         try {
             con = JdbcUtil.getDbConnection(DaoMutSig.class);
             pstmt = con.prepareStatement
-                    ("SELECT count(*) FROM genetic_profile WHERE CANCER_STUDY_ID = ? AND GENETIC_ALTERATION_TYPE LIKE 'GSVA_SCORES'");
+                    ("SELECT count(*) FROM genetic_profile WHERE CANCER_STUDY_ID = ? AND GENETIC_ALTERATION_TYPE LIKE 'GSVA'");
             pstmt.setInt(1, cancerStudy);
             rs = pstmt.executeQuery();
 
