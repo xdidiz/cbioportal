@@ -95,6 +95,7 @@
 <link href="css/mutationMapper.min.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link href="css/crosscancer.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="css/oncokb.css?<%=GlobalProperties.getAppVersion()%>" />
+<link rel="stylesheet" type="text/css" href="css/civic.css?<%=GlobalProperties.getAppVersion()%>" />
 
 
 <%

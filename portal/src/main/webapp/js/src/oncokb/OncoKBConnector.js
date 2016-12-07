@@ -1130,7 +1130,7 @@ OncoKB.Instance.prototype = {
                                         show: {ready: true},
                                         hide: {fixed: true, delay: 500},
                                         style: {
-                                            classes: 'qtip-light qtip-shadow oncokb-card-qtip',
+                                            classes: 'civic-qtip qtip-light qtip-shadow',
                                             tip: true
                                         },
                                         position: {
@@ -1152,7 +1152,7 @@ OncoKB.Instance.prototype = {
 
                                                         var url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicGene.id +
                                                             '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
-                                                        var civicHTML = '<div class="civic-qtip">' +
+                                                        var civicHTML = '<div>' +
                                                             '<a href="' + url + '" target="_blank">CIVIC</a> entries: ';
 
                                                         // List number of entries by type

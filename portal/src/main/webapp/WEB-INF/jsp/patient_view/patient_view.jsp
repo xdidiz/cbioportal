@@ -310,6 +310,7 @@ if (patientViewError!=null) {
 </style>
 
 <link rel="stylesheet" type="text/css" href="css/oncokb.css" />
+<link rel="stylesheet" type="text/css" href="css/civic.css?<%=GlobalProperties.getAppVersion()%>" />
 
 <script type="text/javascript" src="js/src/patient-view/genomic-event-observer.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <%@ include file="../oncokb/oncokb-card-template.html" %>

@@ -62,6 +62,7 @@
     @import "css/data_table_ColVis.css?<%=GlobalProperties.getAppVersion()%>";
     @import "css/mutationMapper.min.css?<%=GlobalProperties.getAppVersion()%>";
     @import "css/oncokb.css?<%=GlobalProperties.getAppVersion()%>";
+    @import "css/civic.css?<%=GlobalProperties.getAppVersion()%>";
 </style>
 
 <%@ include file="oncokb/oncokb-card-template.html" %>
