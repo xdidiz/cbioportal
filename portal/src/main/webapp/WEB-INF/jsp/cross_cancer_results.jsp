@@ -400,8 +400,8 @@ if (sessionError != null) {  %>
     <span class='annotation-item chang_hotspot' alt='{{changHotspotAlt}}'>
         <img width='14' height='14' src='images/cancer-hotspots.svg'>
     </span>
-    <span class='annotation-item civic' alt='{{civicAlt}}'>
-        <img width='14' height='14' src='images/civic-logo.png'>
+    <span class='annotation-item civic' proteinChange='{{proteinChange}}' geneSymbol='{{geneSymbol}}'>
+        <img width='14' height='14' src='images/ajax-loader.gif' alt='Civic Variant Entry'>
     </span>
 </script>
 
