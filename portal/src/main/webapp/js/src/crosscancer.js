@@ -1297,7 +1297,6 @@
                                                 }
 
                                                 var templateFn = BackboneTemplateCache.getTemplateFn("mutation_table_annotation_template");
-
                                                 return templateFn(vars);
                                             }
                                         },

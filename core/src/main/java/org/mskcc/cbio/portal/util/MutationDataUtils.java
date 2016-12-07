@@ -110,7 +110,7 @@ public class MutationDataUtils {
 
     @Autowired
     private MutationModelConverter mutationModelConverter;
-    
+
     /**
      * Generates an array (JSON array) of mutations for the given sample
      * and gene lists.

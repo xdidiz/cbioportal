@@ -246,7 +246,7 @@
                                     mutation: {
                                         myCancerGenome: [],
                                         isHotspot: false,
-                                        get: function(a) { return this[a];},
+                                        get: function(a) { return this[a];}
                                     },
                                     oncokb:{}
                                 };

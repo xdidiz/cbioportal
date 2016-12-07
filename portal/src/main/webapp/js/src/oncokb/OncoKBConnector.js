@@ -894,7 +894,7 @@ OncoKB.Instance.prototype = {
         var civicPromise = self.civicService.getInitPromise();
         
         $.when(oncokbPromise, civicPromise)
-            .done(function(result1, civicGeneInfo) {
+            .done(function() {
                 deferred.resolve();
             });
 
