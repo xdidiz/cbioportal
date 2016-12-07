@@ -274,7 +274,7 @@ UPDATE info SET DB_SCHEMA_VERSION="2.0.0";
 -- ========================== new geneset related tables =============================================
 
 CREATE TABLE `geneset` (
-  `ID` INT(11) NOT NULL,
+  `ID` INT(11) NOT NULL auto_increment,
   `GENETIC_ENTITY_ID` INT NOT NULL,
   `EXTERNAL_ID` VARCHAR(100) NOT NULL,
   `NAME_SHORT` VARCHAR(100) NOT NULL,
@@ -299,7 +299,7 @@ CREATE TABLE `geneset_gene` (
 
 -- --------------------------------------------------------
 CREATE TABLE `geneset_hierarchy` (
-  `NODE_ID` BIGINT(20) NOT NULL,
+  `NODE_ID` BIGINT(20) NOT NULL auto_increment,
   `NODE_NAME` VARCHAR(200) NOT NULL,
   `PARENT_ID` BIGINT NULL DEFAULT NULL,
   PRIMARY KEY (`NODE_ID`),
