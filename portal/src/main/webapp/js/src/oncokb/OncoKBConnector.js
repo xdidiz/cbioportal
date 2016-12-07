@@ -166,10 +166,6 @@ var OncoKB = (function(_, $) {
         this.id = id || 'OncoKB-Instance-' + new Date().getTime();
         this.variantUniqueIds = {}; // Unique variant list.
         this.civicService = CivicService();
-        this.civicGeneId = null;
-        // An object with key-object pairs, where the key is the name of the variant and 
-        // the object contains information about the variant, such as the id
-        this.civicVariants = {};
     }
 
     function EvidenceRequestItem(variant) {
@@ -895,14 +891,10 @@ OncoKB.Instance.prototype = {
                 deferred.reject();
             });
         
-        var civicPromise = self.civicService.getCivicGene(self.id);
+        var civicPromise = self.civicService.getInitPromise();
         
         $.when(oncokbPromise, civicPromise)
             .done(function(result1, civicGeneInfo) {
-                if (civicGeneInfo) {
-                    self.civicGeneId = civicGeneInfo.id;
-                    self.civicVariants = civicGeneInfo.variants;
-                }
                 deferred.resolve();
             });
 
@@ -1120,72 +1112,76 @@ OncoKB.Instance.prototype = {
 
             if (typeof  type === 'undefined' || type === 'alteration') {
                 $(target).find('.annotation-item.civic').each(function() {
+                    var geneSymbol = $(this).attr('geneSymbol');
                     var proteinChange = $(this).attr('proteinChange');
                     $(this).empty(); // remove spinner image
-                    if (proteinChange != null) {
+                    if (geneSymbol != null && proteinChange != null) {
                         
-                        // Get matching civic variants
-                        var matchingCivicVariants = self.civicService.getMatchingCivicVariants(self.civicVariants, proteinChange);
-                        
-                        if (matchingCivicVariants.length > 0) {
-                            $(this).append('<i class="civic-image"></i>');
-                            $(this).one('mouseenter', function () {
-                                $(this).qtip({
-                                    content: {text: '<span><img src="images/loader.gif" alt="loading" /></span>'},
-                                    show: {ready: true},
-                                    hide: {fixed: true, delay: 500},
-                                    style: {
-                                        classes: 'qtip-light qtip-shadow oncokb-card-qtip',
-                                        tip: true
-                                    },
-                                    position: {
-                                        my: 'center left',
-                                        at: 'center right'
-                                    },
-                                    events: {
-                                        render: function (event, api) {
-                                            var civicVariant = matchingCivicVariants[0];
-                                            
-                                            // Load variant information for all matching civicVariants,
-                                            // after which we construct the html for the qtip
-                                            var promises = matchingCivicVariants.map(self.civicService.getCivicVariant, self);
-                                            // Use apply, because when doesn't seem to support arrays
-                                            $.when.apply($, promises)
-                                            .done(function () {
-                                                
-                                                var mainMatchingCivicVariant = matchingCivicVariants[0];
-                                                
-                                                var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
-                                                    '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
-                                                var civicHTML = '<div class="civic-qtip">' +
-                                                    '<a href="' + url + '" target="_blank">CIVIC</a> entries: ';
-                                                
-                                                // List number of entries by type
-                                                var entries = [];
-                                                $.each(mainMatchingCivicVariant.evidence, function(key, value) {
-                                                    entries.push(key.toLowerCase() + ': ' + value);
-                                                });
-                                                civicHTML += entries.join(', ') + '.';
-                                                
-                                                // Append list with matching variant descriptions
-                                                civicHTML += "<ul>";
-                                                matchingCivicVariants.forEach(function(civicVariant) {
-                                                    var url = 'https://civic.genome.wustl.edu/#/events/genes/' + self.civicGeneId +
-                                                        '/summary/variants/' + civicVariant.id + '/summary#variant';
-                                                    civicHTML += '<li>' + civicVariant.name + ': ' + civicVariant.description +
-                                                            ' <a href="' + url + '" target="_blank">More information.</a></li>'
-                                                });
-                                                civicHTML += "</ul>";
-                                                
-                                                civicHTML += 'More and updated information in <a href="' + url + '" target="_blank">CIVIC</a>.';
-                                                civicHTML += "</div>";
-                                                api.set('content.title', 'Civic Variants')
-                                                api.set('content.text', civicHTML);
-                                            });
+                        var civicGene = self.civicService.getCivicGene(geneSymbol);
+                        if (civicGene) {
+                            // Look up matching civic variants
+                            var matchingCivicVariants = self.civicService.getMatchingCivicVariants(civicGene.variants, proteinChange);
+
+                            if (matchingCivicVariants.length > 0) {
+                                $(this).append('<i class="civic-image"></i>');
+                                $(this).one('mouseenter', function () {
+                                    $(this).qtip({
+                                        content: {text: '<span><img src="images/loader.gif" alt="loading" /></span>'},
+                                        show: {ready: true},
+                                        hide: {fixed: true, delay: 500},
+                                        style: {
+                                            classes: 'qtip-light qtip-shadow oncokb-card-qtip',
+                                            tip: true
+                                        },
+                                        position: {
+                                            my: 'center left',
+                                            at: 'center right'
+                                        },
+                                        events: {
+                                            render: function (event, api) {
+                                                var civicVariant = matchingCivicVariants[0];
+
+                                                // Load variant information for all matching civicVariants,
+                                                // after which we construct the html for the qtip
+                                                var promises = matchingCivicVariants.map(self.civicService.getCivicVariant, self);
+                                                // Use apply, because when doesn't seem to support arrays
+                                                $.when.apply($, promises)
+                                                    .done(function () {
+
+                                                        var mainMatchingCivicVariant = matchingCivicVariants[0];
+
+                                                        var url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicGene.id +
+                                                            '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
+                                                        var civicHTML = '<div class="civic-qtip">' +
+                                                            '<a href="' + url + '" target="_blank">CIVIC</a> entries: ';
+
+                                                        // List number of entries by type
+                                                        var entries = [];
+                                                        $.each(mainMatchingCivicVariant.evidence, function (key, value) {
+                                                            entries.push(key.toLowerCase() + ': ' + value);
+                                                        });
+                                                        civicHTML += entries.join(', ') + '.';
+
+                                                        // Append list with matching variant descriptions
+                                                        civicHTML += "<ul>";
+                                                        matchingCivicVariants.forEach(function (civicVariant) {
+                                                            var url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicGene.id +
+                                                                '/summary/variants/' + civicVariant.id + '/summary#variant';
+                                                            civicHTML += '<li>' + civicVariant.name + ': ' + civicVariant.description +
+                                                                ' <a href="' + url + '" target="_blank">More information.</a></li>'
+                                                        });
+                                                        civicHTML += "</ul>";
+
+                                                        civicHTML += 'More and updated information in <a href="' + url + '" target="_blank">CIVIC</a>.';
+                                                        civicHTML += "</div>";
+                                                        api.set('content.title', 'Civic Variants')
+                                                        api.set('content.text', civicHTML);
+                                                    });
+                                            }
                                         }
-                                    }
+                                    });
                                 });
-                            });
+                            }
                         }
                     }
                 });

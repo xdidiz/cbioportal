@@ -2,7 +2,6 @@
 function CivicService() {
     
     var civicGenes = {};
-    var finishedLoading = false;
     
     function retrieveAllCivicGenes() {
         return $.ajax({
@@ -33,19 +32,19 @@ function CivicService() {
                     }
                 });
             }
-
-            finishedLoading = true;
         });
     }
     
-    var promise = retrieveAllCivicGenes();
+    var initializationPromise = retrieveAllCivicGenes();
     
     var service = {
         
-        getCivicGene: function(gene) {
-            return promise.then(function() {
-                return civicGenes[gene];
-            });
+        getInitPromise: function() {
+            return initializationPromise;
+        },
+        
+        getCivicGene: function(geneSymbol) {
+            return civicGenes[geneSymbol];
         },
         
         getMatchingCivicVariants: function(civicVariants, proteinChange) {
@@ -61,7 +60,7 @@ function CivicService() {
         getCivicVariant: function(civicVariant) {
             var deferred = $.Deferred();
 
-            if (civicVariant.description) {
+            if (civicVariant.hasOwnProperty('description')) {
                 // Variant info has already been loaded
                 deferred.resolve();
             }
