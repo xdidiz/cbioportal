@@ -910,7 +910,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		    interim_datum.profile_data = parseFloat(receive_datum.profile_data);
 		} else if (sample_or_patient === "sample") {
 		    // this would be a programming error (unexpected output from getGeneticProfileDataBySample)
-		    throw Error("Unexpectedly received multiple heatmap profile data for one sample");
+		    throw new Error("Unexpectedly received multiple heatmap profile data for one sample");
 		} else {
 		    // aggregate samples for this patient by selecting the highest absolute (Z-)score
 		    if (Math.abs(parseFloat(receive_datum.profile_data)) >
@@ -1342,6 +1342,73 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	'getPatientHeatmapData': function(genetic_profile_id, genes) {
 	    return getHeatmapDataCached(this, genetic_profile_id, genes, 'patient');
 	},
+	'getSelectedGsvaProfile': makeCachedPromiseFunction(
+		function (self, fetch_promise) {
+		    // get the selected GSVA profile
+		    self.getGeneticProfiles()
+		    .then(function (geneticProfiles) {
+			var gsvaProfile = null;
+			for (var i = 0; i < geneticProfiles.length; i++) {
+			    var profile = geneticProfiles[i];
+			    if (profile.genetic_alteration_type === "GSVA" &&
+				    profile.datatype === "GSVA-SCORE") {
+				if (gsvaProfile !== null) {
+				    throw new Error("Programming error: " +
+					    "multiple GSVA score profiles " +
+					    "were selected in the Oncoprint");
+				}
+				gsvaProfile = profile;
+			    }
+			}
+			// TODO: replace this mockery and resolve with an actual profile
+			fetch_promise.resolve({
+			    datatype: 'GSVA-SCORE',
+			    description: 'Gene set variation analysis scores for the samples in this study',
+			    genetic_alteration_type: 'GSVA',
+			    id: geneticProfiles[0].study_id + '_gsva_scores',
+			    name: 'GSVA scores',
+			    show_profile_in_analysis_tab: null,
+			    study_id: geneticProfiles[1].study_id
+			});
+		    }).fail(function () {
+			fetch_promise.reject();
+		    });
+		}),
+	/**
+	 * A unit of GSVA data for one track of the Oncoprint.
+	 *
+	 * @typedef {Object} OncoprintGenesetDataTrack
+	 * @property {string} gs_name - label of the gene set in the Oncoprint
+         * @property {string} genetic_profile_id - identifier of the genetic profile used for this track
+         * @property {OncoprintHeatmapDatum[]} - oncoprint_data - list of objects for individual samples
+	 */
+	/**
+	 * Fetches any GSVA data for the queried Oncoprint parameters.
+	 *
+	 * @returns {Promise<OncoprintGenesetDataTrack[]>}
+	 */
+	'getSampleGsvaData': makeCachedPromiseFunction(
+		function (self, fetch_promise) {
+		    self.getSelectedGsvaProfile()
+		    .then(function (gsvaProfile) {
+			console.log("fetching uncached sample-level GSVA data.");
+			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
+			return getSampleHeatmapData();
+		    }).then(function (copiedHeatmapData) {
+			var trackList = []
+			for (i = 0; i < copiedHeatmapData.length; i++) {
+			    heatmapDataTrack = copiedHeatmapData[i];
+			    var dataTrack = {};
+			    dataTrack.gs_name = "gene set " + heatmapDataTrack.hugo_gene_symbol;
+			    dataTrack.genetic_profile_id = heatmapDataTrack.genetic_profile_id;
+			    dataTrack.oncoprint_data = heatmapDataTrack.oncoprint_data;
+			    trackList.push(dataTrack);
+			}
+			fetch_promise.resolve(trackList);
+		    }).fail(function () {
+			fetch_promise.reject();
+		    });
+		}),
 	'getExternalDataStatus': makeCachedPromiseFunction(
 		function(self, fetch_promise) {
 		    self.getWebServiceGenomicEventData().then(function() {
