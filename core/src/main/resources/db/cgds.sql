@@ -91,10 +91,10 @@ DROP TABLE IF EXISTS `authorities`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `cancer_study`;
 DROP TABLE IF EXISTS `type_of_cancer`;
-DROP TABLE IF EXISTS `genetic_entity`;
 DROP TABLE IF EXISTS `geneset_hierarchy_leaf`;
 DROP TABLE IF EXISTS `geneset_hierarchy`;
 DROP TABLE IF EXISTS `geneset`;
+DROP TABLE IF EXISTS `genetic_entity`;
 
 -- --------------------------------------------------------
 CREATE TABLE `type_of_cancer` (
@@ -255,16 +255,6 @@ CREATE TABLE `geneset_hierarchy_leaf` (
 );
 
 -- --------------------------------------------------------
-CREATE TABLE `genetic_profile_link` (
-  `REFERRING_GENETIC_PROFILE_ID` INT NOT NULL,
-  `REFERRED_GENETIC_PROFILE_ID` INT NOT NULL,
-  `REFERENCE_TYPE` VARCHAR(45) NULL, -- COMMENT 'Values: AGGREGATION (e.g. for GSVA) or STATISTIC (e.g. for Z-SCORES)
-  PRIMARY KEY (`REFERRING_GENETIC_PROFILE_ID`, `REFERRED_GENETIC_PROFILE_ID`),
-  FOREIGN KEY (`REFERRING_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  FOREIGN KEY (`REFERRED_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-);
-
--- --------------------------------------------------------
 CREATE TABLE `uniprot_id_mapping` (
   `UNIPROT_ACC` varchar(255) NOT NULL,
   `UNIPROT_ID` varchar(255) NOT NULL,
@@ -288,6 +278,16 @@ CREATE TABLE `genetic_profile` (
   PRIMARY KEY (`GENETIC_PROFILE_ID`),
   UNIQUE (`STABLE_ID`),
   FOREIGN KEY (`CANCER_STUDY_ID`) REFERENCES `cancer_study` (`CANCER_STUDY_ID`) ON DELETE CASCADE
+);
+
+-- --------------------------------------------------------
+CREATE TABLE `genetic_profile_link` (
+  `REFERRING_GENETIC_PROFILE_ID` INT NOT NULL,
+  `REFERRED_GENETIC_PROFILE_ID` INT NOT NULL,
+  `REFERENCE_TYPE` VARCHAR(45) NULL, -- COMMENT 'Values: AGGREGATION (e.g. for GSVA) or STATISTIC (e.g. for Z-SCORES)
+  PRIMARY KEY (`REFERRING_GENETIC_PROFILE_ID`, `REFERRED_GENETIC_PROFILE_ID`),
+  FOREIGN KEY (`REFERRING_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (`REFERRED_GENETIC_PROFILE_ID` ) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 -- --------------------------------------------------------
