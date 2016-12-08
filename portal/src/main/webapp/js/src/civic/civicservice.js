@@ -49,11 +49,21 @@ function CivicService() {
         
         getMatchingCivicVariants: function(civicVariants, proteinChange) {
             var matchingCivicVariants = [];
+            
+            // If present, add the exact match first
             var civicVariant = civicVariants[proteinChange];
             if (typeof civicVariant !== 'undefined') {
                 matchingCivicVariants.push(civicVariant);
             }
-            //TODO: search for matches other than the literal match
+
+            // Match any other variants after splitting the name on + or /
+            $.each(civicVariants, function(name, civicVariant) {
+                var split = name.split(/[+\/]/);
+                if (split.length > 1 && split.indexOf(proteinChange) >= 0) {
+                    matchingCivicVariants.push(civicVariant);
+                }
+            });
+            
             return matchingCivicVariants;
         },
         
