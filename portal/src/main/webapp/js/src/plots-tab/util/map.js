@@ -62,8 +62,7 @@ var vals = {
         "MRNA_EXPRESSION": "mRNA",
         "PROTEIN_LEVEL": "Protein Level",
         "METHYLATION": "DNA Methylation",
-        "GSVA_SCORE": "GSVA Scores",
-        "P-VALUE": "P-values"
+        "GENESET_SCORE": "Geneset Scores"
     }
 };
 
@@ -73,8 +72,7 @@ var genetic_profile_type_priority_list = [ //from low to high
     "PROTEIN_LEVEL",
     "COPY_NUMBER_ALTERATION",
     "MRNA_EXPRESSION",
-    "GSVA_SCORE",
-    "P-VALUE"
+    "GENESET_SCORE"
 ];
 
 var genetic_profile_name_priority_list = [ //from low to high
