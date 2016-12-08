@@ -53,7 +53,7 @@ var metaData = (function() {
             for (var _profile_name in _gene_obj) {
                 var obj = _gene_obj[_profile_name];
                 if ($.inArray(obj.STABLE_ID, _tmp_id_arr) === -1)  {
-	            	if (obj.GENETIC_ALTERATION_TYPE === "GSVA") {
+	            	if (obj.GENETIC_ALTERATION_TYPE === "GENESET_SCORE") {
 	            		var _datum = jQuery.extend(true, {}, datum_genetic_profile_meta);
 	                    _datum.type = obj.GENETIC_ALTERATION_TYPE;
 	                    _datum.id = obj.STABLE_ID;

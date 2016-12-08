@@ -43,7 +43,6 @@ public enum SampleListCategory {
     ALL_CASES_IN_STUDY("all_cases_in_study"),
     ALL_CASES_WITH_MUTATION_DATA("all_cases_with_mutation_data"),
     ALL_CASES_WITH_CNA_DATA("all_cases_with_cna_data"),
-    ALL_CASES_WITH_GSVA_DATA("all_cases_with_gsva_data"),
     ALL_CASES_WITH_LOG2_CNA_DNA("all_cases_with_log2_cna_data"),
     ALL_CASES_WITH_METHYLATION_DATA("all_cases_with_methylation_data"),
     ALL_CASES_WITH_MRNA_ARRAY_DATA("all_cases_with_mrna_array_data"),
