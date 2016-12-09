@@ -955,6 +955,19 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	var deferred_case_ids = sample_or_patient === "sample" ? sample_ids : self.getPatientIds();
 	genes = genes || [];
 	sample_or_patient = sample_or_patient || "sample";
+
+	//test new method:
+	$.when(window.cbioportal_client.getGeneticDataBySample({
+	    //possible params: genetic_profile_id, genetic_entity_type, sample_ids, sample_list_id, genetic_entity_ids
+	    'genetic_profile_id': ['brca_tcga_gsva_oncogenic_sets_scores'],//mocking id for now, but should be : [genetic_profile_id],
+	    'genetic_entity_type': ['GENESET'],
+	    'genetic_entity_ids': ['MORF_ATRX', 'MORF_ATOX1'],
+	    'sample_ids': sample_ids
+	})).then(function(data) {
+	    debugger;
+	    console.log(data.length);
+	});
+
 	$.when(window.cbioportal_client.getGeneticProfileDataBySample({
 		'genetic_profile_ids': [genetic_profile_id],
 		'genes': genes.map(function(x) { return x.toUpperCase(); }),
