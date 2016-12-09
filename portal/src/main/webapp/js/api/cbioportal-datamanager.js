@@ -1382,7 +1382,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
          * @property {OncoprintHeatmapDatum[]} - oncoprint_data - list of objects for individual samples
 	 */
 	/**
-	 * Fetches any GSVA data for the queried Oncoprint parameters.
+	 * Fetches any sample-level GSVA data for the queried Oncoprint parameters.
 	 *
 	 * @returns {Promise<OncoprintGenesetDataTrack[]>}
 	 */
@@ -1393,6 +1393,33 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 			console.log("fetching uncached sample-level GSVA data.");
 			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
 			return getSampleHeatmapData();
+		    }).then(function (copiedHeatmapData) {
+			var trackList = []
+			for (i = 0; i < copiedHeatmapData.length; i++) {
+			    heatmapDataTrack = copiedHeatmapData[i];
+			    var dataTrack = {};
+			    dataTrack.gs_name = "gene set " + heatmapDataTrack.hugo_gene_symbol;
+			    dataTrack.genetic_profile_id = heatmapDataTrack.genetic_profile_id;
+			    dataTrack.oncoprint_data = heatmapDataTrack.oncoprint_data;
+			    trackList.push(dataTrack);
+			}
+			fetch_promise.resolve(trackList);
+		    }).fail(function () {
+			fetch_promise.reject();
+		    });
+		}),
+	/**
+	 * Fetches any patient-level GSVA data for the queried Oncoprint parameters.
+	 *
+	 * @returns {Promise<OncoprintGenesetDataTrack[]>}
+	 */
+	'getPatientGsvaData': makeCachedPromiseFunction(
+		function (self, fetch_promise) {
+		    self.getSelectedGsvaProfile()
+		    .then(function (gsvaProfile) {
+			console.log("fetching uncached sample-level GSVA data.");
+			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
+			return getPatientHeatmapData();
 		    }).then(function (copiedHeatmapData) {
 			var trackList = []
 			for (i = 0; i < copiedHeatmapData.length; i++) {
