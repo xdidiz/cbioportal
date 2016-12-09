@@ -50,6 +50,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import org.cbioportal.model.GeneticEntity.EntityType;
+import org.mskcc.cbio.portal.model.GeneticAlterationType;
 
 /**
  * Retrieves genomic profile data for one or more genes.
@@ -153,7 +155,7 @@ public class GetProfileDataJSON extends HttpServlet  {
             List<String> stableSampleIds = InternalIdUtil.getStableSampleIds(internalSampleIds);
 
             //Get profile data
-            for (String geneticEntityId: geneticEntityIdList) { //PA
+            for (String geneticEntityId: geneticEntityIdList) {
 
                 DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
                 Gene gene = daoGene.getGene(geneticEntityId);
@@ -170,10 +172,21 @@ public class GetProfileDataJSON extends HttpServlet  {
                 //Get raw data (plain text) for each profile
                 for (String geneticProfileId: geneticProfileIds) {
                     try {
-                        ArrayList<String> tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
-                                gene,
-                                internalSampleIds,
-                                DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId));
+                    	ArrayList<String> tmpProfileDataArr;
+                    	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+                    	if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
+                    		//use new API which supports geneset query:
+                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                    				geneticEntityId, 
+                    				stableSampleIds, 
+                    				EntityType.GENESET, 
+                    				geneticProfile);
+                    	} else {
+                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
+	                                gene,
+	                                internalSampleIds,
+	                                geneticProfile);
+                    	}
                         //Mapping sample Id and profile data
                         HashMap<String,String> tmpResultMap =
                                 new HashMap<String,String>();  //<"sample_id", "profile_data">
@@ -202,10 +215,13 @@ public class GetProfileDataJSON extends HttpServlet  {
         }
 
         if (forceDownload == null) {
+        	//write out in json format:
             httpServletResponse.setContentType("application/json");
             PrintWriter out = httpServletResponse.getWriter();
             mapper.writeValue(out, result);
         } else {
+        	//tabular format response: only for genes...no geneset support here:
+        	//TODO
             String result_str = "";
             if (format.equals("tab")) {
                 String sampleId_str = "GENE_ID" + "\t" + "COMMON" + "\t";
