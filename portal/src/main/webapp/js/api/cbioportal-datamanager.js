@@ -1344,27 +1344,26 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	},
 	'getSelectedGsvaProfile': makeCachedPromiseFunction(
 		function (self, fetch_promise) {
-		    // get the selected GSVA profile
 		    self.getGeneticProfiles()
 		    .then(function (geneticProfiles) {
-			var gsvaProfile = null;
+			var genesetProfile = null;
 			for (var i = 0; i < geneticProfiles.length; i++) {
 			    var profile = geneticProfiles[i];
-			    if (profile.genetic_alteration_type === "GSVA" &&
+			    if (profile.genetic_alteration_type === "GENESET_SCORE" &&
 				    profile.datatype === "GSVA-SCORE") {
-				if (gsvaProfile !== null) {
+				if (genesetProfile !== null) {
 				    throw new Error("Programming error: " +
-					    "multiple GSVA score profiles " +
+					    "multiple geneset score profiles " +
 					    "were selected in the Oncoprint");
 				}
-				gsvaProfile = profile;
+				genesetProfile = profile;
 			    }
 			}
 			// TODO: replace this mockery and resolve with an actual profile
 			fetch_promise.resolve({
 			    datatype: 'GSVA-SCORE',
 			    description: 'Gene set variation analysis scores for the samples in this study',
-			    genetic_alteration_type: 'GSVA',
+			    genetic_alteration_type: 'GENESET_SCORE',
 			    id: geneticProfiles[0].study_id + '_gsva_scores',
 			    name: 'GSVA scores',
 			    show_profile_in_analysis_tab: null,
