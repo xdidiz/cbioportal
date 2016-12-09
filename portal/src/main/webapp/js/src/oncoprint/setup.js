@@ -953,6 +953,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'first_genetic_alteration_track': null,
 	    'genetic_alteration_tracks': {}, // oql line -> track_id
 	    'heatmap_track_groups': {}, // genetic_profile_id -> {genetic_profile_id, track_group_id, gene_to_track_id}
+	    'geneset_tracks': {},  // index of queried gene set -> track_id
 	    'clinical_tracks': {}, // track_id -> attr
 	    
 	    'used_clinical_attributes': [],
@@ -1159,6 +1160,36 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			return populateHeatmapTrack(genetic_profile_id, gene, track_id);
 		    }
 		}));
+	    },
+	    'addGenesetTracks': function (geneset_data_by_line) {
+		oncoprint.suppressRendering();
+		var hm_ids = [];
+		for (var i = 0; i < heatmap_data_by_line.length; i++) {
+		    var track_params = {
+			'rule_set_params': {
+			    'type': 'gradient',
+			    'legend_label': 'Geneset score',
+			    'value_key': 'profile_data',
+			    'value_range': [-1, 1],
+			    'colormap': 'viridis',
+			    'null_color': 'rgba(224,224,224,1)'
+			},
+			'has_column_spacing': false,
+			'track_padding': 0,
+			'label': geneset_data_by_line[i].gs_name,
+			'target_group': 3,
+			'removable': true,
+			'description': geneset_data_by_line[i].gs_name,
+		    };
+		    var new_gs_id = oncoprint.addTracks([track_params])[0];
+		    gs_ids.push(new_gs_id);
+		    if (typeof State.geneset_tracks[0] !== "undefined") {
+			oncoprint.shareRuleSet(State.geneset_tracks[0], new_gs_id);
+		    }
+		    State.geneset_tracks[i] = new_gs_id;
+		}
+		oncoprint.releaseRendering();
+		return gs_ids;
 	    },
 	    'useAndAddAttribute': function(attr_id) {
 		var attr = this.useAttribute(attr_id);
