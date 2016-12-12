@@ -7,7 +7,7 @@ var geneSetsSpec = (function() {
         $gene_div.append($select_div);
         $select_div.append("<label for='"+ ids.sidebar[axis].gene + "'><h5>Gene Set</h5></label>");
         $select_div.append("<select id='" + ids.sidebar[axis].gene + "'></select>");
-        $.each(window.QuerySession.getQueryGenes(), function(index, value) {
+        $.each(window.QuerySession.getQueryGenesets(), function(index, value) {
             $("#" + ids.sidebar[axis].gene).append(
                     "<option value='" + value + "'>" + value + "</option>");
         });

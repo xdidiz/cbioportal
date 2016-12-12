@@ -32,9 +32,14 @@
 
 package org.mskcc.cbio.portal.model;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+
+
 
 /**
  * Class for genetic profile
@@ -50,7 +55,22 @@ public class GeneticProfile {
     private String targetLine;
     private boolean showProfileInAnalysisTab;
     private Properties otherMetadataFields;
-
+    public static final List<GeneticAlterationType> geneBasedTypes = Arrays.asList(
+    		GeneticAlterationType.MUTATION_EXTENDED,
+    		GeneticAlterationType.FUSION,
+    		GeneticAlterationType.STRUCTURAL_VARIANT,
+    		GeneticAlterationType.COPY_NUMBER_ALTERATION,
+    		GeneticAlterationType.MICRO_RNA_EXPRESSION,
+    		GeneticAlterationType.MRNA_EXPRESSION,
+    		GeneticAlterationType.MRNA_EXPRESSION_NORMALS,
+    		GeneticAlterationType.RNA_EXPRESSION,
+    		GeneticAlterationType.METHYLATION,
+    		GeneticAlterationType.METHYLATION_BINARY,
+    		GeneticAlterationType.PHOSPHORYLATION,
+    		GeneticAlterationType.PROTEIN_LEVEL,
+    		GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL,
+    		GeneticAlterationType.PROTEIN_ARRAY_PHOSPHORYLATION);
+    
     public GeneticProfile() {
       super();
    }
@@ -86,7 +106,7 @@ public class GeneticProfile {
        this.setTargetLine(template.getTargetLine());
        this.setOtherMetadataFields(template.getAllOtherMetadataFields());
    }
-
+   
    public int getGeneticProfileId() {
         return geneticProfileId;
     }

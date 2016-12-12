@@ -475,6 +475,7 @@ var enrichmentsTabPlots = (function() {
                 case_set_id: window.QuerySession.getCaseSetId(),
                 case_ids_key: window.QuerySession.getCaseIdsKey()
             }
+            debugger;
             $.post("getProfileData.json", params_get_profile_data, data_process, "json");
 
         }

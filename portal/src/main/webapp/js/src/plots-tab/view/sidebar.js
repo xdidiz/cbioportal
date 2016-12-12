@@ -24,7 +24,8 @@ var sidebar = (function() {
     		}
     		
 		// check geneSet data
-    	if (metaData.getGeneSetsMeta(window.QuerySession.getQueryGenes()[0]).length !== 0) {
+    	debugger;
+    	if (metaData.getGeneSetsMeta(window.QuerySession.getQueryGenesets()[0]).length !== 0) {
     		geneSetsData = true;
     	}
     	
