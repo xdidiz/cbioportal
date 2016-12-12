@@ -830,7 +830,6 @@ OncoKB.Instance.prototype = {
         };
         var oncokbEvidenceRequestItems = {};
         var oncokbSummaryData = {};
-        var deferred = $.Deferred();
         var str = this.getVariantStr();
         var self = this;
 
@@ -888,17 +887,22 @@ OncoKB.Instance.prototype = {
         })
             .fail(function() {
                 console.log('POST failed.');
-                deferred.reject();
             });
         
         var civicPromise = self.civicService.getInitPromise();
+        var promises = [oncokbPromise, civicPromise];
         
-        $.when(oncokbPromise, civicPromise)
-            .done(function() {
-                deferred.resolve();
+        // We're explicitly waiting for all promises to finish (done or fail).
+        // We are wrapping them in another promise separately, to make sure we also 
+        // wait in case one of the promises fails and the other is still busy.
+        var mainPromise = $.when.apply($, $.map(promises, function(promise) {
+            var wrappingDeferred = $.Deferred();
+            promise.always(function () {
+                wrappingDeferred.resolve();
             });
-
-        return deferred.promise();
+            return wrappingDeferred.promise();
+        }));
+        return mainPromise;
     },
     setVariantUniqueIds: function() {
         var uniqueIds = {};
