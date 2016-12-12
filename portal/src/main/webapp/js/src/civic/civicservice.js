@@ -6,7 +6,7 @@ function CivicService() {
     function retrieveAllCivicGenes() {
         return $.ajax({
             type: 'GET',
-            url: 'api-legacy/proxy/civicGenes/',
+            url: 'api-legacy/proxy/civic/genes/',
             dataType: 'json',
             contentType: 'application/json',
         }).then(function(result) {
@@ -77,7 +77,7 @@ function CivicService() {
             else {
                 $.ajax({
                         type: 'GET',
-                        url: 'api-legacy/proxy/civicVariants/' + civicVariant.id,
+                        url: 'api-legacy/proxy/civic/variants/' + civicVariant.id,
                         dataType: 'json',
                         contentType: 'application/json'
                     })
