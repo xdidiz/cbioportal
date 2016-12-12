@@ -93,6 +93,7 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
         String cancerStudyIdentifier = httpServletRequest.getParameter("cancer_study_id");
         String sampleSetId = httpServletRequest.getParameter("case_set_id");
         String sampleIdsKey = httpServletRequest.getParameter("case_ids_key");
+        String geneticEntityType = httpServletRequest.getParameter("genetic_entity_type");
         String geneticEntityIdListStr = httpServletRequest.getParameter("genetic_entity_list");
         if (httpServletRequest instanceof XssRequestWrapper) {
             geneticEntityIdListStr = ((XssRequestWrapper)httpServletRequest).getRawParameter("genetic_entity_list");
@@ -162,15 +163,8 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                             
                             JSONObject tmpResult = new JSONObject();
                             for (GeneticProfile geneticProfile : list) {
-                            	ArrayList<String> tmpProfileDataArr;
-                            	if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
-                            		//use new API which supports geneset query:
-                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
-                            				geneticEntityId, 
-                            				sampleIdList, 
-                            				EntityType.GENESET, 
-                            				geneticProfile);
-                            	} else {
+                            	ArrayList<String> tmpProfileDataArr = null;
+                            	if (geneticEntityType.equalsIgnoreCase(EntityType.GENE.name()) && GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) { 
                             		//Get gene
                                     DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
                                     CanonicalGene gene = daoGene.getGene(geneticEntityId);
@@ -181,7 +175,15 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                             				sampleIdList, 
                             				EntityType.GENE, 
                             				geneticProfile);
+                            	} else if (geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()) && !GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) {
+                            		//use new API which supports geneset query:
+                                	tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                            				geneticEntityId, 
+                            				sampleIdList, 
+                            				EntityType.GENESET, 
+                            				geneticProfile);
                             	}
+                            	
                                 if (isDataAvailable(tmpProfileDataArr)) {
                                     JSONObject tmpProfileObj = new JSONObject();
                                     tmpProfileObj.put("STABLE_ID", geneticProfile.getStableId());
@@ -220,7 +222,7 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
     }
 
     private boolean isDataAvailable(ArrayList<String> inputArr) {
-        if (inputArr.size() == 0) return false;
+        if (inputArr == null || inputArr.size() == 0) return false;
         for (String item : inputArr) {
             if (item != null && item != "NaN" && item != "NA") {
                 return true;

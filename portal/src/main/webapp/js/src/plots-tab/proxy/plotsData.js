@@ -58,7 +58,7 @@ var plotsData = (function() {
                 case_set_id: window.QuerySession.getCaseSetId(),
                 case_ids_key: window.QuerySession.getCaseIdsKey()
             };
-
+            debugger;
             $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
             
         } else if ($("input:radio[name='" + ids.sidebar[axis].data_type + "']:checked").val() === vals.data_type.clin) {
@@ -80,7 +80,7 @@ var plotsData = (function() {
                 case_set_id: window.QuerySession.getCaseSetId(),
                 case_ids_key: window.QuerySession.getCaseIdsKey()
             };
-
+            debugger;
             $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
 
         } else if ($("input:radio[name='" + ids.sidebar[axis].data_type + "']:checked").val() === vals.data_type.clin) {
@@ -242,6 +242,7 @@ var plotsData = (function() {
                         case_set_id: window.QuerySession.getCaseSetId(),
                         case_ids_key: window.QuerySession.getCaseIdsKey()
                     };
+                    debugger;
                     $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
 
                 } else {
