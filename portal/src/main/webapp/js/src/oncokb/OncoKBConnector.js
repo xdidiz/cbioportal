@@ -1180,6 +1180,9 @@ OncoKB.Instance.prototype = {
                                                         civicHTML += "</div>";
                                                         api.set('content.title', 'Civic Variants')
                                                         api.set('content.text', civicHTML);
+                                                    })
+                                                    .fail(function() {
+                                                        api.set('content.text', 'Civic service is not available at this moment.');
                                                     });
                                             }
                                         }
