@@ -474,7 +474,7 @@ var CoExpView = (function() {
                 cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
                 case_set_id: window.QuerySession.getCaseSetId(),
                 case_ids_key: window.QuerySession.getCaseIdsKey(),
-                gene_list: window.QuerySession.getQueryGenes().join(" ")
+                genetic_entity_list: window.QuerySession.getQueryGenes().join(" ")
             };
             $.post("getGeneticProfile.json", paramsGetProfiles, getGeneticProfileCallback, "json");
         },

@@ -36,6 +36,8 @@ import java.io.*;
 import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+
+import org.cbioportal.model.GeneticEntity.EntityType;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.mskcc.cbio.portal.dao.*;
@@ -91,9 +93,9 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
         String cancerStudyIdentifier = httpServletRequest.getParameter("cancer_study_id");
         String sampleSetId = httpServletRequest.getParameter("case_set_id");
         String sampleIdsKey = httpServletRequest.getParameter("case_ids_key");
-        String geneListStr = httpServletRequest.getParameter("gene_list");
+        String geneticEntityIdListStr = httpServletRequest.getParameter("genetic_entity_list");
         if (httpServletRequest instanceof XssRequestWrapper) {
-            geneListStr = ((XssRequestWrapper)httpServletRequest).getRawParameter("gene_list");
+            geneticEntityIdListStr = ((XssRequestWrapper)httpServletRequest).getRawParameter("genetic_entity_list");
         }
 
 		CancerStudy cancerStudy = null;
@@ -122,7 +124,7 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
 
             if (list.size() > 0) {
                 //Retrieve all the profiles available for this cancer study
-                if (sampleSetId == null && geneListStr == null) {
+                if (sampleSetId == null && geneticEntityIdListStr == null) {
                     for (GeneticProfile geneticProfile : list) {
                         JSONObject tmpProfileObj = new JSONObject();
                         tmpProfileObj.put("STABLE_ID", geneticProfile.getStableId());
@@ -138,10 +140,10 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                     httpServletResponse.setContentType("application/json");
                     PrintWriter out = httpServletResponse.getWriter();
                     JSONValue.writeJSONString(result, out);
-                } else if (geneListStr != null && sampleSetId != null && sampleIdsKey != null) { //Only return data available profiles for each queried gene
-                    String[] geneList = geneListStr.split("\\s+");
+                } else if (geneticEntityIdListStr != null && sampleSetId != null && sampleIdsKey != null) { //Only return data available profiles for each queried gene
+                    String[] geneticEntityIdList = geneticEntityIdListStr.split("\\s+");
                     try {
-                        //Get patient ID list
+                        //Get sample ID list
                         DaoSampleList daoSampleList = new DaoSampleList();
                         SampleList sampleList;
                         ArrayList<String> sampleIdList = new ArrayList<String>();
@@ -155,20 +157,31 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                             sampleList = daoSampleList.getSampleListByStableId(sampleSetId);
                             sampleIdList = sampleList.getSampleList();
                         }
-                        // NOTE - as of 12/12/14, patient lists contain sample ids
-                        List<Integer> internalSampleIds = InternalIdUtil.getInternalNonNormalSampleIds(cancerStudyId, sampleIdList);
 
-                        for (String geneId : geneList) {
-                            //Get gene
-                            DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-                            Gene gene = daoGene.getGene(geneId);
-
+                        for (String geneticEntityId: geneticEntityIdList) {
+                            
                             JSONObject tmpResult = new JSONObject();
                             for (GeneticProfile geneticProfile : list) {
-                                ArrayList<String> tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
-                                        gene,
-                                        internalSampleIds,
-                                        DaoGeneticProfile.getGeneticProfileByStableId(geneticProfile.getStableId()));
+                            	ArrayList<String> tmpProfileDataArr;
+                            	if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
+                            		//use new API which supports geneset query:
+                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                            				geneticEntityId, 
+                            				sampleIdList, 
+                            				EntityType.GENESET, 
+                            				geneticProfile);
+                            	} else {
+                            		//Get gene
+                                    DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
+                                    CanonicalGene gene = daoGene.getGene(geneticEntityId);
+                                    String entrezId = gene.getEntrezGeneId() + "";
+
+                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                            				entrezId, 
+                            				sampleIdList, 
+                            				EntityType.GENE, 
+                            				geneticProfile);
+                            	}
                                 if (isDataAvailable(tmpProfileDataArr)) {
                                     JSONObject tmpProfileObj = new JSONObject();
                                     tmpProfileObj.put("STABLE_ID", geneticProfile.getStableId());
@@ -182,7 +195,7 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                                     tmpResult.put(geneticProfile.getStableId(), tmpProfileObj);
                                 }
                             }
-                            result.put(geneId, tmpResult);
+                            result.put(geneticEntityId, tmpResult);
                         }
                     } catch (DaoException e) {
                         System.out.println("DaoException Caught:" + e.getMessage());
