@@ -62,28 +62,6 @@ var plotsData = (function() {
             $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
             
         } else if ($("input:radio[name='" + ids.sidebar[axis].data_type + "']:checked").val() === vals.data_type.clin) {
-           
-
-            function inner_profile_callback_func(profileData) {
-                var _tmp = {}; //convert to json format
-                for (var key in profileData[$("#" + ids.sidebar[axis].gene).val()]) {
-                    var _obj = profileData[$("#" + ids.sidebar[axis].gene).val()][key];
-                    _tmp[key] = _obj[$("#" + ids.sidebar[axis].profile_name).val()];
-                }
-                callback_func(axis, _tmp);
-            }
-
-            var paramsGetProfileData = {  //webservice call to get profile data
-                cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-                genetic_entity_list: $("#" + ids.sidebar[axis].gene).val(),
-                genetic_profile_id: $("#" + ids.sidebar[axis].profile_name).val(),
-                case_set_id: window.QuerySession.getCaseSetId(),
-                case_ids_key: window.QuerySession.getCaseIdsKey()
-            };
-            debugger;
-            $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
-
-        } else if ($("input:radio[name='" + ids.sidebar[axis].data_type + "']:checked").val() === vals.data_type.clin) {
 
             function inner_callback_func(clinicalData) {
                 var _tmp = {};

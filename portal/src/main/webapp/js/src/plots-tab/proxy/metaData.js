@@ -17,8 +17,19 @@ var metaData = (function() {
         geneticProfiles = {},
         genesetProfiles = {},
         clinicalAttrs = [],
-        retrieve_status = -1; //data not yet retrieved (-1), retrieved (1)
+        retrieve_status = getNrDataTypesExpected();  
 
+    function getNrDataTypesExpected() {
+    	var result = 0;
+    	if (window.QuerySession.getQueryGenesets() != null) {
+			result++;
+    	}
+    	if (window.QuerySession.getQueryGenes() != null) {
+			result++;
+    	}
+    	return result;
+    }
+    
     //genes
     function fetchProfileMetaData() {
         var paramsGetProfiles = {
@@ -59,8 +70,11 @@ var metaData = (function() {
             format : "json"
         };
         $.post("webservice.do", paramsGetClinicalAttributes, function(result) {
-            registerMetaData(result.attributes, profileMetaDataResult, geneticAlterationType);
-            readyCallBackFunction();
+            var result = registerMetaData(result.attributes, profileMetaDataResult, geneticAlterationType);
+            if (result == 0) {
+	            //give "ready" signal:
+	            readyCallBackFunction();
+            }
         }, "json");
     }
 
@@ -84,11 +98,11 @@ var metaData = (function() {
             }
         }
         for (var gene in profileMetaDataResult) {
-           if (geneticAlterationType && geneticAlterationType == "GENE") {
+           if (geneticAlterationType == "GENE") {
         	   geneticProfiles[gene] = _profile_arr;
            } else {
         	   genesetProfiles[gene] = _profile_arr;
-           }           
+           }
         }
         
         $.each(clinicalAttrMetaDataResult, function(index, obj) {
@@ -147,7 +161,8 @@ var metaData = (function() {
                 return 0;
             });
         }
-        retrieve_status = 1;
+        retrieve_status--;
+        return retrieve_status;
     }
     
     return {
@@ -158,7 +173,6 @@ var metaData = (function() {
     	 */
         fetch: function(readyCallBack) {
         	readyCallBackFunction = readyCallBack;
-            retrieve_status = -1;
             fetchProfileMetaData();
         },
         getClinAttrsMeta: function() {
@@ -170,9 +184,6 @@ var metaData = (function() {
         getGeneSetsMeta: function(_gene) {
         	debugger;
             return genesetProfiles[_gene];
-        },
-        getRetrieveStatus: function() {
-            return retrieve_status;
         },
         getProfileDescription: function(_gene, attr_id) {
             $.each(metaData.getGeneticProfilesMeta(_gene), function(index, obj) {
