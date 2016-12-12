@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2016 The Hyve B.V.
+ * This code is licensed under the GNU Affero General Public License,
+ * version 3, or (at your option) any later version.
+ *
  * This file is part of cBioPortal.
  *
  * cBioPortal is free software: you can redistribute it and/or modify
