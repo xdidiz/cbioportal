@@ -1392,7 +1392,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		    .then(function (gsvaProfile) {
 			console.log("fetching uncached sample-level GSVA data.");
 			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
-			return getSampleHeatmapData();
+			return self.getSampleHeatmapData();
 		    }).then(function (copiedHeatmapData) {
 			var trackList = []
 			for (i = 0; i < copiedHeatmapData.length; i++) {
@@ -1419,7 +1419,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		    .then(function (gsvaProfile) {
 			console.log("fetching uncached sample-level GSVA data.");
 			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
-			return getPatientHeatmapData();
+			return self.getPatientHeatmapData();
 		    }).then(function (copiedHeatmapData) {
 			var trackList = []
 			for (i = 0; i < copiedHeatmapData.length; i++) {

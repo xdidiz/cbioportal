@@ -1163,8 +1163,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    },
 	    'addGenesetTracks': function (geneset_data_by_line) {
 		oncoprint.suppressRendering();
-		var hm_ids = [];
-		for (var i = 0; i < heatmap_data_by_line.length; i++) {
+		var gs_ids = [];
+		for (var i = 0; i < geneset_data_by_line.length; i++) {
 		    var track_params = {
 			'rule_set_params': {
 			    'type': 'gradient',
@@ -1645,7 +1645,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		return QuerySession.getSampleGsvaData()
 		.then(function (gsva_data) {
 		    console.log("in initOncoprint, GSVA data fetched, adding tracks");
-		    State.addGsvaTracks(gsva_data);
+		    State.addGenesetTracks(gsva_data);
 		})
 	    } else {
 		// gsva not applicable, return a resolved Promise
