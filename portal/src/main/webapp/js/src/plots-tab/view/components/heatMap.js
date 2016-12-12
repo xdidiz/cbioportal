@@ -183,20 +183,6 @@ var heat_map = (function() {
             for (var j = stat.y.min; j < (parseInt(stat.y.max) + 1); j++) {
                 _row_text_set.push(gisticInterpreter.convert_to_val(j));
             }
-        } else if (gsva_vs_gsva()) {
-            for (var i = stat.x.min; i < (parseInt(stat.x.max) + 1); i++) {
-                _col_text_set.push(gisticInterpreter.convert_to_val(i));
-            }
-            for (var j = stat.y.min; j < (parseInt(stat.y.max) + 1); j++) {
-                _row_text_set.push(gisticInterpreter.convert_to_val(j));
-            } 
-        } else if (gsva_vs_genetic()) {
-            for (var i = stat.x.min; i < (parseInt(stat.x.max) + 1); i++) {
-                _col_text_set.push(gisticInterpreter.convert_to_val(i));
-            }
-            for (var j = stat.y.min; j < (parseInt(stat.y.max) + 1); j++) {
-                _row_text_set.push(gisticInterpreter.convert_to_val(j));
-            } 
         } else if (genetic_vs_clinical()) {
             if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene) {
                 for (var i = stat.x.min; i < (parseInt(stat.x.max) + 1); i++) {

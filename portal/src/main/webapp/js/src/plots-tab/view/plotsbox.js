@@ -51,24 +51,24 @@ var plotsbox = (function() {
             }
         } else if (gsva_vs_clinical()) {
         	var _clin_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin)? "x": "y";
-            var _gsva_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set)? "x": "y";
-            scatterPlots.init(ids.main_view.div, data, false, "", true);
             if (clinical_attr_is_discretized(_clin_axis)) {
-            	scatterPlots.init(ids.main_view.div, data, false, _clin_axis, true);
+                scatterPlots.init(ids.main_view.div, data, true, _clin_axis, false);
             } else {
             	scatterPlots.init(ids.main_view.div, data, false, "", true);
             }
         } else if (gsva_vs_genetic()) {
             var _genetic_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene)? "x": "y";
-            var _gsva_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set)? "x": "y";
-            scatterPlots.init(ids.main_view.div, data, false, "", true);
             if (is_profile_discretized(_genetic_axis)) {
-            	scatterPlots.init(ids.main_view.div, data, false, _genetic_axis, true);
+            	scatterPlots.init(ids.main_view.div, data, true, _genetic_axis, false);
             } else {
             	scatterPlots.init(ids.main_view.div, data, false, "", true);
             }
         }
     };
+    
+
+    
+    
     
     return {
         init: function() {
