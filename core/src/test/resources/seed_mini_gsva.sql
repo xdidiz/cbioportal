@@ -30,7 +30,7 @@
 -- gene as genetic_entity
 INSERT INTO genetic_entity (ENTITY_TYPE) VALUES ('GENESET');
 SET @max_entity_id = (Select MAX(ID) from genetic_entity);
---TODO - geneset gene - see gmt file
+-- TODO - geneset gene - see gmt file
 
 INSERT INTO geneset (GENETIC_ENTITY_ID,EXTERNAL_ID,NAME_SHORT,NAME,REF_LINK,VERSION) VALUES (@max_entity_id,'MORF_ATRX','MORF_ATRX','MORF_ATRX','http://www.broadinstitute.org/gsea/msigdb/cards/MORF_ATRX',1);
 INSERT INTO genetic_entity (ENTITY_TYPE) VALUES ('GENESET');
