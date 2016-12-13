@@ -53,10 +53,142 @@ cbio.stat = (function() {
         return _zscoreArr;
     }
     
+  //http://cdn.jsdelivr.net/jstat/latest/jstat.min.js
+  //https://github.com/jstat/jstat
+  /*
+  var seq = jStat.seq( 0, 10, 11 );
+  jStat.corrcoeff( seq, seq ) === 1;
+  */
+
+    var pearsonDist = function(seq1, seq2) {
+    	debugger;
+    	var seq1 = jStat.seq(seq1);
+    	var seq2 = jStat.seq(seq2);
+    	return 1 - jStat.corrcoeff(seq1, seq2);
+    }
+    
+    var internalPearsonDist = function(item1, item2) {
+    	var seq1 = item1.orderedValueList;
+    	var seq2 = item2.orderedValueList;
+    	return pearsonDist(seq1, seq2);
+    }
+    
+    /**
+     * @param samples: Object with sampleStableId and map 
+     * of geneticEntity/value pairs. Example:
+     * [
+     *  {
+     *    sampleStableId: TCGA-AO-AA98-01,
+     *    entities: [TP53, BRCA1],
+     *    entityValueMap: {
+     *    	TP53: 0.045,
+     *    	BRA1: -0.89
+     *    }
+     *  },
+     *  {
+     *    sampleStableId: TCGA-AO-AA98-01,
+     *    entities: [... etc
+     *  }
+     * ]
+     * 
+     * or 
+     * 
+     *  {
+     *    "TCGA-AO-AA98-01":
+     *    {
+     *    	"TP53": 0.045,
+     *    	"BRA1": -0.89
+     *    }
+     *   },
+     */
+    var hclusterSamples = function(samplesAndGenes) {
+    	var refEntityList = null;
+    	var inputItems = [];
+    	//add _orderedValueList to all items, so the values are 
+    	//compared in same order:
+    	for (var sample in samplesAndGenes) {
+    		debugger;
+    		if (samplesAndGenes.hasOwnProperty(sample)) {
+    			var sampleObj = samplesAndGenes[sample];
+    			var inputItem = new Object();
+    			inputItem.sample = sample;
+    			inputItem.orderedValueList = [];//wrong...has to be new object....
+    			if (refEntityList == null)
+    				refEntityList = getRefList(sampleObj);
+    			for (var j = 0; j < refEntityList.length; j++) {
+        			var geneName = refEntityList[j];
+        			var value = sampleObj[geneName];
+        			inputItem.orderedValueList.push(value);
+        		}
+    			inputItems.push(inputItem);
+    		}
+    	}
+    	var clusters = clusterfck.hcluster(inputItems, internalPearsonDist);
+    	return clusters.clusters(1);
+    }
+    
+    var getRefList = function(sample) {
+    	var result = [];
+    	for (var gene in sample) {
+			if (sample.hasOwnProperty(gene)) {
+				result.push(gene);
+			}
+		}
+    	return result;
+    }
+    
+    /**
+     * @param samples: Object with geneticEntityStableId and map 
+     * of sampleStableId/value pairs
+     * 
+     */
+    var hclusterGeneticEntities = function(samplesAndGenes) {
+    	var refEntityList = samplesAndGenes[0];
+    	//add _orderedValueList to all items, so the values are 
+    	//compared in same order:
+    	var genesAndSamples = [];
+    	for (var i = 0; i < refEntityList.length; i++) {
+    		var geneName = ""; //TODO
+    		genesAndSamples[geneName] = new Object();
+    		genesAndSamples[geneName]._orderedValueList = [];
+    		for (var j = 0; j < samplesAndGenes.length; j++) {
+    			genesAndSamples[geneName]._orderedValueList.push(samplesAndGenes[j][geneName]);
+    		}
+    	}
+    	
+    	var clusters = clusterfck.hcluster(genesAndSamples, internalPearsonDist);
+    	return clusters.clusters(1);
+    }
+    
+
+  //https://github.com/tayden/clusterfck
+  //https://raw.githubusercontent.com/tayden/clusterfck/master/dist/clusterfck.min.js
+  /*
+  var clusters = clusterfck.hcluster(colors, clusterfck.EUCLIDEAN_DISTANCE,
+  	clusterfck.AVERAGE_LINKAGE, threshold);
+
+
+  var samples = [
+                [20, 20, 80],
+                [22, 22, 90],
+                [250, 255, 253],
+                [100, 54, 255]
+             ];
+
+  var clusters = clusterfck.hcluster(samples, pearsonDist);
+  clusters.clusters(1);  //3
+  */
+  
+  	
+    
+  	
     return {
         mean: mean,
         stDev: stDev,
-        zscore: zscore
+        zscore: zscore,
+        hclusterSamples: hclusterSamples,
+        hclusterGeneticEntities: hclusterGeneticEntities,
+        pearsonDist: pearsonDist        
     }
     
 }());
