@@ -1171,7 +1171,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    'legend_label': 'Geneset score',
 			    'value_key': 'profile_data',
 			    'value_range': [-1, 1],
-			    'colormap': 'viridis',
+			    'colormap_name': 'viridis',
 			    'null_color': 'rgba(224,224,224,1)'
 			},
 			'has_column_spacing': false,
