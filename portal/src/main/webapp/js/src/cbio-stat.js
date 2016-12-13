@@ -61,10 +61,11 @@ cbio.stat = (function() {
   */
 
     var pearsonDist = function(seq1, seq2) {
-    	debugger;
-    	var seq1 = jStat.seq(seq1);
-    	var seq2 = jStat.seq(seq2);
-    	return 1 - jStat.corrcoeff(seq1, seq2);
+    	var r = jStat.corrcoeff(seq1, seq2);
+    	if (isNaN(r)) {
+    		r = 0; //will result in same distance as no correlation //TODO - calculate correlation only on items where there is data...?
+    	}
+    	return 1 - r;
     }
     
     var internalPearsonDist = function(item1, item2) {
@@ -74,25 +75,10 @@ cbio.stat = (function() {
     }
     
     /**
-     * @param samples: Object with sampleStableId and map 
+     * @param casesAndGenes: Object with sample(or patient)StableId and map 
      * of geneticEntity/value pairs. Example:
-     * [
-     *  {
-     *    sampleStableId: TCGA-AO-AA98-01,
-     *    entities: [TP53, BRCA1],
-     *    entityValueMap: {
-     *    	TP53: 0.045,
-     *    	BRA1: -0.89
-     *    }
-     *  },
-     *  {
-     *    sampleStableId: TCGA-AO-AA98-01,
-     *    entities: [... etc
-     *  }
-     * ]
-     * 
-     * or 
-     * 
+     *  
+     * var a =
      *  {
      *    "TCGA-AO-AA98-01":
      *    {
@@ -100,37 +86,39 @@ cbio.stat = (function() {
      *    	"BRA1": -0.89
      *    }
      *   },
+     *   ...
+     *   
+     *   Use: cbio.stat.hclusterCases(a);
      */
-    var hclusterSamples = function(samplesAndGenes) {
+    var hclusterCases = function(casesAndGenes) {
     	var refEntityList = null;
     	var inputItems = [];
     	//add _orderedValueList to all items, so the values are 
     	//compared in same order:
-    	for (var sample in samplesAndGenes) {
-    		debugger;
-    		if (samplesAndGenes.hasOwnProperty(sample)) {
-    			var sampleObj = samplesAndGenes[sample];
+    	for (var caseId in casesAndGenes) {
+    		if (casesAndGenes.hasOwnProperty(caseId)) {
+    			var caseObj = casesAndGenes[caseId];
     			var inputItem = new Object();
-    			inputItem.sample = sample;
+    			inputItem.caseId = caseId;
     			inputItem.orderedValueList = [];//wrong...has to be new object....
     			if (refEntityList == null)
-    				refEntityList = getRefList(sampleObj);
+    				refEntityList = getRefList(caseObj);
     			for (var j = 0; j < refEntityList.length; j++) {
         			var geneName = refEntityList[j];
-        			var value = sampleObj[geneName];
+        			var value = caseObj[geneName];
         			inputItem.orderedValueList.push(value);
         		}
     			inputItems.push(inputItem);
     		}
     	}
     	var clusters = clusterfck.hcluster(inputItems, internalPearsonDist);
-    	return clusters.clusters(1);
+    	return clusters.clusters(1)[0];
     }
     
-    var getRefList = function(sample) {
+    var getRefList = function(caseItem) {
     	var result = [];
-    	for (var gene in sample) {
-			if (sample.hasOwnProperty(gene)) {
+    	for (var gene in caseItem) {
+			if (caseItem.hasOwnProperty(gene)) {
 				result.push(gene);
 			}
 		}
@@ -143,6 +131,8 @@ cbio.stat = (function() {
      * 
      */
     var hclusterGeneticEntities = function(samplesAndGenes) {
+    	//TODO...
+    	
     	var refEntityList = samplesAndGenes[0];
     	//add _orderedValueList to all items, so the values are 
     	//compared in same order:
@@ -157,36 +147,14 @@ cbio.stat = (function() {
     	}
     	
     	var clusters = clusterfck.hcluster(genesAndSamples, internalPearsonDist);
-    	return clusters.clusters(1);
+    	return clusters.clusters(1)[0];
     }
-    
-
-  //https://github.com/tayden/clusterfck
-  //https://raw.githubusercontent.com/tayden/clusterfck/master/dist/clusterfck.min.js
-  /*
-  var clusters = clusterfck.hcluster(colors, clusterfck.EUCLIDEAN_DISTANCE,
-  	clusterfck.AVERAGE_LINKAGE, threshold);
-
-
-  var samples = [
-                [20, 20, 80],
-                [22, 22, 90],
-                [250, 255, 253],
-                [100, 54, 255]
-             ];
-
-  var clusters = clusterfck.hcluster(samples, pearsonDist);
-  clusters.clusters(1);  //3
-  */
-  
-  	
-    
   	
     return {
         mean: mean,
         stDev: stDev,
         zscore: zscore,
-        hclusterSamples: hclusterSamples,
+        hclusterCases: hclusterCases,
         hclusterGeneticEntities: hclusterGeneticEntities,
         pearsonDist: pearsonDist        
     }

@@ -1287,6 +1287,33 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 			fetch_promise.reject();
 		    });
 		}),
+	'getClusteringOrder': function (case_ui_map, heatmapData, case_ids) {
+			var study_id = QuerySession.getCancerStudyIds()[0];
+
+			var def = new $.Deferred();
+
+			var cluster_input = {};
+			for (var i = 0; i < case_ids.length; i++) {
+				//case ids as key:
+				cluster_input[case_ids[i]] = {};
+				//iterate over genetic entities and get the sample data (heatmap data has genetic entityId as key):
+				for (var j = 0; j < heatmapData.length; j++) {
+					var entityId = heatmapData[j].hugo_gene_symbol;
+					var value = heatmapData[j].oncoprint_data[i].profile_data;//...find sample...
+					cluster_input[case_ids[i]][entityId] = value;
+				}					
+			}
+			//do hierarchical clustering:
+			var clusterOrder = cbio.stat.hclusterCases(cluster_input);
+			//get result in "uid format":
+			var uids = [];
+			for (var i = 0; i < clusterOrder.length; i++) {
+				var uid_case = case_ui_map[study_id][clusterOrder[i].caseId];
+				uids.push(uid_case);
+			}
+			def.resolve(uids); 
+			return def.promise();
+		},
 	'getWebServiceGenomicEventData': makeCachedPromiseFunction(
 		function (self, fetch_promise) {
 		    var profile_types = {};

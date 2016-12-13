@@ -1560,6 +1560,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		}
 		oncoprint.keepSorted();
 	    };
+        /**
+         * This function is triggered by the change of the radio buttons in the "sort"
+         * menu of the oncoprint. 
+         */
 	    var updateSortConfig = function() {
 		if (State.sortby === "data") {
 		    oncoprint.setSortConfig({'type':'tracks'});
@@ -1588,6 +1592,17 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			oncoprint.setSortConfig({'type': 'order', order: (State.using_sample_data ? QuerySession.getSampleIds().map(getUID) : State.patient_order.map(getUID))});
 		    });
 		}
+        else if (State.sortby === "clustering") {
+			//sort according to order found in the clustering results: 
+			State.sorting_by_given_order = true;
+			var heatmap_data_deferred = State.using_sample_data ? QuerySession.getSampleHeatmapData() : QuerySession.getPatientHeatmapData();
+			var case_ids_deferred =  State.using_sample_data ? QuerySession.getSampleIds() : QuerySession.getPatientIds();
+			$.when(QuerySession.getCaseUIDMap(), heatmap_data_deferred, case_ids_deferred).then(function (case_uid_map, heatmap_data, case_ids) {
+				$.when(QuerySession.getClusteringOrder(case_uid_map, heatmap_data, case_ids)).then(function (sampleUidsInClusteringOrder) {
+					oncoprint.setSortConfig({'type': 'order', order: sampleUidsInClusteringOrder});
+				});
+			});
+        }
 	    };
 	    $('#oncoprint_diagram_sortby_group').find('input[name="sortby"]').change(function() {
 		State.sortby = $('#oncoprint_diagram_sortby_group').find('input[name="sortby"]:checked').val();
