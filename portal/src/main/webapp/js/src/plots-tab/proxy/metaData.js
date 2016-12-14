@@ -182,7 +182,6 @@ var metaData = (function() {
             return geneticProfiles[_gene];
         },
         getGeneSetsMeta: function(_gene) {
-        	debugger;
             return genesetProfiles[_gene];
         },
         getProfileDescription: function(_gene, attr_id) {

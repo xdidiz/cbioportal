@@ -190,7 +190,7 @@
                             	<input type="radio" name="plots-y-data-type" value="gene" title="y data type gene" checked>Gene
                             </span>
                             <span id="button-y-gene-set">
-                            	<input type="radio" name="plots-y-data-type" value="gene_set" title="y data type gene set" checked>Gene Set
+                            	<input type="radio" name="plots-y-data-type" value="gene_set" title="y data type gene set" >Gene Set
                             </span>
                             <span id="button-y-clinical">
                             	<input type="radio" name="plots-y-data-type" value="clinical_attribute" title="y data type clinical attribute">Clinical Attribute

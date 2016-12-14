@@ -24,7 +24,6 @@ var sidebar = (function() {
     		}
     		
 		// check geneSet data
-    	debugger;
     	if (metaData.getGeneSetsMeta(window.QuerySession.getQueryGenesets()[0]).length !== 0) {
     		geneSetsData = true;
     	}
@@ -225,8 +224,6 @@ var sidebar = (function() {
             } else if (_y_opts.data_type === vals.data_type.gene_set) {
                 _y_opts.gene_index = document.getElementById(ids.sidebar.y.gene).selectedIndex;
                 _y_opts.profile_name_index = document.getElementById(ids.sidebar.y.profile_name).selectedIndex;
-                _y_opts.apply_log_scale = $("#" + ids.sidebar.y.log_scale).prop('checked');              
-                _y_opts.lock_gene = $("#" + ids.sidebar.y.lock_gene).prop('checked');
             } else if (_y_opts.data_type === vals.data_type.clin) {
                 _y_opts.clin_attr_index = document.getElementById(ids.sidebar.y.clin_attr).selectedIndex;
                 

@@ -58,7 +58,6 @@ var plotsData = (function() {
                 case_set_id: window.QuerySession.getCaseSetId(),
                 case_ids_key: window.QuerySession.getCaseIdsKey()
             };
-            debugger;
             $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
             
         } else if ($("input:radio[name='" + ids.sidebar[axis].data_type + "']:checked").val() === vals.data_type.clin) {
@@ -128,7 +127,44 @@ var plotsData = (function() {
                 } else {
                     mutationCallback();
                 }
-            } else { //clinical vs. clinical //gsva vs. gsva // gsva vs. clinical
+            } else if (gsva_vs_clinical() || gsva_vs_gsva()) {
+            	if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin) {
+            		if (clinical_attr_is_discretized("x")) {
+                        clinical_data_interpreter.process(dotsContent, "x");
+                        var _arr_y = [];
+                        for (var key in dotsContent) {
+                            dotsContent[key].xVal = clinical_data_interpreter.convert_to_numeric(dotsContent[key].xVal, "x");
+                            _arr_y.push(dotsContent[key].yVal);
+                        }
+                        analyseData();
+                        stat.retrieved = true;
+                        readyCallBackFunction();
+            		}
+            	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.clin) {
+            		if (clinical_attr_is_discretized("y")) {
+                        clinical_data_interpreter.process(dotsContent, "y");
+                        var _arr_x = [];
+                        for (var key in dotsContent) {
+                            dotsContent[key].yVal = clinical_data_interpreter.convert_to_numeric(dotsContent[key].yVal, "y");
+                            _arr_x.push(dotsContent[key].xVal);
+                        }
+                        analyseData();
+                        stat.retrieved = true;
+                        readyCallBackFunction();
+            		}
+            	} else {
+            		var _arr_x = [], _arr_y = [];
+                    _arr_x.length = 0;
+                    _arr_y.length = 0;
+                    for(var key in dotsContent) {
+                        _arr_x.push(dotsContent[key].xVal);
+                        _arr_y.push(dotsContent[key].yVal);
+                    }
+                    analyseData();
+                    stat.retrieved = true;
+                    readyCallBackFunction();
+            	}
+            } else { //clinical vs. clinical
                 //translate: assign text value a numeric value for clinical data
                 var _arr_x = [], _arr_y = [];
                 _arr_x.length = 0;
@@ -220,7 +256,6 @@ var plotsData = (function() {
                         case_set_id: window.QuerySession.getCaseSetId(),
                         case_ids_key: window.QuerySession.getCaseIdsKey()
                     };
-                    debugger;
                     $.post("getProfileData.json", paramsGetProfileData, inner_profile_callback_func, "json");
 
                 } else {

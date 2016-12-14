@@ -8,8 +8,8 @@ var PlotUtilsModel = Backbone.Model.extend({
   defaults: {
 	 x_clinical_attr_is_discretized: false,
      y_clinical_attr_is_discretized: false,
-     is_same_gene: false,
-     is_two_genes: true,
+     is_same_gene: true,
+     is_two_genes: false,
      genetic_vs_genetic: true,
      genetic_vs_clinical: false,
      clinical_vs_clinical: false,
