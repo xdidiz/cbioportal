@@ -129,33 +129,20 @@ var sidebar = (function() {
             $("#plots").append("No data available for generating plots.");
         //normal plots
         } else {
-        	var _genetic_axis = null;
-        	var _gsva_axis = null;
-        	var _clinical_axis = null;
         	if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene) {
-        		_genetic_axis = "x";
-        	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.gene) {
-        		_genetic_axis = "y";
+        		profileSpec.init("x")
+        	} else if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set) {
+        		geneSetsSpec.init("x");
+        	} else if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin) {
+        		clinSpec.init("x");
         	}
-        	if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set) {
-        		_gsva_axis = "x";
+        	if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.gene) {
+        		profileSpec.init("y")
         	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.gene_set) {
-        		_gsva_axis = "y";
-        	}
-        	if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin) {
-        		_clinical_axis = "x";
+        		geneSetsSpec.init("y");
         	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.clin) {
-        		_clinical_axis = "y";
+        		clinSpec.init("y");
         	}
-            if (_genetic_axis !== null) {
-            	profileSpec.init(_genetic_axis);
-            } 
-            if (_gsva_axis !== null) {
-            	geneSetsSpec.init(_gsva_axis);
-            } 
-            if (_clinical_axis !== null) {
-            	clinSpec.init(_clinical_axis);
-            }
             optSpec.init();
           //reset the default value of x: default is always x copy num, y mrna
             if (document.getElementById(ids.sidebar.x.profile_type).length > 1) {
