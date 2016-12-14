@@ -231,8 +231,10 @@ function userClickedMainTab(tabAction) {
 //  is selected in Step 1
 function crossCancerStudySelected() {
      $('#step2').hide();
-     $('#step2cross').show();
+     $('#step2cross').show();     
      $('#step3').hide();
+     $('#toggle_gsva_dialog').hide();
+     $('#geneset_list').hide();
      $('#step5').hide();
 }
 
@@ -572,12 +574,10 @@ function toggleThresholdPanel(profileClicked, profile, threshold_div) {
 // toggle:
 //      gistic button
 //      mutsig button
-//		gsva button
 // according to the cancer_study
 function toggleByCancerStudy(cancer_study) {
     var mutsig = $('#toggle_mutsig_dialog');
     var gistic = $('#toggle_gistic_dialog');
-    var gsva = $('#toggle_gsva_dialog');
     if (cancer_study.has_mutsig_data) {
         mutsig.show();
     } else {
@@ -587,11 +587,6 @@ function toggleByCancerStudy(cancer_study) {
         gistic.show();
     } else {
         gistic.hide();
-    }
-    if (cancer_study.has_gsva_data) {
-        gsva.show();
-    } else {
-    	gsva.hide();
     }
 }
 
@@ -649,8 +644,21 @@ function updateCancerStudyInformation() {
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION_BINARY", PROFILE_METHYLATION, "DNA Methylation");
     //addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN, "Protein Level");
     addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN_EXPRESSION, "Protein/phosphoprotein level");
-
-
+    
+    // if GSVA profile is available and checked, display the gsva button and gene sets textbox
+    function toggleGeneSets(profileClicked) {
+    	
+        if (profileClicked.prop('checked')){
+        	$('#toggle_gsva_dialog').show();
+        	$('#geneset_list').show();
+        }
+        // if checkbox is unselected, hide button and textbox
+        else {
+        	$('#toggle_gsva_dialog').hide();
+        	$('#geneset_list').hide();
+        }
+    }  
+    	
     //  if no genomic profiles available, set message and disable submit button
     if ($("#genomic_profiles").html()==""){
         console.log("cancerStudySelected ( genomicProfilesUnavailable() )");
@@ -694,6 +702,11 @@ function updateCancerStudyInformation() {
     //  Set up an Event Handler for showing/hiding mRNA threshold input
     $("." + PROFILE_MRNA_EXPRESSION).click(function(){
        toggleThresholdPanel($(this), PROFILE_MRNA_EXPRESSION, "#z_score_threshold");
+    });
+    
+    //  Set up an Event Handler for showing/hiding gene sets button and textbox
+    $("." + PROFILE_GSVA_SCORES).click(function(){
+       toggleGeneSets($(this));
     });
 
     //  Set up an Event Handler for showing/hiding RPPA threshold input

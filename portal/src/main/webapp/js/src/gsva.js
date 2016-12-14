@@ -67,7 +67,7 @@ var initGsvaDialogue = function() {
     });
 
     // bind UI for gsva table -> gene list
-    $('#select_gsva').click(updateGeneList);
+    $('#select_gsva').click(updateGeneSetList);
 
     // bind UI for gene list -> gsva table
 //    $('#gene_list').change( function() {
@@ -76,27 +76,8 @@ var initGsvaDialogue = function() {
 //        }
 //    });
 
-    listenCancerStudy();
 };
 
-// listen for a change in the selected cancer study and
-// handle appropriately
-// todo: refactor this
-var listenCancerStudy = function() {
-    $('#select_single_study').change( function() {
-
-        // get the cancer study (i.e. tcga_gbm)
-        var cancerStudyId = $('#select_single_study').val();
-
-        // if the selected cancer study has gsva data,
-        // show the gsva button
-        if (window.json.cancer_studies[cancerStudyId].has_gsva_data) {
-            $('#toggle_gsva_dialog').show();
-        } else {
-            $('#toggle_gsva_dialog').hide();
-        }
-    });
-};
 
 //todo: rewrite this function. it is unnecessarily complex
 //var gsva_to_tr = function(gsva) {
@@ -241,24 +222,24 @@ var promptGsvaTable = function() {
 
 // updates the gene_list based on what happens in the Gsva table.
 // gsva table (within gsva dialog box) -> gene list
-var updateGeneList = function() {
+var updateGeneSetList = function() {
     "use strict";
 
     // push all the genes in the gene_list onto a list
-    var gene_list = $('#gene_list').val();
+    var geneset_list = $('#geneset_list').val();
 
     // placeholder gene sets, necessary until the real selection method is implemented
-    var example_gene_sets = ["GENE_SET1", "GENE_SET2", "GENE_SET3"];
+    var example_gene_sets = ["MORF_ATRX", "MORF_ATOX1"];
 
     // if gene_list is currently empty put all the checked gsva genes into it.
-    if (gene_list === "") {
+    if (geneset_list === "") {
 
-        gene_list = [];
+        geneset_list = [];
 //        $('.Gsva :not(.checkall):checked').map(function() {     // don't select the Select All checkbox
         $.each(example_gene_sets, function(index, value) {     // don't select the Select All checkbox
-            gene_list.push(value);
+            geneset_list.push(value);
         });
-        gene_list = gene_list.join(" ");
+        geneset_list = geneset_list.join(" ");
     }
 
     else {
@@ -268,10 +249,10 @@ var updateGeneList = function() {
         $.each(example_gene_sets, function(index, value) {
             var checked = value;
 
-            if ( gene_list.search(new RegExp(checked, "i")) === -1 ) {
-                gene_list = $.trim(gene_list);
+            if ( geneset_list.search(new RegExp(checked, "i")) === -1 ) {
+                geneset_list = $.trim(geneset_list);
                 checked = " " + checked;
-                gene_list += checked;
+                geneset_list += checked;
             }
         });
 //        // look for the unselected gsvas in the gene_list
@@ -296,11 +277,11 @@ var updateGeneList = function() {
 //        });
     }
 
-    $('#gene_list').val(gene_list);
+    $('#geneset_list').val(geneset_list);
 
     // remove spaces in gene_list
-    gene_list = $.trim(gene_list);
-    gene_list = gene_list.replace(/\s{2,}/, "");            // delete 2 or more spaces in a row
+    geneset_list = $.trim(geneset_list);
+    geneset_list = geneset_list.replace(/\s{2,}/, "");            // delete 2 or more spaces in a row
 };
 
 // updates the Gsva table based on what happens in the gene_list

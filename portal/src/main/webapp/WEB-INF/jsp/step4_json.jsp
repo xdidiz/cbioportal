@@ -59,10 +59,6 @@
         <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select from Recurrently Mutated Genes (MutSig)</button>
         <button id="toggle_gistic_dialog" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
     </div>
-
-	<div style="padding-bottom:5px;margin-left:-3px;">
-        <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em;">Select Gene Sets scored with GSVA</button>
-	</div>
 	
     <script type="text/javascript">
         $(document).ready(function() {
@@ -80,6 +76,23 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Alia
 	    // ...but we want to keep newlines, and slashes so unescape them
 	    geneListWithSemis = geneListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
         out.print(geneListWithSemis);
+    }
+%></textarea>
+
+<div style="padding-bottom:5px;margin-left:-3px;">
+       <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
+</div>
+
+<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
+name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
+    if (localGeneSetList != null && localGeneSetList.length() > 0) {
+	    String geneSetListWithSemis =
+			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
+	    // this is for xss security
+	    geneSetListWithSemis = StringEscapeUtils.escapeJavaScript(geneSetListWithSemis);
+	    // ...but we want to keep newlines, and slashes so unescape them
+	    geneSetListWithSemis = geneSetListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
+        out.print(geneSetListWithSemis);
     }
 %></textarea>
 
