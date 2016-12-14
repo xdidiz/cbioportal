@@ -46,16 +46,18 @@ var sidebar = (function() {
                 }
             }
         // only have gsva data
-        } else if ((!geneProfileData || onlyMutData) && !clinicalData && geneSetsData) { 
-                $("#" + ids.sidebar.x.data_type).hide(); //if there's no clinical data and profile data, remove data type choices
-                $("#" + ids.sidebar.y.data_type).hide();
-                geneSetsSpec.init("x");
-                geneSetsSpec.init("y");
-                optSpec.init();
-                //reset the default value of x: default is always x copy num, y mrna
-                if (document.getElementById(ids.sidebar.x.profile_type).length > 1) {
-                    document.getElementById(ids.sidebar.x.profile_type).selectedIndex = "1";
-                    geneSetsSpec.updatePlotValueList("x");                    
+        } else if ((!geneProfileData || onlyMutData) && !clinicalData && geneSetsData) {
+        	$("input:radio[name='" + ids.sidebar.x.data_type + "'][value='" + vals.data_type.gene_set + "']").attr('checked', 'checked');
+            $("input:radio[name='" + ids.sidebar.y.data_type + "'][value='" + vals.data_type.gene_set + "']").attr('checked', 'checked');
+            $("#" + ids.sidebar.x.data_type).hide(); //if there's no clinical data and profile data, remove data type choices
+            $("#" + ids.sidebar.y.data_type).hide();
+            geneSetsSpec.init("x");
+            geneSetsSpec.init("y");
+            optSpec.init();
+            //reset the default value of x: default is always x copy num, y mrna
+            if (document.getElementById(ids.sidebar.x.profile_type).length > 1) {
+                document.getElementById(ids.sidebar.x.profile_type).selectedIndex = "1";
+                geneSetsSpec.updatePlotValueList("x");                    
             }
                 
         //only have clinical data
@@ -70,12 +72,10 @@ var sidebar = (function() {
             
         //only clinical and profile data
         } else if ((!geneSetsData) && clinicalData && geneProfileData) {
-        	var _genetic_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene)? "x": "y";
-            var _clinical_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin)? "x": "y";
         	$("#button-x-gene-set").hide(); //Hide gene set button
         	$("#button-y-gene-set").hide();
-            profileSpec.init(_genetic_axis);
-            clinSpec.init(_clinical_axis);
+            profileSpec.init("x");
+            profileSpec.init("y");
             optSpec.init();
             //reset the default value of x: default is always x copy num, y mrna
             var _type_arr = [];
@@ -92,12 +92,12 @@ var sidebar = (function() {
             }
         // only clinical and gsva data
         } else if ((!geneProfileData || onlyMutData) && clinicalData && geneSetsData) {
-        	var _clinical_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin)? "x": "y";
-            var _gsva_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set)? "x": "y";
+            $("input:radio[name='" + ids.sidebar.x.data_type + "'][value='" + vals.data_type.gene_set + "']").attr('checked', 'checked');
+            $("input:radio[name='" + ids.sidebar.y.data_type + "'][value='" + vals.data_type.gene_set + "']").attr('checked', 'checked');
         	$("#button-x-gene").hide(); //Hide gene button
         	$("#button-y-gene").hide();
-            clinSpec.init(_clinical_axis);
-            geneSetsSpec.init(_gsva_axis);
+        	geneSetsSpec.init("x");
+            geneSetsSpec.init("y");
             optSpec.init();
             //reset the default value of x: default is always x copy num, y mrna
             var _type_arr = [];
@@ -111,12 +111,10 @@ var sidebar = (function() {
             }
         //only profile and gsva data
         } else if (geneProfileData && !onlyMutData && !clinicalData && geneSetsData) {
-        	var _genetic_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene)? "x": "y";
-            var _gsva_axis = ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set)? "x": "y";
             $("#button-x-clinical").hide(); //Hide clinical data button
         	$("#button-y-clinical").hide();
-            profileSpec.init(_genetic_axis);
-            geneSetsSpec.init(_gsva_axis);
+            profileSpec.init("x");
+            profileSpec.init("y");
             optSpec.init();
             //reset the default value of x: default is always x copy num, y mrna
             if (document.getElementById(ids.sidebar.x.profile_type).length > 1) {
@@ -129,20 +127,8 @@ var sidebar = (function() {
             $("#plots").append("No data available for generating plots.");
         //normal plots
         } else {
-        	if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene) {
-        		profileSpec.init("x")
-        	} else if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.gene_set) {
-        		geneSetsSpec.init("x");
-        	} else if ($("input:radio[name='" + ids.sidebar.x.data_type + "']:checked").val() === vals.data_type.clin) {
-        		clinSpec.init("x");
-        	}
-        	if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.gene) {
-        		profileSpec.init("y")
-        	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.gene_set) {
-        		geneSetsSpec.init("y");
-        	} else if ($("input:radio[name='" + ids.sidebar.y.data_type + "']:checked").val() === vals.data_type.clin) {
-        		clinSpec.init("y");
-        	}
+        	profileSpec.init("x")
+        	profileSpec.init("y")
             optSpec.init();
           //reset the default value of x: default is always x copy num, y mrna
             if (document.getElementById(ids.sidebar.x.profile_type).length > 1) {
