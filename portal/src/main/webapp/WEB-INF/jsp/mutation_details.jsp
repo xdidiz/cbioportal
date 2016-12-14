@@ -66,6 +66,7 @@
 </style>
 
 <%@ include file="oncokb/oncokb-card-template.html" %>
+<%@ include file="civic/civic-qtip-template.html" %>
 <script type="text/javascript" src="js/src/civic/civicservice.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/oncokb/OncoKBCard.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/oncokb/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>

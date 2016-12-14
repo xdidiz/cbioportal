@@ -26,7 +26,8 @@ function CivicService() {
                         record.variants.forEach(function(variant) {
                             variants[variant.name] = {
                                 id: variant.id,
-                                name: variant.name
+                                name: variant.name,
+                                geneId: civicGene.id
                             };
                         });
                     }
@@ -86,6 +87,9 @@ function CivicService() {
                             result = $.parseJSON(result);
                         }
                         civicVariant.description = result.description;
+
+                        civicVariant.url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicVariant.geneId +
+                            '/summary/variants/' + civicVariant.id + '/summary#variant';
 
                         // Aggregate evidence items per type
                         civicVariant.evidence = {};

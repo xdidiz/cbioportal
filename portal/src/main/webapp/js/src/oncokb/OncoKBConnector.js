@@ -1134,7 +1134,7 @@ OncoKB.Instance.prototype = {
                                         show: {ready: true},
                                         hide: {fixed: true, delay: 500},
                                         style: {
-                                            classes: 'civic-qtip qtip-light qtip-shadow',
+                                            classes: 'qtip-light qtip-shadow oncokb-card-qtip',
                                             tip: true
                                         },
                                         position: {
@@ -1148,37 +1148,35 @@ OncoKB.Instance.prototype = {
                                                 // Load variant information for all matching civicVariants,
                                                 // after which we construct the html for the qtip
                                                 var promises = matchingCivicVariants.map(self.civicService.getCivicVariant, self);
-                                                // Use apply, because when doesn't seem to support arrays
+                                                // Use apply, because 'when' doesn't support arrays
                                                 $.when.apply($, promises)
                                                     .done(function () {
-
                                                         var mainMatchingCivicVariant = matchingCivicVariants[0];
-
-                                                        var url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicGene.id +
-                                                            '/summary/variants/' + mainMatchingCivicVariant.id + '/summary#variant';
-                                                        var civicHTML = '<div>' +
-                                                            '<a href="' + url + '" target="_blank">CIVIC</a> entries: ';
-
-                                                        // List number of entries by type
-                                                        var entries = [];
-                                                        $.each(mainMatchingCivicVariant.evidence, function (key, value) {
-                                                            entries.push(key.toLowerCase() + ': ' + value);
+                                                        
+                                                        // Build html for list of variants
+                                                        var variantsHTML = '';
+                                                        matchingCivicVariants.forEach(function(variant) {
+                                                            
+                                                            // Build entry types text
+                                                            var entries = [];
+                                                            $.each(variant.evidence, function (key, value) {
+                                                                entries.push(key.toLowerCase() + ': ' + value);
+                                                            });
+                                                            variant.entryTypes = entries.join(', ') + '.';
+                                                            
+                                                            // Build the html from the variant and the template
+                                                            var templateFn = _.template($('#civic-qtip-variant-item').html());
+                                                            variantsHTML += templateFn(variant);
                                                         });
-                                                        civicHTML += entries.join(', ') + '.';
-
-                                                        // Append list with matching variant descriptions
-                                                        civicHTML += "<ul>";
-                                                        matchingCivicVariants.forEach(function (civicVariant) {
-                                                            var url = 'https://civic.genome.wustl.edu/#/events/genes/' + civicGene.id +
-                                                                '/summary/variants/' + civicVariant.id + '/summary#variant';
-                                                            civicHTML += '<li>' + civicVariant.name + ': ' + civicVariant.description +
-                                                                ' <a href="' + url + '" target="_blank">More information.</a></li>'
-                                                        });
-                                                        civicHTML += "</ul>";
-
-                                                        civicHTML += 'More and updated information in <a href="' + url + '" target="_blank">CIVIC</a>.';
-                                                        civicHTML += "</div>";
-                                                        api.set('content.title', 'Civic Variants')
+                                                        
+                                                        //Build main html and update the qtip
+                                                        vars = {
+                                                            title: "CIViC Variants",
+                                                            variantsHTML: variantsHTML,
+                                                            url: mainMatchingCivicVariant.url
+                                                        };
+                                                        var templateFn = _.template($('#civic-qtip').html());
+                                                        civicHTML = templateFn(vars);
                                                         api.set('content.text', civicHTML);
                                                     })
                                                     .fail(function() {
