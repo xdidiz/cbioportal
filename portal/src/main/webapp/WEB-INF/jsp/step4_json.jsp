@@ -79,6 +79,8 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Alia
     }
 %></textarea>
 
+<p id="genestatus"></p>
+
 <div style="padding-bottom:5px;margin-left:-3px;">
        <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
 </div>
@@ -95,8 +97,6 @@ name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: 
         out.print(geneSetListWithSemis);
     }
 %></textarea>
-
-<p id="genestatus"></p>
 
 </div>
 <script type='text/javascript'>
