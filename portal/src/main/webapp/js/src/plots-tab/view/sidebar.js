@@ -13,7 +13,8 @@ var sidebar = (function() {
     	}
     	
     	// check genetic profile data
-    	if (metaData.getGeneticProfilesMeta(window.QuerySession.getQueryGenes()[0]).length !== 0) {
+    	if (window.QuerySession.getQueryGenes() !== null &&
+    			metaData.getGeneticProfilesMeta(window.QuerySession.getQueryGenes()[0]).length !== 0) {
     		geneProfileData = true;
     	}
     	
@@ -24,7 +25,8 @@ var sidebar = (function() {
     		}
     		
 		// check geneSet data
-    	if (metaData.getGeneSetsMeta(window.QuerySession.getQueryGenesets()[0]).length !== 0) {
+    	if (window.QuerySession.getQueryGenesets() !== null &&
+    			metaData.getGeneSetsMeta(window.QuerySession.getQueryGenesets()[0]).length !== 0) {
     		geneSetsData = true;
     	}
     	
