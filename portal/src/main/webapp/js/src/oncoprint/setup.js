@@ -785,7 +785,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				return QuerySession.getPatientGsvaData()
 				.then(function (gsva_data_by_line) {
 				    return utils.timeoutSeparatedLoop(Object.keys(State.geneset_tracks), function(gs_line, i) {
-					console.log("geneset data retrieved, populating sample data for track " + gsva_data_by_line[gs_line].hugo_gene_symbol);
+					console.log("gene set data retrieved, populating sample data for track " + gsva_data_by_line[gs_line].geneset_id);
 					var gs_id = State.geneset_tracks[gs_line];
 					oncoprint.setTrackData(gs_id, gsva_data_by_line[gs_line].oncoprint_data, 'uid');
 					// TODO: use something more appropriate than makeHeatmapTrackTooltip
@@ -1176,10 +1176,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			},
 			'has_column_spacing': false,
 			'track_padding': 0,
-			'label': geneset_data_by_line[i].gs_name,
+			'label': geneset_data_by_line[i].geneset_id,
 			'target_group': 3,
 			'removable': true,
-			'description': geneset_data_by_line[i].gs_name,
+			'description': geneset_data_by_line[i].geneset_id,
 		    };
 		    var new_gs_id = oncoprint.addTracks([track_params])[0];
 		    gs_ids.push(new_gs_id);
