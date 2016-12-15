@@ -3126,19 +3126,22 @@ def validate_study(study_dir, portal_instance, logger, relaxed_mode):
             if validator is None:
                 continue
             validator.validate()
-            
-    # in case of gsva data, we need to compare the score and pvalue data files
+	        
+    # in case of gsva data, both score and p-value data must be present
     if any(m in validators_by_meta_type for m in ("meta_gsva_pvalues", "meta_gsva_scores")):
         ### Check if both files are present
         if not "meta_gsva_pvalues" in validators_by_meta_type:
             logger.error(
-            'meta GSVA pvalue file is missing, we should include this with the score file')
+            'Required meta GSVA pvalue file is missing')
             
         if not "meta_gsva_scores" in validators_by_meta_type:
             logger.error(
-            'meta GSVA score file is missing, we should include this with the pvalue file')
+            'Required meta GSVA score file is missing')
 
-        pass 
+        if not "meta_expression" in validators_by_meta_type:
+			logger.error(
+			'Required meta expression file is missing.'
+			)
 
     # finally validate the case list directory if present
     case_list_dirname = os.path.join(study_dir, 'case_lists')
