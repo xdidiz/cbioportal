@@ -1082,19 +1082,19 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	    var sample_id, sample_score;
 	    for (i = 0; i < profile_data.length; i++) {
 		geneset_id = profile_data[i].geneticEntityId;
-		sample_id = profile_data[i].sample_id;
+		sample_id = profile_data[i].sampleId;
 		sample_score = parseFloat(profile_data[i].value);
 		case_id = (sample_or_patient === "sample" ? sample_id : sample_to_patient_map[sample_id]);
-		if (data_by_id[gene][case_id] === null) {
+		if (data_by_id[geneset_id][case_id].profile_data === null) {
 		    // set the initial value for this sample or patient
-		    data_by_id[gene][case_id].profile_data = sample_score;
+		    data_by_id[geneset_id][case_id].profile_data = sample_score;
 		} else if (sample_or_patient === "sample") {
 		    // this would be a programming error (unexpected output from getGeneticDataBySample)
 		    throw new Error("Unexpectedly received multiple gene set profile data for one sample");
 		} else {
 		    // aggregate samples for this patient by selecting the highest absolute (GSVA-)score
-		    if (Math.abs(sample_score) > Math.abs(data_by_id[gene][case_id].profile_data)) {
-			data_by_id[gene][case_id].profile_data = sample_score;
+		    if (Math.abs(sample_score) > Math.abs(data_by_id[geneset_id][case_id].profile_data)) {
+			data_by_id[geneset_id][case_id].profile_data = sample_score;
 		    }
 		}
 	    }
