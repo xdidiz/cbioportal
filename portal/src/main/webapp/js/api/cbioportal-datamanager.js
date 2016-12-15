@@ -1481,16 +1481,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 				genesetProfile = profile;
 			    }
 			}
-			// TODO: replace this mockery and resolve with an actual profile
-			fetch_promise.resolve({
-			    datatype: 'GSVA-SCORE',
-			    description: 'Gene set variation analysis scores for the samples in this study',
-			    genetic_alteration_type: 'GENESET_SCORE',
-			    id: geneticProfiles[0].study_id + '_gsva_scores',
-			    name: 'GSVA scores',
-			    show_profile_in_analysis_tab: null,
-			    study_id: geneticProfiles[1].study_id
-			});
+			fetch_promise.resolve(genesetProfile);
 		    }).fail(function () {
 			fetch_promise.reject();
 		    });
@@ -1505,18 +1496,13 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		    self.getSelectedGsvaProfile()
 		    .then(function (gsvaProfile) {
 			console.log("fetching uncached sample-level GSVA data.");
-			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
-			return self.getSampleHeatmapData();
-		    }).then(function (copiedHeatmapData) {
-			var trackList = []
-			for (i = 0; i < copiedHeatmapData.length; i++) {
-			    heatmapDataTrack = copiedHeatmapData[i];
-			    var dataTrack = {};
-			    dataTrack.gs_name = "gene set " + heatmapDataTrack.hugo_gene_symbol;
-			    dataTrack.genetic_profile_id = heatmapDataTrack.genetic_profile_id;
-			    dataTrack.oncoprint_data = heatmapDataTrack.oncoprint_data;
-			    trackList.push(dataTrack);
+			var trackListPromise = [];
+			if (gsvaProfile !== null) {
+			    trackListPromise = getGenesetData.call(
+				    self, gsvaProfile.id, self.getQueryGenesets(), "sample");
 			}
+			return trackListPromise;
+		    }).done(function (trackList) {
 			fetch_promise.resolve(trackList);
 		    }).fail(function () {
 			fetch_promise.reject();
@@ -1531,19 +1517,14 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		function (self, fetch_promise) {
 		    self.getSelectedGsvaProfile()
 		    .then(function (gsvaProfile) {
-			console.log("fetching uncached sample-level GSVA data.");
-			// TODO: retrieve actual gene sets instead of substituting expression heatmap data
-			return self.getPatientHeatmapData();
-		    }).then(function (copiedHeatmapData) {
-			var trackList = []
-			for (i = 0; i < copiedHeatmapData.length; i++) {
-			    heatmapDataTrack = copiedHeatmapData[i];
-			    var dataTrack = {};
-			    dataTrack.gs_name = "gene set " + heatmapDataTrack.hugo_gene_symbol;
-			    dataTrack.genetic_profile_id = heatmapDataTrack.genetic_profile_id;
-			    dataTrack.oncoprint_data = heatmapDataTrack.oncoprint_data;
-			    trackList.push(dataTrack);
+			console.log("fetching uncached patient-level GSVA data.");
+			var trackListPromise = [];
+			if (gsvaProfile !== null) {
+			    trackListPromise = getGenesetData.call(
+				    self, gsvaProfile.id, self.getQueryGenesets(), "patient");
 			}
+			return trackListPromise;
+		    }).done(function (trackList) {
 			fetch_promise.resolve(trackList);
 		    }).fail(function () {
 			fetch_promise.reject();
