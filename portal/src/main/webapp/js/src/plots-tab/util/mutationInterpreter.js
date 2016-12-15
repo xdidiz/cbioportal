@@ -48,7 +48,7 @@ var mutationInterpreter = (function() {
                     }
                     return mutationStyle.getSymbol("non");
                 }                
-            } else if (clinical_vs_clinical() || gsva_vs_gsva()) {
+            } else if (clinical_vs_clinical() || gsva_vs_gsva() || gsva_vs_clinical()) {
                 
             }
         },
@@ -78,13 +78,13 @@ var mutationInterpreter = (function() {
                 } else {
                     return mutationStyle.getFill("non");
                 }                  
-            } else if (clinical_vs_clinical() || gsva_vs_gsva()) {
+            } else if (clinical_vs_clinical() || gsva_vs_gsva() || gsva_vs_clinical()) {
             	return mutationStyle.getFill("clin_clin");
             }
 
         },
         getOpacity: function() {
-        	if (clinical_vs_clinical() || gsva_vs_gsva()) {
+        	if (clinical_vs_clinical() || gsva_vs_gsva() || gsva_vs_clinical()) {
             	return mutationStyle.getOpacity("clin_clin");
             }
         	else {
@@ -117,7 +117,7 @@ var mutationInterpreter = (function() {
                 } else {
                     return mutationStyle.getStroke("non");
                 }                  
-            } else if (clinical_vs_clinical() || gsva_vs_gsva()) {
+            } else if (clinical_vs_clinical() || gsva_vs_gsva() || gsva_vs_clinical()) {
             	return mutationStyle.getStroke("clin_clin");
             }
         }
