@@ -1112,6 +1112,45 @@ OncoKB.Instance.prototype = {
                     }
                     }
                 });
+                $(target).find('.annotation-item.civic-gene').each(function() {
+                    var geneSymbol = $(this).attr('geneSymbol');
+                    $(this).empty(); // remove spinner image
+                    if (geneSymbol != null) {
+                        var civicGene = self.civicService.getCivicGene(geneSymbol);
+                        if (civicGene) {
+                            $(this).append('<i class="civic-image"></i>');
+                            $(this).one('mouseenter', function () {
+                                $(this).qtip({
+                                    content: {text: '<span><img src="images/loader.gif" alt="loading" /></span>'},
+                                    show: {ready: true},
+                                    hide: {fixed: true, delay: 500},
+                                    style: {
+                                        classes: 'qtip-light qtip-shadow oncokb-card-qtip',
+                                        tip: true
+                                    },
+                                    position: {
+                                        my: 'center left',
+                                        at: 'center right'
+                                    },
+                                    events: {
+                                        render: function (event, api) {
+                                            //Build html and update the qtip
+                                            vars = {
+                                                title: "CIViC Gene",
+                                                gene: civicGene,
+                                                variantsHTML: "",
+                                                url: civicGene.url
+                                            };
+                                            var templateFn = _.template($('#civic-qtip').html());
+                                            civicHTML = templateFn(vars);
+                                            api.set('content.text', civicHTML);
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+                });
             }
 
             if (typeof  type === 'undefined' || type === 'alteration') {
