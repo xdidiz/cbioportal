@@ -185,6 +185,14 @@ public class QueryBuilder extends HttpServlet {
 	    }
         geneList = servletXssUtil.getCleanInput(geneList);
         httpServletRequest.setAttribute(GENE_LIST, geneList);
+        
+    //  Get User Defined Gene Sets List
+	    String geneSetList = httpServletRequest.getParameter(GENESET_LIST);
+	    if (httpServletRequest instanceof XssRequestWrapper) {
+		    geneSetList = ((XssRequestWrapper)httpServletRequest).getRawParameter(GENESET_LIST);
+	    }
+        geneSetList = servletXssUtil.getCleanInput(geneSetList);
+        httpServletRequest.setAttribute(GENESET_LIST, geneSetList);
 
         //  Get all Cancer Types
         try {
