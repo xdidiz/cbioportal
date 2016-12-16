@@ -252,12 +252,12 @@ var CoExpView = (function() {
                     "fnRowCallback": function(nRow, aData) {
                         $('td:eq(0)', nRow).css("font-weight", "bold");
                         $('td:eq(2)', nRow).css("font-weight", "bold");
-                        if (aData[2] > 0) {
+                        if (aData[1] > 0) {
                             $('td:eq(2)', nRow).css("color", "#3B7C3B");
                         } else {
                             $('td:eq(2)', nRow).css("color", "#B40404");
                         }
-                        if (aData[3] > 0) {
+                        if (aData[2] > 0) {
                             $('td:eq(3)', nRow).css("color", "#3B7C3B");
                         } else {
                             $('td:eq(3)', nRow).css("color", "#B40404");
@@ -318,7 +318,7 @@ var CoExpView = (function() {
                         $("#" + Names.plotId).empty();
                         $("#" + Names.plotId).append("<img style='padding:220px;' src='images/ajax-loader.gif' alt='loading' />");
                         var coexpPlots = new CoexpPlots();
-                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[2], aData[3], $("#coexp-profile-selector :selected").val());
+                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[1], aData[2], $("#coexp-profile-selector :selected").val());
                     }
                 });
             }
@@ -446,7 +446,7 @@ var CoExpView = (function() {
 
     function getGeneticProfileCallback(result) {
         var _genes = window.QuerySession.getQueryGenes();
-        _genes_and_genesets = _genes + window.QuerySession.getQueryGenesets();
+        //_genes_and_genesets = _genes + window.QuerySession.getQueryGenesets();
         //Init Profile selector
         var _profile_list = {};
         _.each(_genes, function(_gene) {
@@ -457,7 +457,7 @@ var CoExpView = (function() {
             $("#coexp-profile-selector-dropdown").hide();
         }
         var coExpSubTabView = new CoExpSubTabView();
-        coExpSubTabView.init(_genes_and_genesets[0]);
+        coExpSubTabView.init(_genes[0]);
     }
     function getGeneSetsProfileCallback(result) {
         var _genesets = window.QuerySession.getQueryGenesets();
