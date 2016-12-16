@@ -144,6 +144,7 @@ var CoExpView = (function() {
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
                 var geneIds = window.QuerySession.getQueryGenes();
+                geneIds += window.QuerySession.getQueryGenesets();
                 $.each(geneIds, function(index, value) {
                     //Distroy all the subview instances
                     var element =  document.getElementById(Prefix.tableDivPrefix + cbio.util.safeProperty(value));
@@ -446,7 +447,6 @@ var CoExpView = (function() {
 
     function getGeneticProfileCallback(result) {
         var _genes = window.QuerySession.getQueryGenes();
-        //_genes_and_genesets = _genes + window.QuerySession.getQueryGenesets();
         //Init Profile selector
         var _profile_list = {};
         _.each(_genes, function(_gene) {
@@ -458,20 +458,6 @@ var CoExpView = (function() {
         }
         var coExpSubTabView = new CoExpSubTabView();
         coExpSubTabView.init(_genes[0]);
-    }
-    function getGeneSetsProfileCallback(result) {
-        var _genesets = window.QuerySession.getQueryGenesets();
-        //Init Profile selector
-        var _profile_list = {};
-        _.each(_genesets, function(_genesets) {
-            _profile_list = _.extend(_profile_list, result[_genesets]);
-        });
-        ProfileSelector.init(_profile_list);
-        if (profileList.length === 1) {
-            $("#coexp-profile-selector-dropdown").hide();
-        }
-        var coExpSubTabView = new CoExpSubTabView();
-        coExpSubTabView.init(_genesets[0]);
     }
 
     return {
@@ -490,16 +476,6 @@ var CoExpView = (function() {
                 genetic_entity_type: "GENE"
             };
             $.post("getGeneticProfile.json", paramsGetProfiles, getGeneticProfileCallback, "json");
-            //if (window.QuerySession.getQueryGenesets() != null) {
-            	//var paramsGetGeneSets = {
-        	      //      cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-        	      //      case_set_id: window.QuerySession.getCaseSetId(),
-        	      //      case_ids_key: window.QuerySession.getCaseIdsKey(),
-        	      //      genetic_entity_list: window.QuerySession.getQueryGenesets().join(" "),
-        	      //      genetic_entity_type: "GENESET"
-        	      //  };
-        	      //  $.post("getGeneticProfile.json", paramsGetGeneSets, getGeneSetsProfileCallback, "json");
-            //}
         },
         has_mutation_data: function() {
             return has_mutation_data;
