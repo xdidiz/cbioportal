@@ -1172,6 +1172,7 @@ OncoKB.Instance.prototype = {
                                                         //Build main html and update the qtip
                                                         vars = {
                                                             title: "CIViC Variants",
+                                                            gene: civicGene,
                                                             variantsHTML: variantsHTML,
                                                             url: mainMatchingCivicVariant.url
                                                         };

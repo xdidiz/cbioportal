@@ -352,6 +352,12 @@
 
 
 /* Civic specific */
+.civic-qtip-content {
+    max-height: 400px;
+    overflow: auto;
+}
+
+.civic-qtip-gene,
 .civic-qtip-variant {
     margin: 5px 9px;
 }
@@ -367,10 +373,12 @@
     background: #ece3f2;
 }
 
+.civic-qtip-gene-name a,
 .civic-qtip-variant-name a {
     font-weight: bold;
     color: #1974b8;
 }
+
 
 /* Annotation icon listed in the tables */
 .civic-image {

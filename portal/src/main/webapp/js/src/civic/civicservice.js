@@ -19,7 +19,11 @@ function CivicService() {
                     if (record.variants && record.variants.length > 0) {
                         var civicGene = {
                             id: record.id,
-                            variants: {} 
+                            name: record.name,
+                            description: record.description,
+                            url: 'https://civic.genome.wustl.edu/#/events/genes/'
+                                + record.id + '/summary',
+                            variants: {},
                         };
                         civicGenes[record.name] = civicGene;
                         var variants = civicGene.variants;

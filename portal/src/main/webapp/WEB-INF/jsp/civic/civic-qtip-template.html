@@ -2,17 +2,25 @@
     <div class="civic-qtip">
         <div class="z-depth-2">
             <div class="col s12 tip-header">{{title}}</div>
-            <div class="col s12">
-                <ul>
-                    {{variantsHTML}}
-                </ul>
-            </div>
 
-            <div class="item disclaimer">
-            <span>
-              Disclaimer: This resource is intended for purely research purposes.
-              It should not be used for emergencies or medical or professional advice.
-            </span>
+            <div class="col s12 civic-qtip-content">
+                <div class="col s12 civic-qtip-gene">
+                    <span class="civic-qtip-gene-name"><a href="{{gene.url}}" target="_blank">{{gene.name}}</a></span>
+                    - {{gene.description}}
+                </div>
+    
+                <div class="col s12">
+                    <ul>
+                        {{variantsHTML}}
+                    </ul>
+                </div>
+    
+                <div class="item disclaimer">
+                <span>
+                  Disclaimer: This resource is intended for purely research purposes.
+                  It should not be used for emergencies or medical or professional advice.
+                </span>
+                </div>
             </div>
     
             <div class="item footer">
