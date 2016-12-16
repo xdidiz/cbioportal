@@ -171,6 +171,46 @@ public final class DaoGeneticProfile {
         return byStableId.get(stableId);
     }
 
+    /**
+     * This method returns the genetic profiles that refer to the given referredGeneticProfileId.
+     * It also filters on the given alterationType such that only profiles of this type are 
+     * returned. 
+     * 
+     * @param alterationType: one of GeneticAlterationType
+     * @param referredGeneticProfile: the referred genetic profile
+     * @return
+     * @throws DaoException
+     */
+    public static List<GeneticProfile> getGeneticProfilesForAlterationTypeAndReferringTo(GeneticAlterationType alterationType,
+    		GeneticProfile referredGeneticProfile) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+        	List<GeneticProfile> result = new ArrayList<GeneticProfile>();
+            con = JdbcUtil.getDbConnection(DaoGene.class);
+            pstmt = con.prepareStatement
+                    ("SELECT * FROM genetic_profile " + 
+                    "where  " +
+                    "GENETIC_ALTERATION_TYPE = ? and " + 
+                    "GENETIC_PROFILE_ID in  " +
+                      "(SELECT REFERRING_GENETIC_PROFILE_ID " + 
+                        "FROM genetic_profile_link where REFERRED_GENETIC_PROFILE_ID = ?)");
+            pstmt.setString(1, alterationType.name());
+            pstmt.setInt(2, referredGeneticProfile.getGeneticProfileId());
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+            	GeneticProfile profileType = extractGeneticProfile(rs);
+            	result.add(profileType);
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneticProfile.class, con, pstmt, rs);
+        }
+    }
+    
     public static GeneticProfile getGeneticProfileById(int geneticProfileId) {
         return byInternalId.get(geneticProfileId);
     }
