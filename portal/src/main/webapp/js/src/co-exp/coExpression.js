@@ -65,6 +65,10 @@ var CoExpView = (function() {
                 $("#coexp-tabs-list").append("<li><a href='#" + Prefix.divPrefix + cbio.util.safeProperty(value) + 
                   "' class='coexp-tabs-ref'><span>" + value + "</span></a></li>");
             });
+            $.each(window.QuerySession.getQueryGenesets(), function(index, value) {
+                $("#coexp-tabs-list").append("<li><a href='#" + Prefix.divPrefix + cbio.util.safeProperty(value) + 
+                  "' class='coexp-tabs-ref'><span>" + value + "</span></a></li>");
+            });
         }
 
         function appendLoadingImgs() {
@@ -140,6 +144,7 @@ var CoExpView = (function() {
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
                 var geneIds = window.QuerySession.getQueryGenes();
+                geneIds += window.QuerySession.getQueryGenesets();
                 $.each(geneIds, function(index, value) {
                     //Distroy all the subview instances
                     var element =  document.getElementById(Prefix.tableDivPrefix + cbio.util.safeProperty(value));
@@ -200,7 +205,6 @@ var CoExpView = (function() {
                     "<thead style='font-size:70%;' >" +
                     "<tr>" + 
                     "<th>Correlated Gene</th>" +
-                    "<th>Cytoband</th>" + 
                     "<th>Pearson's Correlation</th>" +
                     "<th>Spearman's Correlation</th>" +
                     "</tr>" +
@@ -224,22 +228,17 @@ var CoExpView = (function() {
                             "sWidth": "56%"
                         },
                         {
-                            "bSearchable": true,
+                            "sType": 'coexp-absolute-value',
+                            //TODO: should be disabled; this is just a quick fix, otherwise the fnfilter would work on this column
+                            //"bSearchable": false, 
+                            "bSearchable": true, 
                             "aTargets": [ 1 ],
                             "sWidth": "22%"
                         },
                         {
                             "sType": 'coexp-absolute-value',
-                            //TODO: should be disabled; this is just a quick fix, otherwise the fnfilter would work on this column
-                            //"bSearchable": false, 
-                            "bSearchable": true, 
-                            "aTargets": [ 2 ],
-                            "sWidth": "22%"
-                        },
-                        {
-                            "sType": 'coexp-absolute-value',
                             "bSearchable": false,
-                            "aTargets": [ 3 ],
+                            "aTargets": [ 2 ],
                             "sWidth": "22%"
                         }
                     ],
@@ -254,12 +253,12 @@ var CoExpView = (function() {
                     "fnRowCallback": function(nRow, aData) {
                         $('td:eq(0)', nRow).css("font-weight", "bold");
                         $('td:eq(2)', nRow).css("font-weight", "bold");
-                        if (aData[2] > 0) {
+                        if (aData[1] > 0) {
                             $('td:eq(2)', nRow).css("color", "#3B7C3B");
                         } else {
                             $('td:eq(2)', nRow).css("color", "#B40404");
                         }
-                        if (aData[3] > 0) {
+                        if (aData[2] > 0) {
                             $('td:eq(3)', nRow).css("color", "#3B7C3B");
                         } else {
                             $('td:eq(3)', nRow).css("color", "#B40404");
@@ -320,7 +319,7 @@ var CoExpView = (function() {
                         $("#" + Names.plotId).empty();
                         $("#" + Names.plotId).append("<img style='padding:220px;' src='images/ajax-loader.gif' alt='loading' />");
                         var coexpPlots = new CoexpPlots();
-                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[2], aData[3], $("#coexp-profile-selector :selected").val());
+                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[1], aData[2], $("#coexp-profile-selector :selected").val());
                     }
                 });
             }
@@ -351,7 +350,6 @@ var CoExpView = (function() {
                 $.each(_result, function(i, obj) {
                     var tmp_arr = [];
                     tmp_arr.push(obj.gene);
-                    tmp_arr.push(obj.cytoband);
                     tmp_arr.push(obj.pearson.toFixed(2));
                     tmp_arr.push(obj.spearman.toFixed(2));
                     coexpTableArr.push(tmp_arr);
