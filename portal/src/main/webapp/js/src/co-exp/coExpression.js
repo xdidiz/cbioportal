@@ -65,6 +65,10 @@ var CoExpView = (function() {
                 $("#coexp-tabs-list").append("<li><a href='#" + Prefix.divPrefix + cbio.util.safeProperty(value) + 
                   "' class='coexp-tabs-ref'><span>" + value + "</span></a></li>");
             });
+            $.each(window.QuerySession.getQueryGenesets(), function(index, value) {
+                $("#coexp-tabs-list").append("<li><a href='#" + Prefix.divPrefix + cbio.util.safeProperty(value) + 
+                  "' class='coexp-tabs-ref'><span>" + value + "</span></a></li>");
+            });
         }
 
         function appendLoadingImgs() {
@@ -200,7 +204,6 @@ var CoExpView = (function() {
                     "<thead style='font-size:70%;' >" +
                     "<tr>" + 
                     "<th>Correlated Gene</th>" +
-                    "<th>Cytoband</th>" + 
                     "<th>Pearson's Correlation</th>" +
                     "<th>Spearman's Correlation</th>" +
                     "</tr>" +
@@ -224,22 +227,17 @@ var CoExpView = (function() {
                             "sWidth": "56%"
                         },
                         {
-                            "bSearchable": true,
+                            "sType": 'coexp-absolute-value',
+                            //TODO: should be disabled; this is just a quick fix, otherwise the fnfilter would work on this column
+                            //"bSearchable": false, 
+                            "bSearchable": true, 
                             "aTargets": [ 1 ],
                             "sWidth": "22%"
                         },
                         {
                             "sType": 'coexp-absolute-value',
-                            //TODO: should be disabled; this is just a quick fix, otherwise the fnfilter would work on this column
-                            //"bSearchable": false, 
-                            "bSearchable": true, 
-                            "aTargets": [ 2 ],
-                            "sWidth": "22%"
-                        },
-                        {
-                            "sType": 'coexp-absolute-value',
                             "bSearchable": false,
-                            "aTargets": [ 3 ],
+                            "aTargets": [ 2 ],
                             "sWidth": "22%"
                         }
                     ],
@@ -351,7 +349,6 @@ var CoExpView = (function() {
                 $.each(_result, function(i, obj) {
                     var tmp_arr = [];
                     tmp_arr.push(obj.gene);
-                    tmp_arr.push(obj.cytoband);
                     tmp_arr.push(obj.pearson.toFixed(2));
                     tmp_arr.push(obj.spearman.toFixed(2));
                     coexpTableArr.push(tmp_arr);
@@ -449,6 +446,7 @@ var CoExpView = (function() {
 
     function getGeneticProfileCallback(result) {
         var _genes = window.QuerySession.getQueryGenes();
+        _genes_and_genesets = _genes + window.QuerySession.getQueryGenesets();
         //Init Profile selector
         var _profile_list = {};
         _.each(_genes, function(_gene) {
@@ -459,7 +457,21 @@ var CoExpView = (function() {
             $("#coexp-profile-selector-dropdown").hide();
         }
         var coExpSubTabView = new CoExpSubTabView();
-        coExpSubTabView.init(_genes[0]);
+        coExpSubTabView.init(_genes_and_genesets[0]);
+    }
+    function getGeneSetsProfileCallback(result) {
+        var _genesets = window.QuerySession.getQueryGenesets();
+        //Init Profile selector
+        var _profile_list = {};
+        _.each(_genesets, function(_genesets) {
+            _profile_list = _.extend(_profile_list, result[_genesets]);
+        });
+        ProfileSelector.init(_profile_list);
+        if (profileList.length === 1) {
+            $("#coexp-profile-selector-dropdown").hide();
+        }
+        var coExpSubTabView = new CoExpSubTabView();
+        coExpSubTabView.init(_genesets[0]);
     }
 
     return {
@@ -478,6 +490,16 @@ var CoExpView = (function() {
                 genetic_entity_type: "GENE"
             };
             $.post("getGeneticProfile.json", paramsGetProfiles, getGeneticProfileCallback, "json");
+            //if (window.QuerySession.getQueryGenesets() != null) {
+            	//var paramsGetGeneSets = {
+        	      //      cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+        	      //      case_set_id: window.QuerySession.getCaseSetId(),
+        	      //      case_ids_key: window.QuerySession.getCaseIdsKey(),
+        	      //      genetic_entity_list: window.QuerySession.getQueryGenesets().join(" "),
+        	      //      genetic_entity_type: "GENESET"
+        	      //  };
+        	      //  $.post("getGeneticProfile.json", paramsGetGeneSets, getGeneSetsProfileCallback, "json");
+            //}
         },
         has_mutation_data: function() {
             return has_mutation_data;
