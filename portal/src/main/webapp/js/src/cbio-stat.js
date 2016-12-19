@@ -75,7 +75,7 @@ cbio.stat = (function() {
     }
     
     /**
-     * @param casesAndGenes: Object with sample(or patient)StableId and map 
+     * @param casesAndEntitites: Object with sample(or patient)Id and map 
      * of geneticEntity/value pairs. Example:
      *  
      * var a =
@@ -90,22 +90,23 @@ cbio.stat = (function() {
      *   
      *   Use: cbio.stat.hclusterCases(a);
      */
-    var hclusterCases = function(casesAndGenes) {
+    var hclusterCases = function(casesAndEntitites) {
     	var refEntityList = null;
     	var inputItems = [];
     	//add _orderedValueList to all items, so the values are 
     	//compared in same order:
-    	for (var caseId in casesAndGenes) {
-    		if (casesAndGenes.hasOwnProperty(caseId)) {
-    			var caseObj = casesAndGenes[caseId];
+    	for (var caseId in casesAndEntitites) {
+    		if (casesAndEntitites.hasOwnProperty(caseId)) {
+    			var caseObj = casesAndEntitites[caseId];
     			var inputItem = new Object();
     			inputItem.caseId = caseId;
-    			inputItem.orderedValueList = [];//wrong...has to be new object....
-    			if (refEntityList == null)
+    			inputItem.orderedValueList = [];
+    			if (refEntityList == null) {
     				refEntityList = getRefList(caseObj);
+    			}
     			for (var j = 0; j < refEntityList.length; j++) {
-        			var geneName = refEntityList[j];
-        			var value = caseObj[geneName];
+        			var entityId = refEntityList[j];
+        			var value = caseObj[entityId];
         			inputItem.orderedValueList.push(value);
         		}
     			inputItems.push(inputItem);
@@ -117,36 +118,50 @@ cbio.stat = (function() {
     
     var getRefList = function(caseItem) {
     	var result = [];
-    	for (var gene in caseItem) {
-			if (caseItem.hasOwnProperty(gene)) {
-				result.push(gene);
+    	for (var entityId in caseItem) {
+			if (caseItem.hasOwnProperty(entityId)) {
+				result.push(entityId);
 			}
 		}
     	return result;
     }
     
     /**
-     * @param samples: Object with geneticEntityStableId and map 
-     * of sampleStableId/value pairs
+     * @param samples: Object with geneticEntityId and map 
+     * of sampleId/value pairs
      * 
      */
-    var hclusterGeneticEntities = function(samplesAndGenes) {
-    	//TODO...
-    	
-    	var refEntityList = samplesAndGenes[0];
-    	//add _orderedValueList to all items, so the values are 
+    var hclusterGeneticEntities = function(casesAndEntitites) {
+    	var refEntityList = null;
+    	var inputItems = [];
+    	var refCaseIdList = [];
+    	//add orderedValueList to all items, so the values are 
     	//compared in same order:
-    	var genesAndSamples = [];
-    	for (var i = 0; i < refEntityList.length; i++) {
-    		var geneName = ""; //TODO
-    		genesAndSamples[geneName] = new Object();
-    		genesAndSamples[geneName]._orderedValueList = [];
-    		for (var j = 0; j < samplesAndGenes.length; j++) {
-    			genesAndSamples[geneName]._orderedValueList.push(samplesAndGenes[j][geneName]);
+    	for (var caseId in casesAndEntitites) {
+    		if (casesAndEntitites.hasOwnProperty(caseId)) {
+    			var caseObj = casesAndEntitites[caseId];
+    			if (refEntityList == null) {
+    				refEntityList = getRefList(caseObj);
+    			}
+    			//refCaseIdList:
+    			refCaseIdList.push(caseId);
     		}
     	}
-    	
-    	var clusters = clusterfck.hcluster(genesAndSamples, internalPearsonDist);
+    	//iterate over genes, and get sample values:
+		for (var i = 0; i < refEntityList.length; i++) {
+			var entityId = refEntityList[i];
+   			var inputItem = new Object();
+   			inputItem.entityId = entityId;
+   			inputItem.orderedValueList = [];
+   			for (var j = 0; j < refCaseIdList.length; j++) {
+   				var caseId = refCaseIdList[j];
+   				var caseObj = casesAndEntitites[caseId];
+        		var value = caseObj[entityId];
+        		inputItem.orderedValueList.push(value);
+   	    	}
+   	    	inputItems.push(inputItem);
+    	}
+    	var clusters = clusterfck.hcluster(inputItems, internalPearsonDist);
     	return clusters.clusters(1)[0];
     }
   	

@@ -1299,19 +1299,29 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 				//iterate over genetic entities and get the sample data (heatmap data has genetic entityId as key):
 				for (var j = 0; j < heatmapData.length; j++) {
 					var entityId = heatmapData[j].hugo_gene_symbol;
-					var value = heatmapData[j].oncoprint_data[i].profile_data;//...find sample...
+					var value = heatmapData[j].oncoprint_data[i].profile_data;
 					cluster_input[case_ids[i]][entityId] = value;
 				}					
 			}
 			//do hierarchical clustering:
-			var clusterOrder = cbio.stat.hclusterCases(cluster_input);
+			var clusterOrder = cbio.stat.hclusterCases(cluster_input);//should go to worker 1
 			//get result in "uid format":
 			var uids = [];
 			for (var i = 0; i < clusterOrder.length; i++) {
 				var uid_case = case_ui_map[study_id][clusterOrder[i].caseId];
 				uids.push(uid_case);
 			}
-			def.resolve(uids); 
+			//get entityIds in order:
+			var entityIds = [];
+			clusterOrder = cbio.stat.hclusterGeneticEntities(cluster_input);//should go to worker 2
+			for (var i = 0; i < clusterOrder.length; i++) {
+				entityIds.push(clusterOrder[i].entityId);
+			}
+			//setup and resolve result object:
+			var result = new Object();
+			result.sampleUidsInClusteringOrder = uids;
+			result.entityIdsInClusteringOrder = entityIds;
+			def.resolve(result); 
 			return def.promise();
 		},
 	'getWebServiceGenomicEventData': makeCachedPromiseFunction(

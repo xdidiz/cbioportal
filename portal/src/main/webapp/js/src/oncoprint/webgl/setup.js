@@ -1598,8 +1598,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			var heatmap_data_deferred = State.using_sample_data ? QuerySession.getSampleHeatmapData() : QuerySession.getPatientHeatmapData();
 			var case_ids_deferred =  State.using_sample_data ? QuerySession.getSampleIds() : QuerySession.getPatientIds();
 			$.when(QuerySession.getCaseUIDMap(), heatmap_data_deferred, case_ids_deferred).then(function (case_uid_map, heatmap_data, case_ids) {
-				$.when(QuerySession.getClusteringOrder(case_uid_map, heatmap_data, case_ids)).then(function (sampleUidsInClusteringOrder) {
-					oncoprint.setSortConfig({'type': 'order', order: sampleUidsInClusteringOrder});
+				$.when(QuerySession.getClusteringOrder(case_uid_map, heatmap_data, case_ids)).then(function (clusteringResult) {
+					oncoprint.setSortConfig({'type': 'order', order: clusteringResult.sampleUidsInClusteringOrder});
+					oncoprint.setTrackGroupOrder(1, clusteringResult.entityIdsInClusteringOrder);
 				});
 			});
         }
