@@ -1171,6 +1171,25 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 	    });
 	    return def.promise();
 	},
+	'getTrackUIDMap': function(groupId) {
+		var result = {};
+		//get tracks and find genes to build map:
+		var trackIds = oncoprint.model.getTrackGroups()[groupId];//oncoprint.model.getTracks();
+		for (var i = 0; i < trackIds.length; i++) {
+			var trackId = trackIds[i];
+			//Assumption: 
+			//trackId==0 is clinical tracks group
+			//trackId==1 is gene/traditional oncoprint tracks
+			//trackId==2 is heatmap tracks
+			var name = 'gene';
+			if (groupId === 2) {
+				name = 'hugo_gene_symbol'; //due to some internal inconsistency in attribute naming in oncoprint
+			}
+			var gene = oncoprint.model.getTrackData(trackId)[0][name]; //TODO will need  if/else to support GENESET
+			result[gene] = trackId;
+		}
+		return result;
+	},
 	'getStudySampleMap': function () {
 	    return deepCopyObject(this.study_sample_map);
 	},
@@ -1287,7 +1306,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 			fetch_promise.reject();
 		    });
 		}),
-	'getClusteringOrder': function (case_ui_map, heatmapData, case_ids) {
+	'getClusteringOrder': function (case_ui_map, track_uid_map, heatmapData, case_ids) {
 			var study_id = QuerySession.getCancerStudyIds()[0];
 
 			var def = new $.Deferred();
@@ -1311,16 +1330,17 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 				var uid_case = case_ui_map[study_id][clusterOrder[i].caseId];
 				uids.push(uid_case);
 			}
-			//get entityIds in order:
-			var entityIds = [];
+			//get entityUids in order:
+			var entityUids = [];
 			clusterOrder = cbio.stat.hclusterGeneticEntities(cluster_input);//should go to worker 2
 			for (var i = 0; i < clusterOrder.length; i++) {
-				entityIds.push(clusterOrder[i].entityId);
+				var trackUid = track_uid_map[clusterOrder[i].entityId];
+				entityUids.push(trackUid);
 			}
 			//setup and resolve result object:
 			var result = new Object();
 			result.sampleUidsInClusteringOrder = uids;
-			result.entityIdsInClusteringOrder = entityIds;
+			result.entityUidsInClusteringOrder = entityUids;
 			def.resolve(result); 
 			return def.promise();
 		},
