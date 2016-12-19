@@ -163,10 +163,10 @@ public class ImportGeneSetData extends ConsoleRunnable {
         
         // print warnings message with skipped genes
         if (skippedGenes > 0) {
-        System.out.println("\n" + skippedGenes + " times a gene was not found in local gene table. Possible reasons:\n"
-        		+ "1. The Entrez gene IDs are relatively new. In this case, consider adding them to database.\n"
-        		+ "2. The Entrez gene IDs are depricated. In that case, consider updating gene sets and recalculating GSVA scores.\n"
-        		+ "3. Invalid Entrez gene IDs. Please check .gmt file to verify genes are in Entrez gene ID format.\n");
+        System.err.println("\n" + skippedGenes + " times a gene was not found in local gene table. Possible reasons:\n"
+        		+ "1. The Entrez gene IDs are relatively new. Consider adding them to database.\n"
+        		+ "2. The Entrez gene IDs are depricated. Consider updating gene sets and recalculating GSVA scores.\n"
+        		+ "3. Invalid Entrez gene IDs. Please check .gmt file to verify genes are in Entrez gene ID format.\n\n");
         }
     }
     
