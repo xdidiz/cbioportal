@@ -1602,14 +1602,21 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 					function (case_uid_map, track_uid_map, heatmap_data, case_ids) {
 						$.when(QuerySession.getClusteringOrder(case_uid_map, track_uid_map, heatmap_data, case_ids)).then(
 								function (clusteringResult) {
+									LoadingBar.update(0.9);
 									oncoprint.setSortConfig({'type': 'order', order: clusteringResult.sampleUidsInClusteringOrder});
 									oncoprint.setTrackGroupOrder(heatmap_track_group_id, clusteringResult.entityUidsInClusteringOrder);
 									LoadingBar.hide();
 								});
 						//show progress bar:
 						LoadingBar.show();
+						LoadingBar.update(0.2);
 					    LoadingBar.msg("Clustering...");
-					    LoadingBar.update(50);
+					    //update progress bar every 0.2s:
+					    window.setInterval(function() {//TEST
+					    	var d = new Date();
+					    	var n = d.getMilliseconds();
+						    LoadingBar.update(n/1000);
+					    }, 200);
 					});
         }
 	    };
