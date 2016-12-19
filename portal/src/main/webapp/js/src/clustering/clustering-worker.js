@@ -21,9 +21,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-importScripts('clusterfck.min.js');
+importScripts('../../../js/lib/clusterfck.min.js');
 importScripts('../../../js/lib/jstat.min.js');
-
 
 /**
  * "Routing" logic for this worker, based on given message.
