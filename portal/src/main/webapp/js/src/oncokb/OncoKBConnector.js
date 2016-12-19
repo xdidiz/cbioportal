@@ -166,6 +166,7 @@ var OncoKB = (function(_, $) {
         this.id = id || 'OncoKB-Instance-' + new Date().getTime();
         this.variantUniqueIds = {}; // Unique variant list.
         this.civicService = CivicService();
+        this.civicGenes = {};
     }
 
     function EvidenceRequestItem(variant) {
@@ -835,6 +836,7 @@ OncoKB.Instance.prototype = {
 
         self.setVariantUniqueIds();
 
+        var geneSymbols = []
         for (var key in this.variants) {
             var variant = this.variants[key];
             var uniqueStr = variant.gene + variant.alteration + variant.tumorType + variant.consequence;
@@ -842,6 +844,9 @@ OncoKB.Instance.prototype = {
                 oncokbEvidenceRequestItems[uniqueStr] = new OncoKB.EvidenceRequestItem(variant);
             }
             oncokbEvidenceRequestItems[uniqueStr].ids.push(variant.id);
+            if (geneSymbols.indexOf(variant.gene) == -1) {
+                geneSymbols.push(variant.gene);
+            }
         }
 
         oncokbServiceData.queries = $.map(oncokbEvidenceRequestItems, function(value, index) {
@@ -889,7 +894,10 @@ OncoKB.Instance.prototype = {
                 console.log('POST failed.');
             });
         
-        var civicPromise = self.civicService.getInitPromise();
+        var civicPromise = self.civicService.getCivicGenes(geneSymbols)
+            .then(function(result) {
+                self.civicGenes = result;
+            });
         var promises = [oncokbPromise, civicPromise];
         
         // We're explicitly waiting for all promises to finish (done or fail).
@@ -1116,7 +1124,7 @@ OncoKB.Instance.prototype = {
                     var geneSymbol = $(this).attr('geneSymbol');
                     $(this).empty(); // remove spinner image
                     if (geneSymbol != null) {
-                        var civicGene = self.civicService.getCivicGene(geneSymbol);
+                        var civicGene = self.civicGenes[geneSymbol];
                         if (civicGene) {
                             $(this).append('<i class="civic-image"></i>');
                             $(this).one('mouseenter', function () {
@@ -1160,7 +1168,7 @@ OncoKB.Instance.prototype = {
                     $(this).empty(); // remove spinner image
                     if (geneSymbol != null && proteinChange != null) {
                         
-                        var civicGene = self.civicService.getCivicGene(geneSymbol);
+                        var civicGene = self.civicGenes[geneSymbol];
                         if (civicGene) {
                             // Look up matching civic variants
                             var matchingCivicVariants = self.civicService.getMatchingCivicVariants(civicGene.variants, proteinChange);

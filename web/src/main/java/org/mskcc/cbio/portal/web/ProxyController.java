@@ -216,27 +216,15 @@ public class ProxyController
     return responseEntity.getBody();
   }
 
-    @RequestMapping(value="/civic/genes", method = RequestMethod.GET)
-    public @ResponseBody String getCivicGenes(@RequestBody String body, HttpMethod method,
-                                              HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, IOException {
-        if (!enableCivic) {
-            response.sendError(403, "Civic service is disabled");
-            return "";
-        }
-        //TODO: For now, this is a poor man's method for batch retrieval of genes: we just get the whole list (hopefully)
-        String url = civicURL + "genes/?count=1000";
-        return respProxy(url, method, body, response);
-    }
-
-    @RequestMapping(value="/civic/genes/{id}", method = RequestMethod.GET)
-    public @ResponseBody String getCivicGenes(@PathVariable String id, @RequestParam("identifier_type") String identifier_type,
+    @RequestMapping(value="/civic/genes/{ids}", method = RequestMethod.GET)
+    public @ResponseBody String getCivicGenes(@PathVariable String ids, @RequestParam("identifier_type") String identifier_type,
                                               @RequestBody String body, HttpMethod method,
                                               HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, IOException {
         if (!enableCivic) {
             response.sendError(403, "Civic service is disabled");
             return "";
         }
-        String url = civicURL + "genes/" + id + "?identifier_type=" + identifier_type;
+        String url = civicURL + "genes/" + ids + "?identifier_type=" + identifier_type;
         return respProxy(url, method, body, response);
     }
 

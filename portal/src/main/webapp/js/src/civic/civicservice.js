@@ -1,55 +1,53 @@
 
 function CivicService() {
     
-    var civicGenes = {};
-    
-    function retrieveAllCivicGenes() {
-        return $.ajax({
-            type: 'GET',
-            url: 'api-legacy/proxy/civic/genes/',
-            dataType: 'json',
-            contentType: 'application/json',
-        }).then(function(result) {
-            if (_.isString(result)) {
-                result = $.parseJSON(result);
-            }
-            
-            if (result.records) {
-                result.records.forEach(function(record) {
-                    if (record.variants && record.variants.length > 0) {
+    var service = {
+        
+        getCivicGenes: function(geneSymbols) {
+            var ids = geneSymbols.join(',');
+            return $.ajax({
+                type: 'GET',
+                url: 'api-legacy/proxy/civic/genes/' + ids,
+                dataType: 'json',
+                contentType: 'application/json',
+                data: {
+                    identifier_type: 'entrez_symbol'
+                }
+            }).then(function(result) {
+                if (_.isString(result)) {
+                    result = $.parseJSON(result);
+                }
+
+                var civicGenes = {};
+                // Wrap the result in an Array if it is not already one
+                if (!(result instanceof Array)) {
+                    result = [result];
+                } 
+                if (result) {
+                    result.forEach(function(record) {
                         var civicGene = {
                             id: record.id,
                             name: record.name,
                             description: record.description,
                             url: 'https://civic.genome.wustl.edu/#/events/genes/'
-                                + record.id + '/summary',
-                            variants: {},
+                            + record.id + '/summary',
+                            variants: {}
                         };
                         civicGenes[record.name] = civicGene;
-                        var variants = civicGene.variants;
-                        record.variants.forEach(function(variant) {
-                            variants[variant.name] = {
-                                id: variant.id,
-                                name: variant.name,
-                                geneId: civicGene.id
-                            };
-                        });
-                    }
-                });
-            }
-        });
-    }
-    
-    var initializationPromise = retrieveAllCivicGenes();
-    
-    var service = {
-        
-        getInitPromise: function() {
-            return initializationPromise;
-        },
-        
-        getCivicGene: function(geneSymbol) {
-            return civicGenes[geneSymbol];
+                        if (record.variants && record.variants.length > 0) {
+                            var variants = civicGene.variants;
+                            record.variants.forEach(function(variant) {
+                                variants[variant.name] = {
+                                    id: variant.id,
+                                    name: variant.name,
+                                    geneId: civicGene.id
+                                };
+                            });
+                        }
+                    });
+                }
+                return civicGenes;
+            });
         },
         
         getMatchingCivicVariants: function(civicVariants, proteinChange) {
@@ -116,6 +114,7 @@ function CivicService() {
 
             return deferred.promise();
         }
-    }
+    };
+
     return service;
 }
