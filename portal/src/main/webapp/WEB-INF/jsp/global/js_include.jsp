@@ -92,10 +92,6 @@
 <script type="text/javascript" src="js/src/gene_set.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/QueryGeneData.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/cbio-util.js?<%=GlobalProperties.getAppVersion()%>"></script>
-
-<script type="text/javascript" src="http://cdn.jsdelivr.net/jstat/latest/jstat.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/clustering/clusterfck.min.js?<%=GlobalProperties.getAppVersion()%>"></script>
-
 <script type="text/javascript" src="js/src/cbio-stat.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/download-util.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/customCaseSet.js?<%=GlobalProperties.getAppVersion()%>"></script>

@@ -1181,12 +1181,13 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 			//trackId==0 is clinical tracks group
 			//trackId==1 is gene/traditional oncoprint tracks
 			//trackId==2 is heatmap tracks
+			//TODO make constants? 
 			var name = 'gene';
 			if (groupId === 2) {
 				name = 'hugo_gene_symbol'; //due to some internal inconsistency in attribute naming in oncoprint
 			}
-			var gene = oncoprint.model.getTrackData(trackId)[0][name]; //TODO will need  if/else to support GENESET
-			result[gene] = trackId;
+			var trackName = oncoprint.model.getTrackData(trackId)[0][name];
+			result[trackName] = trackId;
 		}
 		return result;
 	},
@@ -1308,9 +1309,8 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 		}),
 	'getClusteringOrder': function (case_ui_map, track_uid_map, heatmapData, case_ids) {
 			var study_id = QuerySession.getCancerStudyIds()[0];
-
 			var def = new $.Deferred();
-
+			//prepare input:
 			var cluster_input = {};
 			for (var i = 0; i < case_ids.length; i++) {
 				//case ids as key:
@@ -1322,26 +1322,28 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 					cluster_input[case_ids[i]][entityId] = value;
 				}					
 			}
-			//do hierarchical clustering:
-			var clusterOrder = cbio.stat.hclusterCases(cluster_input);//should go to worker 1
-			//get result in "uid format":
-			var uids = [];
-			for (var i = 0; i < clusterOrder.length; i++) {
-				var uid_case = case_ui_map[study_id][clusterOrder[i].caseId];
-				uids.push(uid_case);
-			}
-			//get entityUids in order:
-			var entityUids = [];
-			clusterOrder = cbio.stat.hclusterGeneticEntities(cluster_input);//should go to worker 2
-			for (var i = 0; i < clusterOrder.length; i++) {
-				var trackUid = track_uid_map[clusterOrder[i].entityId];
-				entityUids.push(trackUid);
-			}
-			//setup and resolve result object:
-			var result = new Object();
-			result.sampleUidsInClusteringOrder = uids;
-			result.entityUidsInClusteringOrder = entityUids;
-			def.resolve(result); 
+			//do hierarchical clustering in background:
+			$.when(cbio.stat.hclusterCases(cluster_input), cbio.stat.hclusterGeneticEntities(cluster_input)).then(
+					function (sampleClusterOrder, entityClusterOrder) {
+						//get result in "uid format":
+						var uids = [];
+						for (var i = 0; i < sampleClusterOrder.length; i++) {
+							var uid_case = case_ui_map[study_id][sampleClusterOrder[i].caseId];
+							uids.push(uid_case);
+						}
+						//get entityUids in order:
+						var entityUids = [];
+						for (var i = 0; i < entityClusterOrder.length; i++) {
+							var trackUid = track_uid_map[entityClusterOrder[i].entityId];
+							entityUids.push(trackUid);
+						}
+						//setup and resolve result object:
+						var result = new Object();
+						result.sampleUidsInClusteringOrder = uids;
+						result.entityUidsInClusteringOrder = entityUids;
+						def.resolve(result);
+					}
+			);
 			return def.promise();
 		},
 	'getWebServiceGenomicEventData': makeCachedPromiseFunction(

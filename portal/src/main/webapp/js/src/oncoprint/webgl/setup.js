@@ -1595,16 +1595,22 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
         else if (State.sortby === "clustering") {
 			//sort according to order found in the clustering results: 
 			State.sorting_by_given_order = true;
-			var heatmap_track_id = 2; //TODO - there should be a function for this as it probably may vary in the future? 
+			var heatmap_track_group_id = 2; //TODO - there should be a function for this as it probably may vary in the future? 
 			var heatmap_data_deferred = State.using_sample_data ? QuerySession.getSampleHeatmapData() : QuerySession.getPatientHeatmapData();
 			var case_ids_deferred =  State.using_sample_data ? QuerySession.getSampleIds() : QuerySession.getPatientIds();
-			$.when(QuerySession.getCaseUIDMap(), QuerySession.getTrackUIDMap(heatmap_track_id), heatmap_data_deferred, case_ids_deferred).then(
+			$.when(QuerySession.getCaseUIDMap(), QuerySession.getTrackUIDMap(heatmap_track_group_id), heatmap_data_deferred, case_ids_deferred).then(
 					function (case_uid_map, track_uid_map, heatmap_data, case_ids) {
-						$.when(QuerySession.getClusteringOrder(case_uid_map, track_uid_map, heatmap_data, case_ids)).then(function (clusteringResult) {
-							oncoprint.setSortConfig({'type': 'order', order: clusteringResult.sampleUidsInClusteringOrder});
-							oncoprint.setTrackGroupOrder(heatmap_track_id, clusteringResult.entityUidsInClusteringOrder);
-				});
-			});
+						$.when(QuerySession.getClusteringOrder(case_uid_map, track_uid_map, heatmap_data, case_ids)).then(
+								function (clusteringResult) {
+									oncoprint.setSortConfig({'type': 'order', order: clusteringResult.sampleUidsInClusteringOrder});
+									oncoprint.setTrackGroupOrder(heatmap_track_group_id, clusteringResult.entityUidsInClusteringOrder);
+									LoadingBar.hide();
+								});
+						//show progress bar:
+						LoadingBar.show();
+					    LoadingBar.msg("Clustering...");
+					    LoadingBar.update(50);
+					});
         }
 	    };
 	    $('#oncoprint_diagram_sortby_group').find('input[name="sortby"]').change(function() {

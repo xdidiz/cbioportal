@@ -53,28 +53,10 @@ cbio.stat = (function() {
         return _zscoreArr;
     }
     
-  //http://cdn.jsdelivr.net/jstat/latest/jstat.min.js
-  //https://github.com/jstat/jstat
-  /*
-  var seq = jStat.seq( 0, 10, 11 );
-  jStat.corrcoeff( seq, seq ) === 1;
-  */
-
-    var pearsonDist = function(seq1, seq2) {
-    	var r = jStat.corrcoeff(seq1, seq2);
-    	if (isNaN(r)) {
-    		r = 0; //will result in same distance as no correlation //TODO - calculate correlation only on items where there is data...?
-    	}
-    	return 1 - r;
-    }
-    
-    var internalPearsonDist = function(item1, item2) {
-    	var seq1 = item1.orderedValueList;
-    	var seq2 = item2.orderedValueList;
-    	return pearsonDist(seq1, seq2);
-    }
-    
     /**
+     * Executes the clustering of casesAndEntitites in the requested 
+     * dimension (CASES or ENTITIES).
+     * 
      * @param casesAndEntitites: Object with sample(or patient)Id and map 
      * of geneticEntity/value pairs. Example:
      *  
@@ -88,81 +70,40 @@ cbio.stat = (function() {
      *   },
      *   ...
      *   
-     *   Use: cbio.stat.hclusterCases(a);
+     * @return a deferred which gets resolved with the clustering result
+     *   when the clustering is done. 
      */
-    var hclusterCases = function(casesAndEntitites) {
-    	var refEntityList = null;
-    	var inputItems = [];
-    	//add _orderedValueList to all items, so the values are 
-    	//compared in same order:
-    	for (var caseId in casesAndEntitites) {
-    		if (casesAndEntitites.hasOwnProperty(caseId)) {
-    			var caseObj = casesAndEntitites[caseId];
-    			var inputItem = new Object();
-    			inputItem.caseId = caseId;
-    			inputItem.orderedValueList = [];
-    			if (refEntityList == null) {
-    				refEntityList = getRefList(caseObj);
-    			}
-    			for (var j = 0; j < refEntityList.length; j++) {
-        			var entityId = refEntityList[j];
-        			var value = caseObj[entityId];
-        			inputItem.orderedValueList.push(value);
-        		}
-    			inputItems.push(inputItem);
-    		}
+    var _hcluster = function(casesAndEntitites, dimension) {
+    	var worker = new Worker("js/src/clustering/clustering-worker.js");
+    	var message = new Object();
+    	var def = new $.Deferred(); 
+    	message.casesAndEntitites = casesAndEntitites;
+    	message.dimension = dimension;
+    	worker.postMessage(message);
+    	worker.onmessage = function(m) {
+    		def.resolve(m.data);
     	}
-    	var clusters = clusterfck.hcluster(inputItems, internalPearsonDist);
-    	return clusters.clusters(1)[0];
-    }
-    
-    var getRefList = function(caseItem) {
-    	var result = [];
-    	for (var entityId in caseItem) {
-			if (caseItem.hasOwnProperty(entityId)) {
-				result.push(entityId);
-			}
-		}
-    	return result;
+    	return def.promise();
     }
     
     /**
-     * @param samples: Object with geneticEntityId and map 
-     * of sampleId/value pairs
+     * Use: cbio.stat.hclusterCases(a);
+
+     * @return a deferred which gets resolved with the clustering result
+     *   when the clustering is done. 
+     */
+    var hclusterCases = function(casesAndEntitites) {
+    	return _hcluster(casesAndEntitites, "CASES");
+    }
+    
+    /**
+     * Use: hclusterGeneticEntities(a);
      * 
+     * @return a deferred which gets resolved with the clustering result
+     *   when the clustering is done. 
      */
     var hclusterGeneticEntities = function(casesAndEntitites) {
-    	var refEntityList = null;
-    	var inputItems = [];
-    	var refCaseIdList = [];
-    	//add orderedValueList to all items, so the values are 
-    	//compared in same order:
-    	for (var caseId in casesAndEntitites) {
-    		if (casesAndEntitites.hasOwnProperty(caseId)) {
-    			var caseObj = casesAndEntitites[caseId];
-    			if (refEntityList == null) {
-    				refEntityList = getRefList(caseObj);
-    			}
-    			//refCaseIdList:
-    			refCaseIdList.push(caseId);
-    		}
-    	}
-    	//iterate over genes, and get sample values:
-		for (var i = 0; i < refEntityList.length; i++) {
-			var entityId = refEntityList[i];
-   			var inputItem = new Object();
-   			inputItem.entityId = entityId;
-   			inputItem.orderedValueList = [];
-   			for (var j = 0; j < refCaseIdList.length; j++) {
-   				var caseId = refCaseIdList[j];
-   				var caseObj = casesAndEntitites[caseId];
-        		var value = caseObj[entityId];
-        		inputItem.orderedValueList.push(value);
-   	    	}
-   	    	inputItems.push(inputItem);
-    	}
-    	var clusters = clusterfck.hcluster(inputItems, internalPearsonDist);
-    	return clusters.clusters(1)[0];
+    	return _hcluster(casesAndEntitites, "ENTITIES");
     }
   	
     return {
@@ -170,8 +111,7 @@ cbio.stat = (function() {
         stDev: stDev,
         zscore: zscore,
         hclusterCases: hclusterCases,
-        hclusterGeneticEntities: hclusterGeneticEntities,
-        pearsonDist: pearsonDist        
+        hclusterGeneticEntities: hclusterGeneticEntities
     }
     
 }());
