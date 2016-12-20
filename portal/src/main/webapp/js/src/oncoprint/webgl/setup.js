@@ -661,7 +661,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}).then(function () {
 				return utils.timeoutSeparatedLoop(heatmap_data, function(heatmap_track_data, i) {
 					var track_id = State.heatmap_track_groups[heatmap_track_data.genetic_profile_id].gene_to_track_id[heatmap_track_data.gene];
-					//console.log("heatmap data retrieved, populating sample data for track " + heatmap_data_by_line[hm_line].hugo_gene_symbol);
+					console.log("heatmap data retrieved, populating sample data for track " + heatmap_track_data.gene);
 					oncoprint.setTrackData(track_id, heatmap_track_data.oncoprint_data, 'uid');
 					oncoprint.setTrackTooltipFn(track_id, tooltip_utils.makeHeatmapTrackTooltip(heatmap_track_data.genetic_alteration_type, 'sample', true));
 					LoadingBar.update((i + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
@@ -764,7 +764,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}).then(function () {
 			    return utils.timeoutSeparatedLoop(heatmap_data, function(heatmap_track_data, i) {
 					var track_id = State.heatmap_track_groups[heatmap_track_data.genetic_profile_id].gene_to_track_id[heatmap_track_data.gene];
-					//console.log("heatmap data retrieved, populating sample data for track " + heatmap_data_by_line[hm_line].hugo_gene_symbol);
+					console.log("heatmap data retrieved, populating sample data for track " + heatmap_track_data.gene);
 					oncoprint.setTrackData(track_id, heatmap_track_data.oncoprint_data, 'uid');
 					oncoprint.setTrackTooltipFn(track_id, tooltip_utils.makeHeatmapTrackTooltip(heatmap_track_data.genetic_alteration_type, 'patient', true));
 					LoadingBar.update((i + Object.keys(State.genetic_alteration_tracks).length) / total_tracks_to_add);
@@ -985,13 +985,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		}
 		return ret;
 	    },
-	    'getNewTrackGroupId': function() {
+	    'getNewTrackGroupId': function () {
 		// Return 1 more than the max heatmap track group id, minimum 2
 		var heatmap_genetic_profiles = Object.keys(this.heatmap_track_groups);
 		return Math.max(Math.max.apply(null, heatmap_genetic_profiles.map(function(id) { return State.heatmap_track_groups[id].track_group_id; })) + 1, 2);
-	    },	    
-	    
-	    'toggleMinimapShown': function() {
+	    },
+	    'toggleMinimapShown': function () {
 		this.is_minimap_shown = !this.is_minimap_shown;
 		saveToLocalStorage(this);
 	    },
@@ -1158,7 +1157,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'has_column_spacing': false,
 			'track_padding': 0,
 			'label': geneset_data_by_line[i].geneset_id,
-			'target_group': 3,
+			'target_group': 10,
 			'removable': true,
 			'description': geneset_data_by_line[i].geneset_id,
 		    };
