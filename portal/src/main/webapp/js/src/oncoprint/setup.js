@@ -1000,12 +1000,11 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		}
 		return ret;
 	    },
-	    'getNewTrackGroupId': function() {
+	    'getNewTrackGroupId': function () {
 		// Return 1 more than the max heatmap track group id, minimum 2
 		var heatmap_genetic_profiles = Object.keys(this.heatmap_track_groups);
 		return Math.max(Math.max.apply(null, heatmap_genetic_profiles.map(function(id) { return State.heatmap_track_groups[id].track_group_id; })) + 1, 2);
-	    },	    
-	    
+	    },
 	    'toggleMinimapShown': function(opt_val) {
 		if (typeof opt_val !== "undefined") {
 		    this.is_minimap_shown = opt_val;
@@ -1177,7 +1176,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'has_column_spacing': false,
 			'track_padding': 0,
 			'label': geneset_data_by_line[i].geneset_id,
-			'target_group': 3,
+			'target_group': 10,
 			'removable': true,
 			'description': geneset_data_by_line[i].geneset_id,
 		    };
