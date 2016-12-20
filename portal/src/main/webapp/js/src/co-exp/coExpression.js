@@ -195,7 +195,8 @@ var CoExpView = (function() {
             },
             geneId = "", //Gene of this sub tab instance
             coexpTableArr = [], //Data array for the datatable
-            coExpTableInstance = "";
+            coExpTableInstance = "",
+            entityProfileMap = {};
 
         var CoExpTable = function() {
 
@@ -324,7 +325,11 @@ var CoExpView = (function() {
                         $("#" + Names.plotId).empty();
                         $("#" + Names.plotId).append("<img style='padding:220px;' src='images/ajax-loader.gif' alt='loading' />");
                         var coexpPlots = new CoexpPlots();
-                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[1], aData[2], $("#coexp-profile-selector :selected").val());
+                        var profile1Id = $("#coexp-profile-selector :selected").val();//TODO - this is not true if the tab is geneset type
+                        var entity1Id = geneId;
+                        var entity2Id = aData[0];
+                        var profile2Id = entityProfileMap[entity2Id];
+                        coexpPlots.init(Names.plotId, entity1Id, entity2Id, aData[1], aData[2], profile1Id, profile2Id);
                     }
                 });
             }
@@ -357,6 +362,7 @@ var CoExpView = (function() {
                     tmp_arr.push(obj.gene);
                     tmp_arr.push(obj.pearson.toFixed(2));
                     tmp_arr.push(obj.spearman.toFixed(2));
+                    entityProfileMap[obj.gene] = obj.profileId;
                     coexpTableArr.push(tmp_arr);
                 });           
             }

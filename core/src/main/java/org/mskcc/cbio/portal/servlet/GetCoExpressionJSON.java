@@ -236,9 +236,10 @@ public class GetCoExpressionJSON extends HttpServlet {
                                             _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
                                         }
                                         else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
-                                        	String entityStableId = CoExpUtil.getEntityStableIdForGeneset(compared_gene_entity_id);
+                                        	String entityStableId = CoExpUtil.getEntityStableIdForGenesetEntityId(compared_gene_entity_id);
                                             _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name                                        	
                                         }
+                                        _scores.put("profileId", queryProfile.getStableId());
                                         _scores.put("pearson", pearson);
                                         _scores.put("spearman", spearman);
                                         fullResultJson.add(_scores);

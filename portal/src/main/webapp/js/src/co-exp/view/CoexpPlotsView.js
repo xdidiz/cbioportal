@@ -169,12 +169,13 @@ var CoexpPlotsView = function() {
     }
 
     function configHeaderSettings() {
-        plotsOpts.text.title = "mRNA co-expression: " + geneX + " vs. " + geneY + "  ";
+        plotsOpts.text.title = dataAttr.profile1_name + ": " + geneX + " vs. " + dataAttr.profile2_name + ": " + geneY + "  ";
         plotsOpts.text.fileName = "co_expression_result-" + geneX + "-" + geneY;
-        //determine if turn on log scale 
-        if (dataAttr.profile_name.indexOf("RNA Seq") !== -1) {
+        //determine if turn on log scale if both are RNA Seq 
+        if (dataAttr.profile1_name.indexOf("RNA Seq") !== -1 && dataAttr.profile2_name.indexOf("RNA Seq") !== -1) {
             settings.enable_log_scale = true;
-        } 
+        }
+        //TODO - apply log scale on whatever axis is representing RNA Seq
     }
 
     function initDivs(_divName) {
