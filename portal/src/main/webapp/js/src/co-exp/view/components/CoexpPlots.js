@@ -45,22 +45,24 @@
 
 var CoexpPlots = function() {
 
-    function init(divName, geneX, geneY, pearson, spearman, profileId)  {
-        getAlterationData(divName, geneX, geneY, pearson, spearman, profileId);
+    function init(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id)  {
+        getAlterationData(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id);
     }
 
-    function getAlterationData(divName, geneX, geneY, pearson, spearman, profileId) {
+    function getAlterationData(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id) {
         var paramsGetAlterationData = {
             cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-            gene_list: geneX + " " + geneY,
+            entity1: entityX, 
+            entity2: entityY,
             case_set_id: window.QuerySession.getCaseSetId(),
             case_ids_key: window.QuerySession.getCaseIdsKey(),
-            profile_id: profileId
+            entity1_profile: profile1Id,
+            entity2_profile: profile2Id
         };
         $.post(
             "getAlterationData.json", 
             paramsGetAlterationData, 
-            getAlterationDataCallBack(divName, geneX, geneY, pearson, spearman), 
+            getAlterationDataCallBack(divName, entityX, entityY, pearson, spearman), 
             "json");
     }
 
