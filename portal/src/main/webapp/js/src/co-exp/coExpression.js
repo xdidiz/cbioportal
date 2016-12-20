@@ -144,7 +144,7 @@ var CoExpView = (function() {
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
                 var geneIds = window.QuerySession.getQueryGenes();
-                geneIds += window.QuerySession.getQueryGenesets();
+                geneIds.concat(window.QuerySession.getQueryGenesets());
                 $.each(geneIds, function(index, value) {
                     //Distroy all the subview instances
                     var element =  document.getElementById(Prefix.tableDivPrefix + cbio.util.safeProperty(value));
@@ -387,7 +387,7 @@ var CoExpView = (function() {
                          cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
                          genetic_entity: _geneticEntityId,
                          profile_id: $("#coexp-profile-selector :selected").val(),
-                         correlated_entities_to_find: "GENE",// GENE or GENESET
+                         correlated_entities_to_find: "GENESET",// GENE or GENESET
                          genetic_entity_type: "GENE", // GENE or GENESET
                          case_set_id: window.QuerySession.getCaseSetId(),
                          case_ids_key: window.QuerySession.getCaseIdsKey(),
