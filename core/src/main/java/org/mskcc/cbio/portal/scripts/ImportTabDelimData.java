@@ -95,7 +95,7 @@ public class ImportTabDelimData {
     }
 
     /**
-     * Import the Copy Number Alteration, MRNA Expression Data, or protein RPPA data
+     * Import the Copy Number Alteration, mRNA Expression, protein RPPA or GSVA data
      *
      * @throws IOException  IO Error.
      * @throws DaoException Database Error.
@@ -119,6 +119,8 @@ public class ImportTabDelimData {
         boolean gsvaProfile = geneticProfile!=null
                                 && geneticProfile.getGeneticAlterationType() == GeneticAlterationType.GENESET_SCORE
                                 && parts[0].equalsIgnoreCase("geneset_id");
+        System.err.println(geneticProfile.getGeneticAlterationType());
+        System.err.println(parts[0]);
         
         int numRecordsToAdd = 0;
         int samplesSkipped = 0;
@@ -126,14 +128,15 @@ public class ImportTabDelimData {
         	int hugoSymbolIndex = getHugoSymbolIndex(parts);
 	        int entrezGeneIdIndex = getEntrezGeneIdIndex(parts);
 	        int rppaGeneRefIndex = getRppaGeneRefIndex(parts);
-                int genesetIdIndex = getGenesetIdIndex(parts);
+	        int genesetIdIndex = getGenesetIdIndex(parts);
 	        int sampleStartIndex = getStartIndex(parts, hugoSymbolIndex, entrezGeneIdIndex, rppaGeneRefIndex, genesetIdIndex);
 	        if (rppaProfile) {
-	        	if (rppaGeneRefIndex == -1)
-	        		throw new RuntimeException("Error: the following column should be present for RPPA data: Composite.Element.Ref");
-	        }                
-	        else if (!gsvaProfile && hugoSymbolIndex == -1 && entrezGeneIdIndex == -1)
-	        	throw new RuntimeException("Error: at least one of the following columns should be present: Hugo_Symbol or Entrez_Gene_Id");
+	        	if (rppaGeneRefIndex == -1) {
+							throw new RuntimeException("Error: the following column should be present for RPPA data: Composite.Element.Ref");
+						}
+	        } else if (!gsvaProfile && hugoSymbolIndex == -1 && entrezGeneIdIndex == -1) {
+						throw new RuntimeException("Error: at least one of the following columns should be present: Hugo_Symbol or Entrez_Gene_Id");
+					}
 	        
 	        String sampleIds[];
 	        sampleIds = new String[parts.length - sampleStartIndex];
@@ -194,8 +197,8 @@ public class ImportTabDelimData {
 	        //Object to insert records in the generic 'genetic_alteration' table: 
 	        DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
                 
-                // object for retrieving records from 'geneset' table
-                DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
+	        // object for retrieving records from 'geneset' table
+	        DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
                 
 	        //cache for data found in  cna_event' table:
 	        Map<CnaEvent.Event, CnaEvent.Event> existingCnaEvents = null;	        
@@ -545,7 +548,7 @@ public class ImportTabDelimData {
     private boolean storeGeneticEntityGeneticAlterations(String[] values, DaoGeneticAlteration daoGeneticAlteration,
         Integer geneticEntityId, DaoGeneticEntity.EntityTypes geneticEntityType, String geneticEntityName) {
         try {
-            if (!importedGeneticEntitySet.add(geneticEntityId)) {
+            if (importedGeneticEntitySet.add(geneticEntityId)) {
                 daoGeneticAlteration.addGeneticAlterationsForGeneticEntity(geneticProfile.getGeneticProfileId(), geneticEntityId, values);
                 return true;
             }

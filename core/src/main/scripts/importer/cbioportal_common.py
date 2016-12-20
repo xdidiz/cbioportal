@@ -235,8 +235,9 @@ IMPORTER_CLASSNAME_BY_META_TYPE = {
     MetaFileTypes.GISTIC_GENES: "org.mskcc.cbio.portal.scripts.ImportGisticData",
     MetaFileTypes.TIMELINE: "org.mskcc.cbio.portal.scripts.ImportTimelineData",
     MetaFileTypes.CASE_LIST: IMPORT_CASE_LIST_CLASS,
-    MetaFileTypes.MUTATION_SIGNIFICANCE: "org.mskcc.cbio.portal.scripts.ImportMutSigData"#,
-    #MetaFileTypes.MUTATION_SIGNIFICANCE: "org.mskcc.cbio.portal.scripts.ImportGSVAData"
+    MetaFileTypes.MUTATION_SIGNIFICANCE: "org.mskcc.cbio.portal.scripts.ImportMutSigData",
+    MetaFileTypes.GSVA_SCORES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+	MetaFileTypes.GSVA_PVALUES: "org.mskcc.cbio.portal.scripts.ImportProfileData"
 }
 
 IMPORTER_REQUIRES_METADATA = {
@@ -245,8 +246,7 @@ IMPORTER_REQUIRES_METADATA = {
     "org.mskcc.cbio.portal.scripts.ImportGisticData" : False,
     "org.mskcc.cbio.portal.scripts.ImportMutSigData" : False,
     "org.mskcc.cbio.portal.scripts.ImportProfileData" : True,
-    "org.mskcc.cbio.portal.scripts.ImportTimelineData" : True#,
-    #"org.mskcc.cbio.portal.scripts.ImportGSVAData" : True
+    "org.mskcc.cbio.portal.scripts.ImportTimelineData" : True
 }
 
 # ------------------------------------------------------------------------------
@@ -488,8 +488,8 @@ def get_meta_file_type(metaDictionary, logger, filename):
         ("GISTIC_GENES_AMP", "Q-VALUE"): MetaFileTypes.GISTIC_GENES,
         ("GISTIC_GENES_DEL", "Q-VALUE"): MetaFileTypes.GISTIC_GENES,
         ("MUTSIG", "Q-VALUE"): MetaFileTypes.MUTATION_SIGNIFICANCE,
-        ("GSVA", "GSVA_SCORE"): MetaFileTypes.GSVA_SCORES,
-        ("GSVA", "P-VALUE"): MetaFileTypes.GSVA_PVALUES
+        ("GENESET_SCORE", "GSVA-SCORE"): MetaFileTypes.GSVA_SCORES,
+        ("GENESET_SCORE", "P-VALUE"): MetaFileTypes.GSVA_PVALUES
     }
     result = None
     if 'genetic_alteration_type' in metaDictionary and 'datatype' in metaDictionary:
