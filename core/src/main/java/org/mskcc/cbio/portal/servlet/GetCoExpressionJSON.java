@@ -75,7 +75,7 @@ import org.mskcc.cbio.portal.util.XssRequestWrapper;
  */
 public class GetCoExpressionJSON extends HttpServlet {
 
-    private double coExpScoreThreshold = 0.3;
+    private double coExpScoreThreshold = 0.0;
     //private int resultLength = 250;
     
     // class which process access control to cancer studies
@@ -140,7 +140,7 @@ public class GetCoExpressionJSON extends HttpServlet {
         }
         String queryGeneticEntityType = httpServletRequest.getParameter("genetic_entity_type");
         String profileId = httpServletRequest.getParameter("profile_id");
-        String correlated_entities_to_find = httpServletRequest.getParameter("correlated_entries_to_find");
+        String correlated_entities_to_find = httpServletRequest.getParameter("correlated_entities_to_find");
         String caseSetId = httpServletRequest.getParameter("case_set_id");
         String caseIdsKey = httpServletRequest.getParameter("case_ids_key");
         boolean isFullResult = Boolean.parseBoolean(httpServletRequest.getParameter("is_full_result"));
@@ -151,9 +151,9 @@ public class GetCoExpressionJSON extends HttpServlet {
         
         CanonicalGene geneEntityObj = daoGeneOptimized.getGene(queryGeneticEntity); //TODO - Change CanonicalGene
         int queryGeneticEntityId;
-        if (EntityType.GENESET.equals(queryGeneticEntityType)) {
+        if (queryGeneticEntityType.equals("GENESET")) {
         	queryGeneticEntityId = CoExpUtil.getEntityIdForGeneset(queryGeneticEntityType); //TODO use DaoGeneset (new one added by Angelica)
-        } else if (EntityType.GENE.equals(queryGeneticEntityType)) {
+        } else if (queryGeneticEntityType.equals("GENE")) {
         	queryGeneticEntityId = daoGeneOptimized.getGene(queryGeneticEntity).getGeneticEntityId();
         }
         else {
@@ -166,10 +166,10 @@ public class GetCoExpressionJSON extends HttpServlet {
         	//validation: 
         	
             GeneticProfile final_gp;
-            if (EntityType.GENE.equals(correlated_entities_to_find)) {
+            if (correlated_entities_to_find.equals("GENE")) {
             	final_gp = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
             }
-            else if (EntityType.GENESET.equals(correlated_entities_to_find)) {
+            else if (correlated_entities_to_find.equals("GENESET")) {
             	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
             	List<GeneticProfile> list_of_profiles;
 				try {
@@ -181,18 +181,18 @@ public class GetCoExpressionJSON extends HttpServlet {
 				}
         		List<GeneticProfile> gsva_profiles = new ArrayList<GeneticProfile>();
             	for (GeneticProfile gp : list_of_profiles) {
-            		if ((gp.getDatatype()).equals("GSVA-SCORES")) {
+            		if ((gp.getDatatype()).equals("GSVA-SCORE")) {
             			gsva_profiles.add(gp);
             		}
             	}
             	if (gsva_profiles.size() == 1) {
             		final_gp = gsva_profiles.get(0);
-            	} else if (gsva_profiles.size() == 0) {
+            	//} else if (gsva_profiles.size() == 0) {
             		//Throw error: no GSVA data for this study
-            		throw new IllegalArgumentException("The queried study does not contain any GSVA scores.");
+            		//throw new IllegalArgumentException("The queried study does not contain any GSVA scores for this mRNA profile.");
             	} else {
             		//Throw error: only one GSVA scores file per study supported
-            		throw new IllegalArgumentException("The queried study contains more than one file with GSVA scores.");
+            		final_gp = null;
             	}
             	
             }
@@ -231,7 +231,7 @@ public class GetCoExpressionJSON extends HttpServlet {
                                 new_query_gene_entity_exp[m] = _new_query_gene_entity_exp[m].doubleValue();
                                 new_compared_gene_entity_exp[m] = _new_compared_gene_entity_exp[m].doubleValue();
                             }
-
+                                                        
                             if (new_query_gene_entity_exp.length != 0 && new_compared_gene_entity_exp.length != 0) {
                                 double pearson = pearsonsCorrelation.correlation(new_query_gene_entity_exp, new_compared_gene_entity_exp);
                                 if ((pearson >= coExpScoreThreshold ||
@@ -242,7 +242,7 @@ public class GetCoExpressionJSON extends HttpServlet {
                                     if ((spearman >= coExpScoreThreshold || spearman <= (-1) * coExpScoreThreshold) &&
                                         ((spearman > 0 && pearson > 0) || (spearman < 0 && pearson < 0))) {
                                     	//!! here another gene/geneset switch is needed to query either DaoGeneOptimized or CoExpUtil(temp method) for gene or geneset name
-                                        CanonicalGene comparedGene = daoGeneOptimized.getGene(compared_gene_entity_id); //TODO - change CanonicalGene
+                                        CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id); //TODO - change CanonicalGene
                                         ObjectNode _scores = mapper.createObjectNode();
                                         _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
                                         _scores.put("pearson", pearson);
@@ -250,9 +250,9 @@ public class GetCoExpressionJSON extends HttpServlet {
                                         fullResultJson.add(_scores);
                                     }
                                 }
-                            }
+                            } 
                         }
-                    }
+                    } 
                     mapper.writeValue(out, fullResultJson);
                 } catch (DaoException e) {
                     System.out.println(e.getMessage());
@@ -274,7 +274,7 @@ public class GetCoExpressionJSON extends HttpServlet {
                     double[] query_gene_entity_exp = CoExpUtil.getExpressionList(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey, queryGeneticEntityId);
 
                     for (int i = 0; i < mapSize; i++) {
-                        long compared_gene_entity_id = gene_entities.get(i);
+                        Integer compared_gene_entity_id = gene_entities.get(i);
                         double[] compared_gene_entity_exp = map.get(compared_gene_entity_id);
                         if (compared_gene_entity_exp != null && query_gene_entity_exp != null) {
                             //Filter out cases with empty value on either side
@@ -300,7 +300,7 @@ public class GetCoExpressionJSON extends HttpServlet {
                                 compared_gene_entity_id != queryGeneticEntityId) {
                                 double pearson = pearsonsCorrelation.correlation(new_query_gene_entity_exp, new_compared_gene_entity_exp);
                                 double spearman = spearmansCorrelation.correlation(new_query_gene_entity_exp, new_compared_gene_entity_exp);
-                                CanonicalGene comparedGene = daoGeneOptimized.getGene(compared_gene_entity_id); //TODO - Change CanonicalGene
+                                CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id); //TODO - Change CanonicalGene
                                 fullResutlStr.append(
                                     comparedGene.getHugoGeneSymbolAllCaps() + "\t" +
                                     (double) Math.round(pearson * 100) / 100 + "\t" +
