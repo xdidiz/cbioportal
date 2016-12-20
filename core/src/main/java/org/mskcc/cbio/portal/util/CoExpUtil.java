@@ -179,4 +179,9 @@ public class CoExpUtil {
 		return CoExpUtil.genesetRepository.getGenesetByGenesetId(entityStableId).getEntityId();
 	}
 	
+	public static String getEntityStableIdForGeneset(Integer entityId) {
+		// TODO temp method:
+		return CoExpUtil.genesetRepository.getGenesetByGenesetInternalId(entityId).getEntityStableId();
+	}
+	
 }
