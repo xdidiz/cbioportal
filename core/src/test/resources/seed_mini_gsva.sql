@@ -91,3 +91,10 @@ INSERT INTO genetic_profile_samples
 INSERT INTO genetic_profile_samples 
  (GENETIC_PROFILE_ID, ORDERED_SAMPLE_LIST) VALUES (3000,@samples);
     
+SET @mrna_prof = (Select MAX(GENETIC_PROFILE_ID) from genetic_profile where STABLE_ID = 'brca_tcga_mrna');
+insert into sample_profile
+(Select sample_id, 2000, null from sample_profile where GENETIC_PROFILE_ID = @mrna_prof);
+insert into sample_profile
+(Select sample_id, 3000, null from sample_profile where GENETIC_PROFILE_ID = @mrna_prof);
+ 
+ 

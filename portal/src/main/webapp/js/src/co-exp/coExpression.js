@@ -144,7 +144,7 @@ var CoExpView = (function() {
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
                 var geneIds = window.QuerySession.getQueryGenes();
-                geneIds += window.QuerySession.getQueryGenesets();
+                geneIds.concat(window.QuerySession.getQueryGenesets());
                 $.each(geneIds, function(index, value) {
                     //Distroy all the subview instances
                     var element =  document.getElementById(Prefix.tableDivPrefix + cbio.util.safeProperty(value));
@@ -195,11 +195,17 @@ var CoExpView = (function() {
             },
             geneId = "", //Gene of this sub tab instance
             coexpTableArr = [], //Data array for the datatable
-            coExpTableInstance = "";
+            coExpTableInstance = "",
+            entityProfileMap = {};
 
         var CoExpTable = function() {
 
             function configTable() {
+            	//Create buttons to select genes and gene sets
+            	//$("#dataTables_scrollHeadInner").append(
+            	//		"<input type='checkbox' id='gene_checkbox' checked><label for='gene_checkbox'>Genes</label>" +
+            	//		"<input type='checkbox' id='geneset_checkbox'><label for='geneset_checkbox'>Gene sets</label>"
+            	//);
                 //Draw out the markdown of the datatable
                 $("#" + Names.tableId).append(
                     "<thead style='font-size:70%;' >" +
@@ -319,7 +325,11 @@ var CoExpView = (function() {
                         $("#" + Names.plotId).empty();
                         $("#" + Names.plotId).append("<img style='padding:220px;' src='images/ajax-loader.gif' alt='loading' />");
                         var coexpPlots = new CoexpPlots();
-                        coexpPlots.init(Names.plotId, geneId, aData[0], aData[1], aData[2], $("#coexp-profile-selector :selected").val());
+                        var profile1Id = $("#coexp-profile-selector :selected").val();//TODO - this is not true if the tab is geneset type
+                        var entity1Id = geneId;
+                        var entity2Id = aData[0];
+                        var profile2Id = entityProfileMap[entity2Id];
+                        coexpPlots.init(Names.plotId, entity1Id, entity2Id, aData[1], aData[2], profile1Id, profile2Id);
                     }
                 });
             }
@@ -352,6 +362,7 @@ var CoExpView = (function() {
                     tmp_arr.push(obj.gene);
                     tmp_arr.push(obj.pearson.toFixed(2));
                     tmp_arr.push(obj.spearman.toFixed(2));
+                    entityProfileMap[obj.gene] = obj.profileId;
                     coexpTableArr.push(tmp_arr);
                 });           
             }
@@ -375,13 +386,15 @@ var CoExpView = (function() {
             }
 
             return {
-                init: function(_geneId) {
+                init: function(_geneticEntityId) {
                     //Getting co-exp data (for currently selected gene/profile) from servlet
                     $("#" + Names.plotId).empty();
                     var paramsGetCoExpData = {
                          cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-                         gene: _geneId,
+                         genetic_entity: _geneticEntityId,
                          profile_id: $("#coexp-profile-selector :selected").val(),
+                         correlated_entities_to_find: "GENESET",// GENE or GENESET
+                         genetic_entity_type: "GENE", // GENE or GENESET
                          case_set_id: window.QuerySession.getCaseSetId(),
                          case_ids_key: window.QuerySession.getCaseIdsKey(),
                          is_full_result: "false"
@@ -390,10 +403,28 @@ var CoExpView = (function() {
                         "getCoExp.do", 
                         paramsGetCoExpData, 
                         function(result) {
-                            getCoExpDataCallBack(result, _geneId);
+                            getCoExpDataCallBack(result, _geneticEntityId);
                         },
                         "json"
                     );
+                    //var paramsGetCoExpData2 = {
+                    //        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+                    //        genetic_entity: _geneticEntityId,
+                    //        profile_id: $("#coexp-profile-selector :selected").val(),
+                    //        correlated_entities_to_find: "GENESET",// GENE or GENESET
+                    //        genetic_entity_type: "GENESET", // GENE or GENESET
+                    //        case_set_id: window.QuerySession.getCaseSetId(),
+                    //        case_ids_key: window.QuerySession.getCaseIdsKey(),
+                    //        is_full_result: "false"
+                    //   };
+                   //$.post(
+                    //   "getCoExp.do", 
+                    //   paramsGetCoExpData2, 
+                    //   function(result) {
+                    //       getCoExpDataCallBack(result, _geneticEntityId);
+                    //   },
+                    //   "json"
+                   //);
                 }
             };          
             
