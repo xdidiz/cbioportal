@@ -1170,7 +1170,29 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    'legend_label': 'Geneset score',
 			    'value_key': 'profile_data',
 			    'value_range': [-1, 1],
-			    'colormap_name': 'viridis',
+			    /*
+			     * The PiYG colormap is based on color specifications and designs
+			     * developed by Cynthia Brewer (http://colorbrewer.org).
+			     * The ColorBrewer palettes have been included under the terms
+			     * of an Apache-stype license (for details, see the file
+			     * OPEN-SOURCE-DOCUMENTATION in the root directory of the cBioPortal
+			     * source distribution).
+			     */
+			    'colors': [
+				[142,   1,  82, 1],
+				[197,  27, 125, 1],
+				[222, 119, 174, 1],
+				[241, 182, 218, 1],
+				[253, 224, 239, 1],
+				[247, 247, 247, 1],
+				[230, 245, 208, 1],
+				[184, 225, 134, 1],
+				[127, 188,  65, 1],
+				[ 77, 146,  33, 1],
+				[ 39, 100,  25, 1]
+			    ],
+			    'value_stop_points': [-1, -0.8, -0.6, -0.4, -0.2,
+				0, 0.2, 0.4, 0.6, 0.8, 1],
 			    'null_color': 'rgba(224,224,224,1)'
 			},
 			'has_column_spacing': false,
