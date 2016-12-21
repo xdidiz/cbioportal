@@ -36,7 +36,9 @@
 %>
 
 <div class="query_step_section">
-    <span class="step_header">Enter Gene Set:</span>
+
+    <!-- Title --> 
+    <span class="step_header">Select Genes:</span>
 
     <script language="javascript" type="text/javascript">
 
@@ -51,10 +53,12 @@
         <% out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='onco_query_lang_desc.jsp' onclick='return popitup('onco_query_lang_desc.jsp')'>Advanced: Onco Query Language (OQL)</a></span>"); %>
     <% } %>
     
+    <!-- Dropdown menu --> 
     <div style='padding-top:10px;padding-bottom:5px;'>
-        <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Gene Set"></select>
+        <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Subset of Genes"></select>
     </div>
 
+    <!-- Buttons --> 
     <div style="padding-bottom:5px;margin-left:-3px;">
         <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select from Recurrently Mutated Genes (MutSig)</button>
         <button id="toggle_gistic_dialog" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
@@ -66,36 +70,42 @@
         });
     </script>
 
-<textarea rows='5' cols='80' id='gene_list' placeholder="Enter HUGO Gene Symbols or Gene Aliases" required
-name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Aliases'><%
-    if (localGeneList != null && localGeneList.length() > 0) {
-	    String geneListWithSemis =
-			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneList);
-	    // this is for xss security
-	    geneListWithSemis = StringEscapeUtils.escapeJavaScript(geneListWithSemis);
-	    // ...but we want to keep newlines, and slashes so unescape them
-	    geneListWithSemis = geneListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
-        out.print(geneListWithSemis);
-    }
-%></textarea>
-
-<p id="genestatus"></p>
-
-<div style="padding-bottom:5px;margin-left:-3px;">
+    <!-- Box --> 
+	<textarea rows='5' cols='80' id='gene_list' placeholder="Enter HUGO Gene Symbols or Gene Aliases" required
+	name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Aliases'><%
+	    if (localGeneList != null && localGeneList.length() > 0) {
+		    String geneListWithSemis =
+				    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneList);
+		    // this is for xss security
+		    geneListWithSemis = StringEscapeUtils.escapeJavaScript(geneListWithSemis);
+		    // ...but we want to keep newlines, and slashes so unescape them
+		    geneListWithSemis = geneListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
+	        out.print(geneListWithSemis);
+	    }
+	%></textarea>
+	
+	<p id="genestatus"></p>
+	
+    <!-- Title --> 
+    <span class="step_header" id="geneset_header">Select Gene Sets:</span>
+    
+    <!-- Buttons --> 	
+	<div style="padding-bottom:5px;margin-left:-3px;">
        <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
-</div>
+	</div>
 
-<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
-name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
-    if (localGeneSetList != null && localGeneSetList.length() > 0) {
-	    String geneSetListWithSemis =
-			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
-	    // this is for xss security
-	    geneSetListWithSemis = StringEscapeUtils.escapeJavaScript(geneSetListWithSemis);
-	    // ...but we want to keep newlines, and slashes so unescape them
-	    geneSetListWithSemis = geneSetListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
-        out.print(geneSetListWithSemis);
-    }
+    <!-- Box --> 
+	<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
+	name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
+	    if (localGeneSetList != null && localGeneSetList.length() > 0) {
+		    String geneSetListWithSemis =
+				    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
+		    // this is for xss security
+		    geneSetListWithSemis = StringEscapeUtils.escapeJavaScript(geneSetListWithSemis);
+		    // ...but we want to keep newlines, and slashes so unescape them
+		    geneSetListWithSemis = geneSetListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
+	        out.print(geneSetListWithSemis);
+	    }
 %></textarea>
 
 </div>
