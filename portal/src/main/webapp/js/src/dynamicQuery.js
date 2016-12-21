@@ -522,7 +522,7 @@ function updateDefaultCaseList() {
     } else if (!mutSelect && !cnaSelect && !expSelect && rppaSelect) {
         defaultCaseList = selectedCancerStudy+"_rppa";
     } else if (gsvaSelect) {
-        defaultCaseList = selectedCancerStudy+"_mrna";
+        defaultCaseList = selectedCancerStudy+"_gsva_scores";
     }
     
     $('#select_case_set').val(defaultCaseList);
