@@ -235,6 +235,7 @@ function crossCancerStudySelected() {
      $('#step3').hide();
      $('#toggle_gsva_dialog').hide();
      $('#geneset_list').hide();
+     $('#select_gene_sets').hide();
      $('#step5').hide();
 }
 
@@ -613,11 +614,13 @@ function toggleGeneSets(profileClicked) {
     if (profileClicked.prop('checked')){
     	$('#toggle_gsva_dialog').show();
     	$('#geneset_list').show();
+    	$('#select_gene_sets').show();
     }
     // if checkbox is unselected, hide button and textbox
     else {
     	$('#toggle_gsva_dialog').hide();
     	$('#geneset_list').hide();
+    	$('#select_gene_sets').hide();
     }
 }  
 
