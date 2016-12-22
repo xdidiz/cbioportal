@@ -36,7 +36,7 @@
 %>
 
 <div class="query_step_section">
-    <span class="step_header">Enter Gene Set:</span>
+    <span class="step_header">Select Genes:</span>
 
     <script language="javascript" type="text/javascript">
 
@@ -81,6 +81,7 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Alia
 
 <p id="genestatus"></p>
 
+<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
 <div style="padding-bottom:5px;margin-left:-3px;">
        <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
 </div>
