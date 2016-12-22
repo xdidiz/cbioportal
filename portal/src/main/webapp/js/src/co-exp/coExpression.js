@@ -38,9 +38,10 @@
  * User: yichao
  * Date: 12/5/13
  */
+var __g_coExpSubTabView;
 
 var CoExpView = (function() {
-
+	
     //Pre settings for every sub tab instance
     var Prefix = {
             divPrefix: "coexp_",
@@ -98,6 +99,7 @@ var CoExpView = (function() {
                 	_genetic_entity_type = "GENESET";
                 }
                 var coExpSubTabView = new CoExpSubTabView();
+                __g_coExpSubTabView = coExpSubTabView;
                 coExpSubTabView.init(_genetic_entity, _genetic_entity_type);
             });
         }
@@ -173,8 +175,15 @@ var CoExpView = (function() {
                 });
                 //Re-draw the currently selected sub-tab view
                 var curTabIndex = $("#coexp-tabs").tabs("option", "active");
+                var _genetic_entity_type = null;
+                if ((window.QuerySession.getQueryGenes()).indexOf(geneIds[curTabIndex]) !== -1) {
+                	_genetic_entity_type = "GENE";
+                } else if ((window.QuerySession.getQueryGenesets()).indexOf(geneIds[curTabIndex]) !== -1) {
+                	_genetic_entity_type = "GENESET";
+                }
                 var coExpSubTabView = new CoExpSubTabView();
-                coExpSubTabView.init(geneIds[curTabIndex]);
+                __g_coExpSubTabView = coExpSubTabView;
+                coExpSubTabView.init(geneIds[curTabIndex], _genetic_entity_type);
             });
         }
 
@@ -314,14 +323,22 @@ var CoExpView = (function() {
             }
             
             function attachGeneticEntityButtons() { 
-        	//Create buttons to select genes and gene sets
-        	$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
-        			"<br><input type='checkbox' id='gene_checkbox' checked><label for='gene_checkbox'>Genes</label>" +
-        			"<input type='checkbox' id='geneset_checkbox'><label for='geneset_checkbox'>Gene sets</label>"
-        		);
-        		//attach onchange event 
-        		//when checked:
-        		//coExpSubTabView.init(geneEntityId, "GENE/geneset");
+	        	//Create buttons to select genes and gene sets
+	        	$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
+	        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='gene_checkbox'>Genes</label>" +
+	        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene sets</label>"
+	        		);
+            }
+            
+            function updateTable(geneEntityId) {
+            	$("#" + Names.tableDivId).change(function() {
+	        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+	        			__g_coExpSubTabView.init(geneEntityId, "GENE");
+	        	    }
+	        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+	        	    	__g_coExpSubTabView.init(geneEntityId, "GENESET");
+	        	    }
+            	});
             }
 
             function attachRowListener() {
@@ -398,7 +415,8 @@ var CoExpView = (function() {
                 attachPearsonFilter();
                 attachGeneticEntityButtons();
                 attachRowListener();
-                initTable(); 
+                initTable();
+                updateTable(geneEntityId);
             }
 
             return {
@@ -455,7 +473,7 @@ var CoExpView = (function() {
             $("#" + Names.tableDivId).append(
                 "<table id='" + Names.tableId + "' class='display coexp_datatable_" + geneEntityId + "' cellpadding='0' cellspacing='0' border='0'></table>");
         }
-
+        
         return {
             init: function(_geneEntityId, _geneEntityType) {
                 //Set the attributes of the sub-view instance
@@ -487,6 +505,7 @@ var CoExpView = (function() {
             $("#coexp-profile-selector-dropdown").hide();
         }
         var coExpSubTabView = new CoExpSubTabView();
+        __g_coExpSubTabView = coExpSubTabView;
         coExpSubTabView.init(_genes[0], "GENE");
     }
 
