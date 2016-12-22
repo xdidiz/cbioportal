@@ -78,7 +78,7 @@ public class ImportGeneSetData extends ConsoleRunnable {
             }
             
             // import geneset data file and/or supplemental geneset data file
-            boolean allowUpdates = options.hasArgument("update");
+            boolean allowUpdates = options.has("update");
             //TODO parse version from command line args
             String version = "1";
             if (options.hasArgument(data)) {
@@ -169,7 +169,7 @@ public class ImportGeneSetData extends ConsoleRunnable {
         		+ "3. Invalid Entrez gene IDs. Please check .gmt file to verify genes are in Entrez gene ID format.\n\n");
         }
     }
-    
+
     /**
      * Imports supplemental geneset data from supp file.
      * @param suppFile

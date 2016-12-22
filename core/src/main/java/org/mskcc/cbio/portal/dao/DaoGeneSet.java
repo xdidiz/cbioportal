@@ -84,8 +84,8 @@ public class DaoGeneSet {
                     + "VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             pstmt.setInt(1, geneSet.getGeneticEntityId());
             pstmt.setString(2, geneSet.getExternalId());
-            pstmt.setString(3,geneSet.getNameShort());
-            pstmt.setString(4,geneSet.getName());
+            pstmt.setString(3, geneSet.getNameShort());
+            pstmt.setString(4, geneSet.getName());
             pstmt.setString(5, geneSet.getRefLink());
             pstmt.setString(6, geneSet.getVersion());
             rows += pstmt.executeUpdate();
@@ -420,7 +420,8 @@ public class DaoGeneSet {
             JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
         }
         deleteAllGeneSetGeneRecords();
-        deleteAllGeneSetHierarchyRecords();
+        // Moved this to DaeoGeneSetHierarchy.java
+        // deleteAllGeneSetHierarchyRecords();
         deleteAllGeneSetHierarchyParentRecords();
     }
 
@@ -444,28 +445,7 @@ public class DaoGeneSet {
             JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
         }
     }
-    
-    /**
-     * Deletes all records from 'geneset_hierarchy' table in database.
-     * @throws DaoException 
-     */
-    public void deleteAllGeneSetHierarchyRecords() throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            pstmt = con.prepareStatement("TRUNCATE TABLE geneset_hierarchy");
-            pstmt.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
-        }
-    }
-    
+
     /**
      * Deletes all records from 'geneset_hierarchy_parent' table in database.
      * @throws DaoException 

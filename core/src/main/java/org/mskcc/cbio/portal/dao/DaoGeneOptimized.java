@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,6 +66,9 @@ public class DaoGeneOptimized {
     private final HashMap<String, List<CanonicalGene>> geneAliasMap = new HashMap<String, List<CanonicalGene>>();
     private final Set<CanonicalGene> cbioCancerGenes = new HashSet<CanonicalGene>();
     private final Map<String, CanonicalGene> disambiguousGenes = new HashMap<String, CanonicalGene>();
+    
+    /// MSK added 3 custom genes to resources/cbio_cancer_genes.txt, which give errors everytime this is ran. So added them to a whitelist.
+    private String[] WHITE_LIST = {"CDKN2AP14ARF", "CDKN2AP16INK4A", "EGFRVIII"};
     
     /**
      * Private Constructor, to enforce singleton pattern.
@@ -101,6 +105,8 @@ public class DaoGeneOptimized {
                     }
                     if (gene!=null) {
                         cbioCancerGenes.add(gene);
+                    } else if (Arrays.asList(WHITE_LIST).contains(parts[0])) {
+                    	
                     } else {
                     	ProgressMonitor.logWarning(line+" in the cbio cancer gene list config file [resources" + CBIO_CANCER_GENES_FILE + 
                         		"] is not a HUGO gene symbol. You should either update this file or update the `gene` and `gene_alias` tables to fix this.");
