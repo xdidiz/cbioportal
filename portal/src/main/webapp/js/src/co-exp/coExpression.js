@@ -38,7 +38,6 @@
  * User: yichao
  * Date: 12/5/13
  */
-var __g_coExpSubTabView;
 
 var CoExpView = (function() {
 	
@@ -99,7 +98,6 @@ var CoExpView = (function() {
                 	_genetic_entity_type = "GENESET";
                 }
                 var coExpSubTabView = new CoExpSubTabView();
-                __g_coExpSubTabView = coExpSubTabView;
                 coExpSubTabView.init(_genetic_entity, _genetic_entity_type);
             });
         }
@@ -182,7 +180,6 @@ var CoExpView = (function() {
                 	_genetic_entity_type = "GENESET";
                 }
                 var coExpSubTabView = new CoExpSubTabView();
-                __g_coExpSubTabView = coExpSubTabView;
                 coExpSubTabView.init(geneIds[curTabIndex], _genetic_entity_type);
             });
         }
@@ -211,7 +208,11 @@ var CoExpView = (function() {
             geneEntityId = "", //Gene of this sub tab instance
             coexpTableArr = [], //Data array for the datatable
             coExpTableInstance = "",
-            entityProfileMap = {};
+            entityProfileMap = {},
+            geneArr = [], //Genes correlated with the queried genetic entity
+            geneSetArr = [], //Gene sets correlated with the queried genetic entity
+        	genesRetrieved = false,
+        	geneSetsRetrieved = false;
 
         var CoExpTable = function() {
 
@@ -227,7 +228,7 @@ var CoExpView = (function() {
                     "</thead><tbody></tbody>"
                 );
 
-                //Configure the datatable with  jquery
+                //Configure the datatable with jquery
                 coExpTableInstance = $("#" + Names.tableId).dataTable({
                     "sDom": '<"H"f<"coexp-table-filter-pearson">>t<"F"i<"datatable-paging"p>>',
                     "bPaginate": true,
@@ -328,17 +329,42 @@ var CoExpView = (function() {
 	        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='gene_checkbox'>Genes</label>" +
 	        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene sets</label>"
 	        		);
-            }
-            
-            function updateTable(geneEntityId) {
-            	$("#" + Names.tableDivId).change(function() {
-	        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-	        			__g_coExpSubTabView.init(geneEntityId, "GENE");
-	        	    }
-	        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-	        	    	__g_coExpSubTabView.init(geneEntityId, "GENESET");
-	        	    }
-            	});
+	        	$("input#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
+		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+		        			if (genesRetrieved == false) { //Only do the json call once, if the list is still null
+		        				GetCoExpData(window.QuerySession.getCancerStudyIds()[0], geneEntityId,$("#coexp-profile-selector :selected").val(), "GENE",
+		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false");
+		        				genesRetrieved = true;
+		        				} else { //Add the genes into the coexpTable again if they are not there
+		        					coExpTableInstance.fnAddData(geneArr);
+		        				} 
+		        			} else { //Button not checked, clear the whole table
+		        				coExpTableInstance.fnClearTable();
+		        				if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) { //If the gene sets box is checked, keep the gene sets
+		        					if (geneSetArr.length >= 1) {
+			        					coExpTableInstance.fnAddData(geneSetArr);
+			        				}
+		        				}
+		        			}
+		        		});
+	        	$("input#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
+		        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+		        	    	if (geneSetsRetrieved == false) { //Only do the json call once, if the list is still null
+		        				GetCoExpData(window.QuerySession.getCancerStudyIds()[0], geneEntityId, $("#coexp-profile-selector :selected").val(), "GENESET",
+		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false");
+		        				geneSetsRetrieved = true;
+		        				} else { //Add the gene sets into the coexpTable again
+		                			coExpTableInstance.fnAddData(geneSetArr);
+		        				} 
+		        			} else { //Button not checked, clear the whole table
+		                		coExpTableInstance.fnClearTable();
+		                		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) { //If the gene box is checked, keep the genes
+		                			if (geneArr.length >= 1) {
+			        					coExpTableInstance.fnAddData(geneArr);
+			        				}
+		                		}
+		        			}
+		        		});
             }
 
             function attachRowListener() {
@@ -383,8 +409,8 @@ var CoExpView = (function() {
                 };
             }  
 
-            function convertData(_result) {
-                //Convert the format of the callback result to fit datatable
+            function convertData(_result, correlatedEntitiesToFind) {
+                //Convert the format of the callback result to fit datatable, and fill the geneArr or geneSetArr
                 coexpTableArr = [];
                 $.each(_result, function(i, obj) {
                     var tmp_arr = [];
@@ -393,10 +419,15 @@ var CoExpView = (function() {
                     tmp_arr.push(obj.spearman.toFixed(2));
                     entityProfileMap[obj.gene] = obj.profileId;
                     coexpTableArr.push(tmp_arr);
-                });           
+                    if (correlatedEntitiesToFind == "GENE") {
+                    	geneArr.push(tmp_arr);
+                    } else if (correlatedEntitiesToFind == "GENESET") {
+                    	geneSetArr.push(tmp_arr);
+                    }
+                });
             }
 
-            function getCoExpDataCallBack(result, geneEntityId) {
+            function getCoExpDataCallBack(result, correlatedEntitiesToFind) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
                 if (result.length === 0) {
@@ -404,7 +435,7 @@ var CoExpView = (function() {
                     attachDownloadFullResultButton();                    
                 } else {
                     //Render datatable
-                    convertData(result);                   
+                    convertData(result, correlatedEntitiesToFind);   // add "result" to the correct variable
                 }
             }
             
@@ -416,13 +447,37 @@ var CoExpView = (function() {
                 attachGeneticEntityButtons();
                 attachRowListener();
                 initTable();
-                updateTable(geneEntityId);
+            }
+            
+            //Function to get co-expression data
+            function GetCoExpData(cancerStudyId, geneticEntity, profileId, correlatedEntitiesToFind, geneticEntityType,
+            		caseSetId, caseIdsKey, isFullResult) {
+            	var paramsGetCoExpData = {
+                        cancer_study_id: cancerStudyId,
+                        genetic_entity: geneticEntity,
+                        profile_id: profileId,
+                        correlated_entities_to_find: correlatedEntitiesToFind,
+                        genetic_entity_type: geneticEntityType, 
+                        case_set_id: caseSetId,
+                        case_ids_key: caseIdsKey,
+                        is_full_result: isFullResult
+            	};
+            	$.post(
+            		"getCoExp.do", 
+            		paramsGetCoExpData, 
+            		function(result) {
+            			getCoExpDataCallBack(result, correlatedEntitiesToFind);
+            			coExpTableInstance.fnAddData(result);
+            		},
+            		"json"
+            	);
             }
 
             return {
                 init: function(_geneticEntityId, _geneticEntityType) {
                     //Getting co-exp data (for currently selected gene/profile) from servlet
                     $("#" + Names.plotId).empty();
+                    //Make the first call only with genes (we have always genes in our query)
                     var paramsGetCoExpData = {
                          cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
                          genetic_entity: _geneticEntityId,
@@ -437,8 +492,9 @@ var CoExpView = (function() {
                         "getCoExp.do", 
                         paramsGetCoExpData, 
                         function(result) {
-                            getCoExpDataCallBack(result, _geneticEntityId);
+                            getCoExpDataCallBack(result, "GENE");
                             renderDatatable();
+                            genesRetrieved = true;
                        },
                        "json"
                     );
@@ -488,6 +544,18 @@ var CoExpView = (function() {
                     var coExpTable = new CoExpTable();
                     coExpTable.init(geneEntityId, _geneEntityType);
                 }
+            },
+        	app: function(_geneEntityId, _geneEntityType) {
+                //Set the attributes of the sub-view instance
+                geneEntityId = _geneEntityId;
+                //TODO: Just a quick fix for the sub-tab collapse bug
+                $(window).trigger("resize");
+                //Get the div id of the right sub-tab
+                var element = $(".coexp_datatable_" + cbio.util.safeProperty(_geneEntityId));
+                assembleNames();
+                drawLayout();
+                var coExpTable = new CoExpTable();
+                coExpTable.init(geneEntityId, _geneEntityType);
             }
         };
 
@@ -505,7 +573,6 @@ var CoExpView = (function() {
             $("#coexp-profile-selector-dropdown").hide();
         }
         var coExpSubTabView = new CoExpSubTabView();
-        __g_coExpSubTabView = coExpSubTabView;
         coExpSubTabView.init(_genes[0], "GENE");
     }
 
