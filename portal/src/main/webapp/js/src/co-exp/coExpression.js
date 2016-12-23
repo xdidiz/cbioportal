@@ -351,7 +351,9 @@ var CoExpView = (function() {
 		        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
 		        	    	if (geneSetsRetrieved == false) { //Only do the json call once, if the list is still null
 		        				GetCoExpData(window.QuerySession.getCancerStudyIds()[0], geneEntityId, $("#coexp-profile-selector :selected").val(), "GENESET",
-		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false");
+		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false", function() {
+		        					coExpTableInstance.fnAddData(geneSetArr);
+		        				});
 		        				geneSetsRetrieved = true;
 		        				} else { //Add the gene sets into the coexpTable again
 		                			coExpTableInstance.fnAddData(geneSetArr);
@@ -427,15 +429,20 @@ var CoExpView = (function() {
                 });
             }
 
-            function getCoExpDataCallBack(result, correlatedEntitiesToFind) {
+            function getCoExpDataCallBack(result, correlatedEntitiesToFind, isData) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
                 if (result.length === 0) {
                     $("#" + Names.tableDivId).append("There are no gene pairs with a Pearson or Spearman score > 0.3 or < -0.3. To see the scores for all gene pairs, use the button below.");
                     attachDownloadFullResultButton();                    
                 } else {
-                    //Render datatable
-                    convertData(result, correlatedEntitiesToFind);   // add "result" to the correct variable
+                	if (isData) {
+                		 convertData(result, correlatedEntitiesToFind);
+                		 coExpTableInstance.fnAddData(result);
+                	} else {
+                		 convertData(result, correlatedEntitiesToFind);
+                		 renderDatatable();
+                	}
                 }
             }
             
@@ -466,8 +473,9 @@ var CoExpView = (function() {
             		"getCoExp.do", 
             		paramsGetCoExpData, 
             		function(result) {
-            			getCoExpDataCallBack(result, correlatedEntitiesToFind);
-            			coExpTableInstance.fnAddData(result);
+            			getCoExpDataCallBack(result, correlatedEntitiesToFind, true, function () {
+            				coExpTableInstance.fnAddData(result);
+            			});
             		},
             		"json"
             	);
@@ -492,8 +500,7 @@ var CoExpView = (function() {
                         "getCoExp.do", 
                         paramsGetCoExpData, 
                         function(result) {
-                            getCoExpDataCallBack(result, "GENE");
-                            renderDatatable();
+                            getCoExpDataCallBack(result, "GENE", false);
                             genesRetrieved = true;
                        },
                        "json"
