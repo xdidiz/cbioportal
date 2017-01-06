@@ -104,7 +104,7 @@ public class ImportGeneSetData extends ConsoleRunnable {
      * @param version 
      * @throws Exception 
      */
-    private static void importData(File genesetFile, boolean allowUpdates, String version) throws Exception {
+    public static void importData(File genesetFile, boolean allowUpdates, String version) throws Exception {
         ProgressMonitor.setCurrentMessage("Reading data from: " + genesetFile.getCanonicalPath());
         DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
@@ -175,7 +175,7 @@ public class ImportGeneSetData extends ConsoleRunnable {
      * @param suppFile
      * @throws Exception 
      */
-    private static void importSuppGeneSetData(File suppFile) throws Exception {
+    static void importSuppGeneSetData(File suppFile) throws Exception {
         ProgressMonitor.setCurrentMessage("Reading data from: " + suppFile.getCanonicalPath());
         DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         

@@ -244,6 +244,32 @@ public class DaoGeneSet {
     }
     
     /**
+     * Get GeneSet record.
+     */
+    public GeneSet getGeneSetById(int geneSetId) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoGene.class);
+            pstmt = con.prepareStatement
+                    ("SELECT * FROM geneset WHERE ID = ?");
+            pstmt.setInt(1, geneSetId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                //return extractGene(rs);
+            	return extractGeneSet(rs);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+        }
+    }
+    
+    /**
      * Extracts GeneSet record from ResultSet.
      * @param rs
      * @return GeneSet record
