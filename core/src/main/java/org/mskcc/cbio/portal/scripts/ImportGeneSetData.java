@@ -80,6 +80,8 @@ public class ImportGeneSetData extends ConsoleRunnable {
             // import geneset data file and/or supplemental geneset data file
             boolean allowUpdates = options.has("update");
             //TODO parse version from command line args
+            //TODO WARNINGS for wrong versions: if version 2 and 1 already exists: give error saying version 1 needs to be removed first
+            // if version 1 and update option not given: check if geneset already exists in version 1, if exists give error (tell user to use update option)
             String version = "1";
             if (options.hasArgument(data)) {
                 File genesetFile = new File(options.valueOf(data));

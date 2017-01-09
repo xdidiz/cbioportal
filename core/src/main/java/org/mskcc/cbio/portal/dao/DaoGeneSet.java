@@ -252,8 +252,7 @@ public class DaoGeneSet {
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGene.class);
-            pstmt = con.prepareStatement
-                    ("SELECT * FROM geneset WHERE ID = ?");
+            pstmt = con.prepareStatement("SELECT * FROM geneset WHERE ID = ?");
             pstmt.setInt(1, geneSetId);
             rs = pstmt.executeQuery();
             if (rs.next()) {

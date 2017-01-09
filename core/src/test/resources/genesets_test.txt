@@ -6,5 +6,5 @@ UNITTEST_GENESET5	http://www.broadinstitute.org/gsea/msigdb/cards/EGFR_UP.V1_DN	
 UNITTEST_GENESET6	http://www.broadinstitute.org/gsea/msigdb/cards/EGFR_UP.V1_UP	1	207	208
 UNITTEST_GENESET7	http://www.broadinstitute.org/gsea/msigdb/cards/ERB2_UP.V1_DN	1	2	3
 UNITTEST_GENESET8	http://www.broadinstitute.org/gsea/msigdb/cards/ERB2_UP.V1_UP	10000
-UNITTEST_GENESET9	http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_DN	10000 675
+UNITTEST_GENESET9	http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_DN	10000	675
 UNITTEST_GENESET10	http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_UP	4893	207	208

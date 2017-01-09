@@ -73,15 +73,19 @@ public class DaoGeneSetHierarchy {
 	        
 	        // Prepare SQL statement
             preparedStatement = connection.prepareStatement("INSERT INTO geneset_hierarchy " 
-	                + "(`NODE_ID`, `NODE_NAME`, `PARENT_ID`) VALUES(?,?,?)");
+	                + "(`NODE_NAME`, `PARENT_ID`) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
 	        
             // Fill in statement
-            preparedStatement.setInt(1, geneSetHierarchy.getNodeId());
-            preparedStatement.setString(2, geneSetHierarchy.getNodeName());
-            preparedStatement.setInt(3, geneSetHierarchy.getParentId());
+            preparedStatement.setString(1, geneSetHierarchy.getNodeName());
+            preparedStatement.setInt(2, geneSetHierarchy.getParentId());
             
             // Execute statement
             preparedStatement.executeUpdate();
+
+            // Get the auto generated key, which is the Node ID:
+            resultSet = preparedStatement.getGeneratedKeys();
+            resultSet.next();
+            geneSetHierarchy.setNodeId(resultSet.getInt(1));
             
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -182,8 +186,15 @@ public class DaoGeneSetHierarchy {
         ResultSet resultSet = null;
         try {
         	connection = JdbcUtil.getDbConnection(DaoGeneSetHierarchy.class);
-        	preparedStatement = connection.prepareStatement("DELETE FROM geneset_hierarchy");
-        	preparedStatement.executeUpdate();
+//        	preparedStatement = connection.prepareStatement("DELETE FROM geneset_hierarchy");
+//        	preparedStatement.executeUpdate();
+        	
+        	String[] SQLs = {"DELETE FROM geneset_hierarchy", 
+        			"ALTER TABLE geneset_hierarchy AUTO_INCREMENT = 1"};
+            for (String sql : SQLs) {
+            	preparedStatement = connection.prepareStatement(sql);
+            	preparedStatement.executeUpdate();
+            }
         }
         catch (SQLException e) {
             throw new DaoException(e);

@@ -54,12 +54,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TestImportGeneSetData {
 
+    //private URL geneSetDataFilePath;
+    //private URL suppGeneSetDataFilePath;
     private URL geneSetDataFilePath;
     private URL suppGeneSetDataFilePath;
     
     @Before
     public void setUp() {
-
+    	
+    	// New Implementation, but can't get it to work
         geneSetDataFilePath = this.getClass().getResource("/genesets_test.txt");
         suppGeneSetDataFilePath = this.getClass().getResource("/supp-genesets.txt");
     }

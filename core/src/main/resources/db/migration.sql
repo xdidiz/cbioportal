@@ -266,10 +266,11 @@ RENAME TABLE `genetic_alteration_new` TO `genetic_alteration`;
 -- drop temporary column:
 ALTER TABLE `genetic_entity` DROP COLUMN `TMP_GENE_ID`;
 
+UPDATE info SET DB_SCHEMA_VERSION="2.0.0";
 
 -- ========================== end of genetic_entity related migration =============================================
 
-UPDATE info SET DB_SCHEMA_VERSION="2.0.0";
+##version: 2.1.0
 -- ========================== new geneset related tables =============================================
 
 CREATE TABLE `geneset` (
