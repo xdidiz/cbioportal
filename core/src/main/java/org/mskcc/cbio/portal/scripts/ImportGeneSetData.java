@@ -44,8 +44,9 @@ import org.mskcc.cbio.portal.util.ProgressMonitor;
  * @author ochoaa
  */
 public class ImportGeneSetData extends ConsoleRunnable {
-	public static int skippedGenes;
     
+	public static int skippedGenes;
+
     @Override
     public void run() {
         try {
@@ -106,7 +107,8 @@ public class ImportGeneSetData extends ConsoleRunnable {
      * @param version 
      * @throws Exception 
      */
-    public static void importData(File genesetFile, boolean allowUpdates, String version) throws Exception {
+    public static int importData(File genesetFile, boolean allowUpdates, String version) throws Exception {
+
         ProgressMonitor.setCurrentMessage("Reading data from: " + genesetFile.getCanonicalPath());
         DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
@@ -165,11 +167,12 @@ public class ImportGeneSetData extends ConsoleRunnable {
         
         // print warnings message with skipped genes
         if (skippedGenes > 0) {
-        System.err.println("\n" + skippedGenes + " times a gene was not found in local gene table. Possible reasons:\n"
+        System.err.println("\n" + skippedGenes + " times a gene was not found in local gene table. Possible reasons:\n\n"
         		+ "1. The Entrez gene IDs are relatively new. Consider adding them to database.\n"
         		+ "2. The Entrez gene IDs are depricated. Consider updating gene sets and recalculating GSVA scores.\n"
         		+ "3. Invalid Entrez gene IDs. Please check .gmt file to verify genes are in Entrez gene ID format.\n\n");
         }
+        return skippedGenes;
     }
 
     /**

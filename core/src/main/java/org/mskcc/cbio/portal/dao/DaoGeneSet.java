@@ -167,7 +167,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
         
     }
@@ -200,7 +200,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
 
@@ -239,7 +239,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -251,9 +251,10 @@ public class DaoGeneSet {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            con = JdbcUtil.getDbConnection(DaoGene.class);
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement("SELECT * FROM geneset WHERE ID = ?");
             pstmt.setInt(1, geneSetId);
+            System.out.println(pstmt);
             rs = pstmt.executeQuery();
             if (rs.next()) {
                 //return extractGene(rs);
@@ -264,7 +265,7 @@ public class DaoGeneSet {
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -310,7 +311,7 @@ public class DaoGeneSet {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            con = JdbcUtil.getDbConnection(DaoGene.class);
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement(SQL);
             pstmt.setInt(1, geneticEntityId);
             rs = pstmt.executeQuery();
@@ -323,7 +324,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -336,7 +337,7 @@ public class DaoGeneSet {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            con = JdbcUtil.getDbConnection(DaoGene.class);
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement(SQL);
             pstmt.setString(1, geneSet.getNameShort());
             pstmt.setString(2, geneSet.getName());
@@ -354,7 +355,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -385,7 +386,7 @@ public class DaoGeneSet {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            con = JdbcUtil.getDbConnection(DaoGene.class);
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             for (String sql : SQLs) {
                 pstmt = con.prepareStatement(sql);
                 pstmt.setInt(1, id);
@@ -396,7 +397,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -410,7 +411,7 @@ public class DaoGeneSet {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            con = JdbcUtil.getDbConnection(DaoGene.class);
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement("DELETE FROM geneset_gene WHERE `GENESET_ID` = ?");
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
@@ -419,7 +420,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
     
@@ -442,7 +443,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
         deleteAllGeneSetGeneRecords();
         // Moved this to DaeoGeneSetHierarchy.java
@@ -467,7 +468,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
 
@@ -488,7 +489,7 @@ public class DaoGeneSet {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGene.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
 }

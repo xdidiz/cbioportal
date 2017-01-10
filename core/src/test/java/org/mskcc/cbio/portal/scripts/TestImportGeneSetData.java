@@ -54,48 +54,34 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TestImportGeneSetData {
 
-    //private URL geneSetDataFilePath;
-    //private URL suppGeneSetDataFilePath;
-    private URL geneSetDataFilePath;
-    private URL suppGeneSetDataFilePath;
-    
-    @Before
-    public void setUp() {
-    	
-    	// New Implementation, but can't get it to work
-        geneSetDataFilePath = this.getClass().getResource("/genesets_test.txt");
-        suppGeneSetDataFilePath = this.getClass().getResource("/supp-genesets.txt");
-    }
-
-    @Test
+	@Test
     public void testImportGeneSetData() throws Exception {
     	DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         ProgressMonitor.setConsoleMode(false);
-		// TBD: change this to use getResourceAsStream()
-        if (suppGeneSetDataFilePath!=null) {
-            File file = new File(suppGeneSetDataFilePath.getFile());
-            ImportGeneSetData.importSuppGeneSetData(file);
-        }
         
-        if (geneSetDataFilePath != null) {
-            File file = new File(geneSetDataFilePath.getFile());
-            boolean allowUpdates = true;
-            String version = "";
-            ImportGeneSetData.importData(file, allowUpdates, version);
-            // ImportGeneSetData.importData(File genesetFile, boolean allowUpdates, String version);
+        File file = new File("src/test/resources/genesets_test.txt");
+        boolean allowUpdates = true;
+        String version = "";
+        int skippedGenes = ImportGeneSetData.importData(file, allowUpdates, version);
 
-            GeneSet geneSet = daoGeneSet.getGeneSetById(5);
-            assertEquals("UNITTEST_GENESET5", geneSet.getExternalId());
-            geneSet = daoGeneSet.getGeneSetById(10);
-            assertEquals("UNITTEST_GENESET10", geneSet.getExternalId());
-
-//            geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
-//            assertEquals("8", geneSet.getId());
-//            geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
-//            assertEquals("2", geneSet.getId());
-        }
-        else {
-            throw new IllegalArgumentException("Cannot find test gene file, is PORTAL_HOME set?");
-        }
+        file = new File("src/test/resources/supp-genesets.txt");
+        ImportGeneSetData.importSuppGeneSetData(file);
+        
+        // Test database entries
+        GeneSet geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET5");
+        assertEquals("UNITTEST_GENESET5", geneSet.getExternalId());
+        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET10");
+        assertEquals("http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_UP", geneSet.getRefLink());
+        
+        // Test warning message
+        assertEquals(5, skippedGenes);
+        
+        // Test database entries supplementary file
+        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
+        assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getName());
+        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
+        assertEquals("M2636", geneSet.getNameShort());
     }
-}	
+}
+
+
