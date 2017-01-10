@@ -42,25 +42,20 @@ import java.util.*;
 
 public class DaoGeneSet {
     
-    private static DaoGeneSet daoGeneSet = null;
+	// Initialise DaoGeneSet instance
+	private static DaoGeneSet instance = new DaoGeneSet();
+	
+	// Keep Constructor empty
+	private DaoGeneSet() {
+	}
+	
+	// Access instance from outside the class
+	public static DaoGeneSet getInstance(){
+		return instance;
+	}
+    
     private static DaoGeneOptimized daoGene = null;
-    
-    private DaoGeneSet() {
-        daoGene = DaoGeneOptimized.getInstance();
-    }
-    
-    /**
-     * Gets instance of DaoGeneSet (singleton pattern). 
-     * @return DaoGeneSet
-     * @throws DaoException
-     */
-    public static DaoGeneSet getInstance() throws DaoException {
-        if (daoGeneSet == null) {
-            daoGeneSet = new DaoGeneSet();
-        }
-        return daoGeneSet;
-    }
-    
+
     /**
      * Adds a new GeneSet record to the database.
      * @param geneSet

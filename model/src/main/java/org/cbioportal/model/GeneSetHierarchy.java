@@ -32,7 +32,6 @@ public class GeneSetHierarchy {
 	private int parentId;
 
 	public GeneSetHierarchy() {
-		
 	}
 
 	public int getNodeId() {
@@ -59,5 +58,3 @@ public class GeneSetHierarchy {
 		this.parentId = parentId;
 	}
 }
-
-

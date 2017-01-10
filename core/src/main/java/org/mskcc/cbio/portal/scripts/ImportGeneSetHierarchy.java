@@ -44,12 +44,15 @@ import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.yaml.snakeyaml.Yaml;
 import org.cbioportal.model.GeneSet;
 import org.cbioportal.model.GeneSetHierarchy;
+import org.cbioportal.model.GeneSetHierarchyLeaf;
 
 public class ImportGeneSetHierarchy extends ConsoleRunnable {
 	
 	// Initiate a database instance
 	static DaoGeneSetHierarchy daoGeneSetHierarchy = DaoGeneSetHierarchy.getInstance();
-	
+	static DaoGeneSetHierarchyLeaf daoGeneSetHierarchyLeaf = DaoGeneSetHierarchyLeaf.getInstance();
+	static DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
+
 	// Initiate variable for validation
 	static boolean validate;
 	
@@ -99,8 +102,8 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
         	System.out.println();
         	
             // First we want to validate that what we can import without errors
-            validate = true;
-            importData(genesetFile, allowOverwrite);
+            //validate = true;
+            //importData(genesetFile, allowOverwrite);
             
             // If this is succesful, we want to import
             validate = false;
@@ -114,7 +117,7 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
     /**
      * Imports data from geneset hierarchy file.
      */
-    private static void importData(File genesetFile, boolean allowOverwrite) throws Exception {
+    public static void importData(File genesetFile, boolean allowOverwrite) throws Exception {
     	
         // Load data and parse with snakeyaml
         InputStream input = new FileInputStream(genesetFile);
@@ -139,7 +142,9 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
     	if (emptyDatabase || allowOverwrite) {
         	
     		// Make the database empty
-    		if (!emptyDatabase && validate) {
+    		//if (!emptyDatabase && validate) {
+    		if (!emptyDatabase) {
+
     	    	System.out.println("Emptying geneset_hierarchy and geneset_hierarchy_leaf before filling with new data.");
     	    	System.out.println();
     			daoGeneSetHierarchy.deleteAllGeneSetHierarchyRecords();
@@ -165,26 +170,44 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
 		
 		// Iterate over the child nodes at this level
 		for (String childNode: childNodes) {
+			
 			// Add leaf for gene sets
 			if (childNode.equals("Gene sets")) {
 				
 				// Iterate over gene sets
-				for (String geneSet: (List<String>) geneSetTree.get("Gene sets")) {
+				for (String geneSetName: (List<String>) geneSetTree.get("Gene sets")) {
 		
-					// Add the gene set to the database
-					addGeneSetHierarchyLeafs(parentNodeId, geneSet);
+					// Retrieve geneSet from database
+					GeneSet geneSet = daoGeneSet.getGeneSetByExternalId(geneSetName);
+					
+					// Check if geneSet is in database
+					if (geneSet != null) {
+						
+						// Only write geneset to database when not validating
+						if (!validate) {
+							GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
+							geneSetHierarchyLeaf.setNodeId(parentNodeId);
+							geneSetHierarchyLeaf.setGeneSetId(geneSet.getId());
+
+							// Add leaf to geneset_hierarchy_leaf
+							System.out.println("Parent id: " + parentNodeId + ", GeneSet id: " + geneSetName);
+							daoGeneSetHierarchyLeaf.addGeneSetHierarchyLeaf(geneSetHierarchyLeaf);
+						}
+					} else {
+			            throw new RuntimeException("\nGene set `" + geneSetName + "` not in geneset table in database. Please add it first before adding tree containing it.");
+					}
 				}
 				
 			// Add nodes for (sub)categories
 			} else {
-
-				GeneSetHierarchy geneSetHierarchy = new GeneSetHierarchy();
-				geneSetHierarchy.setNodeName(childNode);
-				geneSetHierarchy.setParentId(parentNodeId);
 				
 				try {
 					if (!validate) {
-						// Add node
+						GeneSetHierarchy geneSetHierarchy = new GeneSetHierarchy();
+						geneSetHierarchy.setNodeName(childNode);
+						geneSetHierarchy.setParentId(parentNodeId);
+						
+						// Add node to geneset_hierarchy
 						daoGeneSetHierarchy.addGeneSetHierarchy(geneSetHierarchy);
 					
 						// Get node ID 
@@ -203,27 +226,6 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
         }
     }
     
-    
-    /**
-     * Retrieve gene set IDs.
-     */
-    private static void addGeneSetHierarchyLeafs(int parentNodeId, String geneSetName) throws DaoException {
-        DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
-		GeneSet geneSet = daoGeneSet.getGeneSetByExternalId(geneSetName);
-		
-		// Add leaf to geneset_hierarchy_leaf
-		if (geneSet != null) {
-			
-			// Only write geneset to database when not validating
-			if (!validate) {
-				System.out.println("Parent id: " + parentNodeId + ", GeneSet id: " + geneSetName);
-				daoGeneSetHierarchy.addGeneSetHierarchyLeaf(parentNodeId, geneSet.getId());
-			}
-		} else {
-            throw new RuntimeException("\nGene set `" + geneSetName + "` not in geneset table in database. Please add it first before adding tree containing it.");
-		}
-    	
-    }
 
 
     public ImportGeneSetHierarchy(String[] args) {

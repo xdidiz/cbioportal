@@ -41,8 +41,8 @@ import java.util.List;
  */
 public class GeneSet implements Serializable {
     
-    private Integer id;
-    private Integer geneticEntityId;
+    private int id;
+    private int geneticEntityId;
     private String externalId;
     private String nameShort;
     private String name;
@@ -53,7 +53,7 @@ public class GeneSet implements Serializable {
     /**
      * @return the id
      */
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
@@ -67,7 +67,7 @@ public class GeneSet implements Serializable {
     /**
      * @return the geneticEntityId
      */
-    public Integer getGeneticEntityId() {
+    public int getGeneticEntityId() {
         return geneticEntityId;
     }
 

@@ -27,6 +27,9 @@
 package org.mskcc.cbio.portal.scripts;
 
 import org.cbioportal.model.GeneSet;
+import org.cbioportal.model.GeneSetHierarchy;
+import org.cbioportal.model.GeneSetHierarchyLeaf;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,7 +38,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 
 import org.mskcc.cbio.portal.dao.DaoGeneSet;
-
+import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchy;
+import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchyLeaf;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,38 +54,40 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(locations = { "classpath:/applicationContext-dao.xml" })
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @Transactional
-public class TestImportGeneSetData {
+public class TestImportGeneSetHierarchyData {
 
 	@Test
-    public void testImportGeneSetData() throws Exception {
-		// Initiate daoGeneSet to connect to database
-    	DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
+    public void testImportGeneSetHierarchyData() throws Exception {
+		DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
+		DaoGeneSetHierarchy daoGeneSetHierarchy = DaoGeneSetHierarchy.getInstance();
+		DaoGeneSetHierarchyLeaf daoGeneSetHierarchyLeaf = DaoGeneSetHierarchyLeaf.getInstance();
+
         ProgressMonitor.setConsoleMode(false);
         
-        // Open genesets test data file
-        File file = new File("src/test/resources/genesets_test.txt");
+        File file = new File("src/test/resources/genesetshierarchy_test_genesets.txt");
         boolean allowUpdates = true;
         String version = "";
-        int skippedGenes = ImportGeneSetData.importData(file, allowUpdates, version);
+        ImportGeneSetData.importData(file, allowUpdates, version);
+        
+        file = new File("src/test/resources/genesetshierarchy_test.yaml");
+        ImportGeneSetHierarchy.importData(file, true);
 
-        // Open supplementary file
-        file = new File("src/test/resources/supp-genesets.txt");
-        ImportGeneSetData.importSuppGeneSetData(file);
-        
         // Test database entries
-        GeneSet geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET5");
-        assertEquals("UNITTEST_GENESET5", geneSet.getExternalId());
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET10");
-        assertEquals("http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_UP", geneSet.getRefLink());
         
-        // Test warning message
-        assertEquals(5, skippedGenes);
+        // Get geneSet id
+        GeneSet geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET4");
         
-        // Test database entries supplementary file
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
-        assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getName());
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
-        assertEquals("M2636", geneSet.getNameShort());
+        // Get parent node id from geneSetHierarchyLeaf
+        GeneSetHierarchyLeaf geneSetHierarchyLeaf = daoGeneSetHierarchyLeaf.getGeneSetHierarchyLeafsByGeneSetId(geneSet.getId());
+        
+        // Get node name from geneSetHierarchy
+        GeneSetHierarchy geneSetHierarchy = daoGeneSetHierarchy.getGeneSetHierarchyFromNodeId(geneSetHierarchyLeaf.getNodeId());
+        
+        // Check if node name is as expected
+        assertEquals("Institutes Subcategory 1", geneSetHierarchy.getNodeName());
+        
+        // TODO Test warning message
+        
     }
 }
 
