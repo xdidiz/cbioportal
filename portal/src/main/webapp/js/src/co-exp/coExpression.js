@@ -263,7 +263,7 @@ var CoExpView = (function() {
                     "bScrollCollapse": true,
                     //iDisplayLength: coexp_table_arr.length,
                     "oLanguage": {
-                        "sSearch": "Search Gene"
+                        "sSearch": "Search Genetic Entity"
                     },
                     "bDeferRender": true,
                     "iDisplayLength": 30,
@@ -314,11 +314,11 @@ var CoExpView = (function() {
                     "</select>");
                 $("select#coexp-table-select-" + cbio.util.safeProperty(geneEntityId)).change(function () {
                     if ($(this).val() === "negativePearson") {
-                        coExpTableInstance.fnFilter("-", 2, false);
+                        coExpTableInstance.fnFilter("-", 1, false);
                     } else if ($(this).val() === "positivePearson") {
-                        coExpTableInstance.fnFilter('^[0-9]*\.[0-9]*$', 2, true);
+                        coExpTableInstance.fnFilter('^[0-9]*\.[0-9]*$', 1, true);
                     } else if ($(this).val() === "all") {
-                        coExpTableInstance.fnFilter("", 2);
+                        coExpTableInstance.fnFilter("", 1);
                     }
                 });
             }
@@ -331,11 +331,8 @@ var CoExpView = (function() {
 	        		);
 	        	$("input#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
 		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-		        			if (genesRetrieved == false) { //Only do the json call once, if the list is still null
-		        				GetCoExpData(window.QuerySession.getCancerStudyIds()[0], geneEntityId,$("#coexp-profile-selector :selected").val(), "GENE",
-		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false");
-		        				genesRetrieved = true;
-		        				} else { //Add the genes into the coexpTable again if they are not there
+		        			//genesRetrieved will not be false since we always retrieve genes
+				        		if (genesRetrieved == true){ //Add the genes into the coexpTable again if they are not there
 		        					coExpTableInstance.fnAddData(geneArr);
 		        				} 
 		        			} else { //Button not checked, clear the whole table
@@ -349,12 +346,27 @@ var CoExpView = (function() {
 		        		});
 	        	$("input#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
 		        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-		        	    	if (geneSetsRetrieved == false) { //Only do the json call once, if the list is still null
-		        				GetCoExpData(window.QuerySession.getCancerStudyIds()[0], geneEntityId, $("#coexp-profile-selector :selected").val(), "GENESET",
-		        						"GENE", window.QuerySession.getCaseSetId(), window.QuerySession.getCaseIdsKey(), "false", function() {
-		        					coExpTableInstance.fnAddData(geneSetArr);
-		        				});
-		        				geneSetsRetrieved = true;
+		        	    	if (geneSetsRetrieved == false) { //If it is the first time that the checkbox is checked, retrieve the data
+        		            	var paramsGetCoExpData = {
+        		                        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+        		                        genetic_entity: geneEntityId,
+        		                        profile_id: $("#coexp-profile-selector :selected").val(),
+        		                        correlated_entities_to_find: "GENESET",
+        		                        genetic_entity_type: "GENE", 
+        		                        case_set_id: window.QuerySession.getCaseSetId(),
+        		                        case_ids_key: window.QuerySession.getCaseIdsKey(),
+        		                        is_full_result: "false"
+        		            	};
+        		            	$.post(
+        		            		"getCoExp.do", 
+        		            		paramsGetCoExpData, 
+        		            		function(result) {
+        		            			convertData(result, "GENESET");
+        		            			coExpTableInstance.fnAddData(geneSetArr);
+        		            			geneSetsRetrieved = true;
+        		            		},
+        		            		"json"
+        		            	);
 		        				} else { //Add the gene sets into the coexpTable again
 		                			coExpTableInstance.fnAddData(geneSetArr);
 		        				} 
@@ -429,56 +441,22 @@ var CoExpView = (function() {
                 });
             }
 
-            function getCoExpDataCallBack(result, correlatedEntitiesToFind, isData) {
+            function getCoExpDataCallBack(result, correlatedEntitiesToFind) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
                 if (result.length === 0) {
                     $("#" + Names.tableDivId).append("There are no gene pairs with a Pearson or Spearman score > 0.3 or < -0.3. To see the scores for all gene pairs, use the button below.");
                     attachDownloadFullResultButton();                    
                 } else {
-                	if (isData) {
-                		 convertData(result, correlatedEntitiesToFind);
-                		 coExpTableInstance.fnAddData(result);
-                	} else {
-                		 convertData(result, correlatedEntitiesToFind);
-                		 renderDatatable();
-                	}
+                	convertData(result, correlatedEntitiesToFind);
+                	overWriteFilters(); 
+                    configTable();
+                    attachDownloadFullResultButton();
+                    attachPearsonFilter();
+                    attachGeneticEntityButtons();
+                    attachRowListener();
+                    initTable();
                 }
-            }
-            
-            function renderDatatable() {
-            	overWriteFilters(); 
-                configTable();
-                attachDownloadFullResultButton();
-                attachPearsonFilter();
-                attachGeneticEntityButtons();
-                attachRowListener();
-                initTable();
-            }
-            
-            //Function to get co-expression data
-            function GetCoExpData(cancerStudyId, geneticEntity, profileId, correlatedEntitiesToFind, geneticEntityType,
-            		caseSetId, caseIdsKey, isFullResult) {
-            	var paramsGetCoExpData = {
-                        cancer_study_id: cancerStudyId,
-                        genetic_entity: geneticEntity,
-                        profile_id: profileId,
-                        correlated_entities_to_find: correlatedEntitiesToFind,
-                        genetic_entity_type: geneticEntityType, 
-                        case_set_id: caseSetId,
-                        case_ids_key: caseIdsKey,
-                        is_full_result: isFullResult
-            	};
-            	$.post(
-            		"getCoExp.do", 
-            		paramsGetCoExpData, 
-            		function(result) {
-            			getCoExpDataCallBack(result, correlatedEntitiesToFind, true, function () {
-            				coExpTableInstance.fnAddData(result);
-            			});
-            		},
-            		"json"
-            	);
             }
 
             return {
@@ -490,7 +468,7 @@ var CoExpView = (function() {
                          cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
                          genetic_entity: _geneticEntityId,
                          profile_id: $("#coexp-profile-selector :selected").val(),
-                         correlated_entities_to_find: "GENE",// GENE or GENESET
+                         correlated_entities_to_find: "GENE",
                          genetic_entity_type: _geneticEntityType, 
                          case_set_id: window.QuerySession.getCaseSetId(),
                          case_ids_key: window.QuerySession.getCaseIdsKey(),
@@ -500,7 +478,7 @@ var CoExpView = (function() {
                         "getCoExp.do", 
                         paramsGetCoExpData, 
                         function(result) {
-                            getCoExpDataCallBack(result, "GENE", false);
+                            getCoExpDataCallBack(result, "GENE");
                             genesRetrieved = true;
                        },
                        "json"
