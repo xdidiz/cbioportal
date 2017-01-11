@@ -47,7 +47,6 @@ public class GeneSet implements Serializable {
     private String nameShort;
     private String name;
     private String refLink;
-    private String version;
     private List<Integer> genesetGenes;
 
     /**
@@ -132,20 +131,6 @@ public class GeneSet implements Serializable {
      */
     public void setRefLink(String refLink) {
         this.refLink = refLink;
-    }
-
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * @param version the version to set
-     */
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     /**

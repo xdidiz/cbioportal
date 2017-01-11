@@ -75,14 +75,13 @@ public class DaoGeneSet {
             
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement("INSERT INTO geneset " 
-                    + "(`GENETIC_ENTITY_ID`, `EXTERNAL_ID`, `NAME_SHORT`, `NAME`, `REF_LINK`, `VERSION`) "
-                    + "VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                    + "(`GENETIC_ENTITY_ID`, `EXTERNAL_ID`, `NAME_SHORT`, `NAME`, `REF_LINK`) "
+                    + "VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             pstmt.setInt(1, geneSet.getGeneticEntityId());
             pstmt.setString(2, geneSet.getExternalId());
             pstmt.setString(3, geneSet.getNameShort());
             pstmt.setString(4, geneSet.getName());
             pstmt.setString(5, geneSet.getRefLink());
-            pstmt.setString(6, geneSet.getVersion());
             rows += pstmt.executeUpdate();
             //get the auto generated key:
             rs = pstmt.getGeneratedKeys();
@@ -278,7 +277,6 @@ public class DaoGeneSet {
         String nameShort = rs.getString("NAME_SHORT");
         String name = rs.getString("NAME");
         String refLink = rs.getString("REF_LINK");
-        String version = rs.getString("VERSION");
         
         GeneSet geneSet = new GeneSet();
         geneSet.setId(id);
@@ -287,7 +285,6 @@ public class DaoGeneSet {
         geneSet.setNameShort(nameShort);
         geneSet.setName(name);
         geneSet.setRefLink(refLink);
-        geneSet.setVersion(version);
         
         return geneSet;
     }
@@ -325,7 +322,7 @@ public class DaoGeneSet {
     
     public void updateGeneSet(GeneSet geneSet, boolean updateGeneSetGenes) throws DaoException {
         String SQL = "UPDATE geneset SET " + 
-                "`NAME_SHORT` = ?, `NAME` = ?, `REF_LINK` = ?, `VERSION` = ? " +
+                "`NAME_SHORT` = ?, `NAME` = ?, `REF_LINK` = ?" +
                 "WHERE `ID` = ?";
                 
         Connection con = null;
@@ -337,8 +334,7 @@ public class DaoGeneSet {
             pstmt.setString(1, geneSet.getNameShort());
             pstmt.setString(2, geneSet.getName());
             pstmt.setString(3, geneSet.getRefLink());
-            pstmt.setString(4, geneSet.getVersion());
-            pstmt.setInt(5, geneSet.getId());
+            pstmt.setInt(4, geneSet.getId());
             pstmt.executeUpdate();
 
             // update geneset genes as well if indicated

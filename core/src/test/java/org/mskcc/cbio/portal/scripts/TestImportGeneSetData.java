@@ -81,7 +81,7 @@ public class TestImportGeneSetData {
         geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
         assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getName());
         geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
-        assertEquals("M2636", geneSet.getNameShort());
+        assertEquals("UNITTEST_GENESET8", geneSet.getNameShort());
     }
 }
 

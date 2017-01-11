@@ -106,6 +106,7 @@ public class DaoGeneSetHierarchyLeaf {
             resultSet = preparedStatement.executeQuery();
             
             GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
+            resultSet.next();
             geneSetHierarchyLeaf.setNodeId(resultSet.getInt("NODE_ID"));
             geneSetHierarchyLeaf.setGeneSetId(resultSet.getInt("GENESET_ID"));
             

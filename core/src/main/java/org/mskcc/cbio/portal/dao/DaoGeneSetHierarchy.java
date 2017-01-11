@@ -37,10 +37,7 @@
 package org.mskcc.cbio.portal.dao;
 
 import org.cbioportal.model.GeneSetHierarchy;
-import org.mskcc.cbio.portal.util.ProgressMonitor;
-
 import java.sql.*;
-import java.util.*;
 
 public class DaoGeneSetHierarchy {
 	
