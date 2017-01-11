@@ -277,12 +277,11 @@ CREATE TABLE `geneset` (
   `ID` INT(11) NOT NULL auto_increment,
   `GENETIC_ENTITY_ID` INT NOT NULL,
   `EXTERNAL_ID` VARCHAR(100) NOT NULL,
-  `NAME_SHORT` VARCHAR(100) NOT NULL,
-  `NAME` VARCHAR(300) NOT NULL,
+  `NAME` VARCHAR(100) NOT NULL,
+  `DESCRIPTION` VARCHAR(300) NOT NULL,
   `REF_LINK` TEXT CHARACTER SET 'ascii' NULL,
-  `VERSION` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`ID`),
-  UNIQUE INDEX `NAME_SHORT_UNIQUE` (`NAME_SHORT` ASC),
+  UNIQUE INDEX `NAME_UNIQUE` (`NAME` ASC),
   UNIQUE INDEX `EXTERNAL_ID_COLL_UNIQUE` (`EXTERNAL_ID` ASC),
   UNIQUE INDEX `GENETIC_ENTITY_ID_UNIQUE` (`GENETIC_ENTITY_ID` ASC),
   FOREIGN KEY (`GENETIC_ENTITY_ID`) REFERENCES `genetic_entity` (`ID`) ON DELETE CASCADE
@@ -316,6 +315,11 @@ CREATE TABLE `geneset_hierarchy_leaf` (
 );
 
 -- --------------------------------------------------------
+CREATE TABLE `geneset_info` (
+  `GENESET_VERSION` varchar(24)
+);
+
+-- --------------------------------------------------------
 CREATE TABLE `genetic_profile_link` (
   `REFERRING_GENETIC_PROFILE_ID` INT NOT NULL,
   `REFERRED_GENETIC_PROFILE_ID` INT NOT NULL,
@@ -328,4 +332,3 @@ CREATE TABLE `genetic_profile_link` (
 UPDATE info SET DB_SCHEMA_VERSION="2.1.0";
 
 -- ========================== end of geneset related tables =============================================
-
