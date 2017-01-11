@@ -77,7 +77,7 @@ public class GeneticAlterationUtil {
      * @return Array List of String values.
      * @throws DaoException Database Error.
      * 
-     * @deprecated use new getGeneticDataRow() below instead
+     * Note: this will be deprecated as soon as new getGeneticDataRow() below is fully implemented supporting MUTATION api as well.
      */
     public static ArrayList<String> getGeneticAlterationDataRow(Gene targetGene,
                                                                 List<Integer> targetSampleList,
@@ -122,7 +122,9 @@ public class GeneticAlterationUtil {
     }
  
     /**
-     * Similar to getGeneticAlterationDataRow above, but generic to any entity type.
+     * Similar to getGeneticAlterationDataRow above, but generic to any entity type, supporting only 
+     * alteration data that is stored in genetic_alteration table (so not MUTATION data - for MUTATION data use the 
+     * old getGeneticAlterationDataRow for now).
      * Uses the new API.
      * 
      * @param geneticEntityStableId: gene stable id (entrezId), or geneset stable id 
@@ -138,6 +140,9 @@ public class GeneticAlterationUtil {
     public static ArrayList<String> getGeneticDataRow(String geneticEntityStableId,
             List<String> sampleIds, EntityType entityType,
             GeneticProfile targetGeneticProfile) throws DaoException {
+    	//TODO use if (targetGeneticProfile.getGeneticAlterationType() == GeneticAlterationType.MUTATION_EXTENDED) like
+    	//in previous getGeneticAlterationDataRow method, but here using the new API (which is still to be implemented)
+    	
 		//use new API which supports geneset query:
     	List<GeneticData> geneticDataItems = geneticDataService.fetchGeneticDataInGeneticProfile(
     			targetGeneticProfile.getStableId(), 

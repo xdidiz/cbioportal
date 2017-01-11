@@ -169,11 +169,13 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                                     DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
                                     CanonicalGene gene = daoGene.getGene(geneticEntityId);
                                     String entrezId = gene.getEntrezGeneId() + "";
+                                    
+                                    // TODO - Remove internalSampleIds and replace them for sampleIdList once getGeneticDataRow handles mutations
+                                    List<Integer> internalSampleIds = InternalIdUtil.getInternalNonNormalSampleIds(cancerStudyId, sampleIdList);
 
-                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
-                            				entrezId, 
-                            				sampleIdList, 
-                            				EntityType.GENE, 
+                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
+                            				gene, 
+                            				internalSampleIds, 
                             				geneticProfile);
                             	} else if (geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()) && !GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) {
                             		//use new API which supports geneset query:
