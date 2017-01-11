@@ -95,6 +95,7 @@ DROP TABLE IF EXISTS `geneset_hierarchy_leaf`;
 DROP TABLE IF EXISTS `geneset_hierarchy`;
 DROP TABLE IF EXISTS `geneset`;
 DROP TABLE IF EXISTS `genetic_entity`;
+DROP TABLE IF EXISTS 'geneset_info';
 
 -- --------------------------------------------------------
 CREATE TABLE `type_of_cancer` (
@@ -219,7 +220,6 @@ CREATE TABLE `geneset` (
   `NAME_SHORT` VARCHAR(100) NOT NULL,
   `NAME` VARCHAR(300) NOT NULL,
   `REF_LINK` TEXT CHARACTER SET 'ascii' NULL,
-  `VERSION` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE INDEX `NAME_SHORT_UNIQUE` (`NAME_SHORT` ASC),
   UNIQUE INDEX `EXTERNAL_ID_COLL_UNIQUE` (`EXTERNAL_ID` ASC),
@@ -253,6 +253,11 @@ CREATE TABLE `geneset_hierarchy_leaf` (
   FOREIGN KEY (`NODE_ID`) REFERENCES `geneset_hierarchy` (`NODE_ID`) ON DELETE CASCADE,
   FOREIGN KEY (`GENESET_ID`) REFERENCES `geneset` (`ID`) ON DELETE CASCADE
 );
+
+-- --------------------------------------------------------
+CREATE TABLE `geneset_info` (
+  `GENESET_VERSION` varchar(24)
+) DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 CREATE TABLE `uniprot_id_mapping` (
