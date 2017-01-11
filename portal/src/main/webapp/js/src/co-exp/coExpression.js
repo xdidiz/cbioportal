@@ -333,7 +333,9 @@ var CoExpView = (function() {
 		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
 		        			//genesRetrieved will not be false since we always retrieve genes
 				        		if (genesRetrieved == true){ //Add the genes into the coexpTable again if they are not there
-		        					coExpTableInstance.fnAddData(geneArr);
+				        			if (geneArr.length >= 1) {
+			        					coExpTableInstance.fnAddData(geneArr);
+			        				}
 		        				} 
 		        			} else { //Button not checked, clear the whole table
 		        				coExpTableInstance.fnClearTable();
@@ -362,13 +364,17 @@ var CoExpView = (function() {
         		            		paramsGetCoExpData, 
         		            		function(result) {
         		            			convertData(result, "GENESET");
-        		            			coExpTableInstance.fnAddData(geneSetArr);
+        		            			if (geneSetArr.length >= 1) { //Only add gene sets if we have them
+        		            				coExpTableInstance.fnAddData(geneSetArr);
+        		            			}
         		            			geneSetsRetrieved = true;
         		            		},
         		            		"json"
         		            	);
 		        				} else { //Add the gene sets into the coexpTable again
-		                			coExpTableInstance.fnAddData(geneSetArr);
+		        					if (geneSetArr.length >= 1) { //Only add gene sets if we have them
+    		            				coExpTableInstance.fnAddData(geneSetArr);
+    		            			}
 		        				} 
 		        			} else { //Button not checked, clear the whole table
 		                		coExpTableInstance.fnClearTable();
