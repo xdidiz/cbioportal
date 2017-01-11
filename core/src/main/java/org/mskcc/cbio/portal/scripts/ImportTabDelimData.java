@@ -132,11 +132,12 @@ public class ImportTabDelimData {
 	        int sampleStartIndex = getStartIndex(parts, hugoSymbolIndex, entrezGeneIdIndex, rppaGeneRefIndex, genesetIdIndex);
 	        if (rppaProfile) {
 	        	if (rppaGeneRefIndex == -1) {
-							throw new RuntimeException("Error: the following column should be present for RPPA data: Composite.Element.Ref");
-						}
+	        		throw new RuntimeException("Error: the following column should be present for RPPA data: Composite.Element.Ref");
+				}
 	        } else if (!gsvaProfile && hugoSymbolIndex == -1 && entrezGeneIdIndex == -1) {
-						throw new RuntimeException("Error: at least one of the following columns should be present: Hugo_Symbol or Entrez_Gene_Id");
-					}
+				throw new RuntimeException("Error: at least one of the following columns should be present: Hugo_Symbol or Entrez_Gene_Id");
+	        }
+	        
 	        
 	        String sampleIds[];
 	        sampleIds = new String[parts.length - sampleStartIndex];
@@ -197,9 +198,6 @@ public class ImportTabDelimData {
 	        //Object to insert records in the generic 'genetic_alteration' table: 
 	        DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
                 
-	        // object for retrieving records from 'geneset' table
-	        DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
-                
 	        //cache for data found in  cna_event' table:
 	        Map<CnaEvent.Event, CnaEvent.Event> existingCnaEvents = null;	        
 	        if (discretizedCnaProfile) {
@@ -221,7 +219,7 @@ public class ImportTabDelimData {
                     // either parse line as geneset or gene for importing into 'genetic_alteration' table
                     if (gsvaProfile) {
                         recordAdded = parseGeneSetLine(line, lenParts, sampleStartIndex, genesetIdIndex, 
-                                filteredSampleIndices, daoGeneticAlteration, daoGeneSet);
+                                filteredSampleIndices, daoGeneticAlteration);
                     }
                     else {
                         recordAdded = parseLine(line, lenParts, sampleStartIndex, 
@@ -271,12 +269,11 @@ public class ImportTabDelimData {
      * @param genesetIdIndex
      * @param filteredSampleIndices
      * @param daoGeneticAlteration
-     * @param daoGeneSet
      * @return
      * @throws DaoException 
      */
     private boolean parseGeneSetLine(String line, int nrColumns, int sampleStartIndex, int genesetIdIndex,
-             List<Integer> filteredSampleIndices, DaoGeneticAlteration daoGeneticAlteration, DaoGeneSet daoGeneSet) throws DaoException {
+             List<Integer> filteredSampleIndices, DaoGeneticAlteration daoGeneticAlteration) throws DaoException {
         boolean storedRecord = false;
         
         if (!line.startsWith("#") && line.trim().length() > 0) {
@@ -294,7 +291,7 @@ public class ImportTabDelimData {
             values = filterOutNormalValues(filteredSampleIndices, values);
             
             // necessary to specify GeneSet from model pkg for now, until GeneSet in core model pkg removed
-            org.cbioportal.model.GeneSet geneSet = daoGeneSet.getGeneSetByExternalId(parts[genesetIdIndex]);
+            org.cbioportal.model.GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId(parts[genesetIdIndex]);
             if (geneSet !=  null) {
                 storedRecord = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneSet.getGeneticEntityId(), 
                         DaoGeneticEntity.EntityTypes.GENE_SET, geneSet.getExternalId());

@@ -1,16 +1,5 @@
 /*
  * Copyright (c) 2016 The Hyve B.V.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
- * FOR A PARTICULAR PURPOSE. The software and documentation provided hereunder
- * is on an "as is" basis, and Memorial Sloan-Kettering Cancer Center has no
- * obligations to provide maintenance, support, updates, enhancements or
- * modifications. In no event shall Memorial Sloan-Kettering Cancer Center be
- * liable to any party for direct, indirect, special, incidental or
- * consequential damages, including lost profits, arising out of the use of this
- * software and its documentation, even if Memorial Sloan-Kettering Cancer
- * Center has been advised of the possibility of such damage.
  */
 
 /*
@@ -48,33 +37,16 @@ import org.cbioportal.model.GeneSetHierarchyLeaf;
 
 public class ImportGeneSetHierarchy extends ConsoleRunnable {
 	
-	// Initiate a database instance
-	static DaoGeneSetHierarchy daoGeneSetHierarchy = DaoGeneSetHierarchy.getInstance();
-	static DaoGeneSetHierarchyLeaf daoGeneSetHierarchyLeaf = DaoGeneSetHierarchyLeaf.getInstance();
-	static DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
-
-	// Initiate variable for validation
-	static boolean validate;
-	
-	// Initiate childNodeId, necessary to test if GeneSetId is present during validation
-	// , because true childNodeId will not be retrieved since no database connection is made. 
-	static int childNodeId = 0;
-	
-	// Initiate start nodeId to give to first iteration.
-	static int nodeIds = 0;
-
-
     @Override
     public void run() {
         try {
             String progName = "ImportGeneSetHierarchy";
             String description = "Import geneset hierarchy files in YAML format.";
-            // usage: --data <data_file.yaml> --overwrite
+            // usage: --data <data_file.yaml>
             
             OptionParser parser = new OptionParser();
             OptionSpec<String> data = parser.accepts("data", "Geneset data file")
                     .withRequiredArg().ofType(String.class);
-            parser.accepts("overwrite", "Permits overwrite to geneset tree data even if geneset tree is in use");
 
             OptionSet options = null;
             try {
@@ -93,7 +65,6 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
                         "'data' argument required");
             }
             
-            boolean allowOverwrite = options.has("overwrite");
             
             File genesetFile = new File(options.valueOf(data));
             
@@ -101,13 +72,44 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
             System.out.println(genesetFile);
         	System.out.println();
         	
-            // First we want to validate that what we can import without errors
-            //validate = true;
-            //importData(genesetFile, allowOverwrite);
+        	// Check if geneset_hierarchy already filled
+         	boolean emptyDatabase = !DaoGeneSetHierarchy.checkGeneSetHierarchy();
+	        if (emptyDatabase) {
+    	        	System.out.println("Table geneset_hierarchy is empty.");
+    	        } else {
+    	        	System.out.println("Table geneset_hierarchy is not empty.");
+        	}
             
+            // First we want to validate that the gene sets we're adding, are in database.
+            boolean validate = true;
+            importData(genesetFile, validate);
+
+        	// Asks if used wants to continue
+//            ProgressMonitor.setCurrentMessage("Previous gene set hierarchy found. Do you want to remove previous hierarchy and continue importing new hierarchy?");
+//            ProgressMonitor.setCurrentMessage("Type `yes` to continue or anything else to abort.");
+//        	
+//            try (Scanner scanner = new Scanner(System.in)) {
+//
+//            	String confirmEmptyingGeneSetHierarchy = scanner.next().toLowerCase();
+//            	ProgressMonitor.setCurrentMessage(confirmEmptyingGeneSetHierarchy);
+//            	if (!confirmEmptyingGeneSetHierarchy.equals("yes")) {
+//            		throw new UsageException(
+//    	                    progName, description, parser,
+//    	    				"User did not confirm to remove previous gene set hierarchy.");
+//            	}
+//            }
+            
+    		// Make the database empty
+    		if (!emptyDatabase) {
+
+    	    	System.out.println("Emptying geneset_hierarchy and geneset_hierarchy_leaf before filling with new data.");
+    	    	System.out.println();
+    			DaoGeneSetHierarchy.deleteAllGeneSetHierarchyRecords();
+    		}	
+        	
             // If this is succesful, we want to import
             validate = false;
-            importData(genesetFile, allowOverwrite);
+            importData(genesetFile, validate);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -117,7 +119,7 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
     /**
      * Imports data from geneset hierarchy file.
      */
-    public static void importData(File genesetFile, boolean allowOverwrite) throws Exception {
+    public static void importData(File genesetFile, boolean validate) throws Exception {
     	
         // Load data and parse with snakeyaml
         InputStream input = new FileInputStream(genesetFile);
@@ -125,45 +127,18 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
         Map<String, Object> geneSetTree = (Map<String, Object>) yaml.load(input);
     	input.close();
 
-    	// Check if database already contains values
-    	boolean emptyDatabase = daoGeneSetHierarchy.checkGeneSetHierarchy();
-
-    	// Check if geneset_hierarchy already filled
-    	if (validate) {
-	        if (emptyDatabase) {
-	        	System.out.println("Table geneset_hierarchy is empty.");
-	        } else {
-	        	System.out.println("Table geneset_hierarchy is not empty.");
-	        }
-        	System.out.println();
-    	}
+    	// Initiate start nodeId to give to first iteration.
+    	int nodeIds = 0;
     	
-    	// Start making changes to database
-    	if (emptyDatabase || allowOverwrite) {
-        	
-    		// Make the database empty
-    		//if (!emptyDatabase && validate) {
-    		if (!emptyDatabase) {
-
-    	    	System.out.println("Emptying geneset_hierarchy and geneset_hierarchy_leaf before filling with new data.");
-    	    	System.out.println();
-    			daoGeneSetHierarchy.deleteAllGeneSetHierarchyRecords();
-    		}
-
-        	// Parse the tree and import to geneset_hierarchy
-        	parseTree(geneSetTree, nodeIds);
-        
-    	} else {
-            throw new RuntimeException("\nTable geneset_hierarchy is not empty. Will not overwrite.\n" +
-                "Set option '--overwrite' to overwrite existing gene set tree.");
-    	}
+    	// Parse the tree and import to geneset_hierarchy
+    	parseTree(geneSetTree, nodeIds, validate);
     }
     
     /**
      * Parses data from geneset hierarchy file and saves in database.
      * @throws DaoException 
      */
-    private static void parseTree(Map<String, Object> geneSetTree, int parentNodeId) throws DaoException {
+    private static void parseTree(Map<String, Object> geneSetTree, int parentNodeId, boolean validate) throws DaoException {
     	
     	// Create set with child nodes
 		Set<String> childNodes = geneSetTree.keySet();
@@ -178,7 +153,7 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
 				for (String geneSetName: (List<String>) geneSetTree.get("Gene sets")) {
 		
 					// Retrieve geneSet from database
-					GeneSet geneSet = daoGeneSet.getGeneSetByExternalId(geneSetName);
+					GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId(geneSetName);
 					
 					// Check if geneSet is in database
 					if (geneSet != null) {
@@ -191,7 +166,7 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
 
 							// Add leaf to geneset_hierarchy_leaf
 							System.out.println("Parent id: " + parentNodeId + ", GeneSet id: " + geneSetName);
-							daoGeneSetHierarchyLeaf.addGeneSetHierarchyLeaf(geneSetHierarchyLeaf);
+							DaoGeneSetHierarchyLeaf.addGeneSetHierarchyLeaf(geneSetHierarchyLeaf);
 						}
 					} else {
 			            throw new RuntimeException("\nGene set `" + geneSetName + "` not in geneset table in database. Please add it first before adding tree containing it.");
@@ -202,31 +177,33 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
 			} else {
 				
 				try {
+					int childNodeId; 
 					if (!validate) {
 						GeneSetHierarchy geneSetHierarchy = new GeneSetHierarchy();
 						geneSetHierarchy.setNodeName(childNode);
 						geneSetHierarchy.setParentId(parentNodeId);
 						
 						// Add node to geneset_hierarchy
-						daoGeneSetHierarchy.addGeneSetHierarchy(geneSetHierarchy);
+						DaoGeneSetHierarchy.addGeneSetHierarchy(geneSetHierarchy);
 					
 						// Get node ID 
 						childNodeId = geneSetHierarchy.getNodeId();
 						System.out.println("Node id: " + childNodeId + ", Node name: " + childNode + ", Parent id: " + parentNodeId);		
+					} else{
+						// Initiate childNodeId, necessary to test if GeneSetId is present during validation
+						// , because true childNodeId will not be retrieved since no database connection is made. 
+						childNodeId = 0;
 					}
 					
 					// Go into the node
-					parseTree((Map<String, Object>) geneSetTree.get(childNode), childNodeId);
+					parseTree((Map<String, Object>) geneSetTree.get(childNode), childNodeId, validate);
 					
 				} catch (DaoException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		            throw new DaoException(e);
 				}
 			} 
         }
     }
-    
-
 
     public ImportGeneSetHierarchy(String[] args) {
         super(args);
@@ -235,8 +212,9 @@ public class ImportGeneSetHierarchy extends ConsoleRunnable {
     public static void main(String[] args) {
         ConsoleRunnable runner = new ImportGeneSetHierarchy(args);
         runner.runInConsole();        
-    }
-
-
-    
+    }  
 }
+
+
+
+

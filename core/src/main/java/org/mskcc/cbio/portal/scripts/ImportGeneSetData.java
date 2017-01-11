@@ -30,6 +30,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @author ochoaa
+ * @author Sander Tan
+ */
 package org.mskcc.cbio.portal.scripts;
 
 import java.io.*;
@@ -40,34 +44,32 @@ import org.cbioportal.model.GeneSetInfo;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 
-/**
- *
- * @author ochoaa
- */
+
 public class ImportGeneSetData extends ConsoleRunnable {
     
 	public static int skippedGenes;
-    DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-    DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
-    DaoGeneSetInfo daoGeneSetInfo = DaoGeneSetInfo.getInstance();
-
+    
     @Override
     public void run() {
-        try {
+        try {        	
             String progName = "ImportGeneSetData";
             String description = "Import geneset data files.";
-            // usage: --data <data_file.txt> --supp <supp_file.txt>  --version <Version> --update [allow updates to existing geneset data]
+            // usage: 		--data <data_file.txt> --supp <supp_file.txt> 
+            // optional:	--new-version <version> 
+            //				--update-info
             
             OptionParser parser = new OptionParser();
             OptionSpec<String> data = parser.accepts("data", "Geneset data file")
                     .withRequiredArg().ofType(String.class);
             OptionSpec<String> supp = parser.accepts("supp", "Option geneset supplemental data file")
                     .withRequiredArg().ofType(String.class);
-            OptionSpec<String> version = parser.accepts("version", "Version of gene sets")
-                    .withRequiredArg().ofType(String.class);
-            //parser.accepts("update", "Permits updates to geneset data even if geneset is in use");
-            parser.accepts("update", "Allow new version of genesets. Removes geneset data for genesets that are updated");
-            
+            OptionSpec<String> newVersionArgument = parser.accepts("new-version", "New version of gene sets. This will REMOVE GSVA data and hierarchy.")
+            	.withRequiredArg().ofType(String.class);
+            parser.accepts("update-info", "Only update the info of gene sets (Ref Link, name, description)");
+
+            // For testing purposes, we don't want the prompt, so make extra argument.
+            parser.accepts("confirm-delete-all-genesets-hierarchy-genesetprofiles", "This will avoid the command prompt being shown.");
+
             OptionSet options = null;
             try {
                 options = parser.parse(args);
@@ -84,59 +86,88 @@ public class ImportGeneSetData extends ConsoleRunnable {
                         progName, description, parser,
                         "'data' and/or 'supp' argument required");
             }
-            if (!options.has(version)) {
+            
+            // Check options
+            boolean updateInfo = options.has("update-info");
+            boolean newVersion = options.has("new-version");
+            boolean confirmEmptyGeneSets = options.has("confirm-delete-all-genesets-hierarchy-genesetprofiles");
+            
+            // Check current version
+            GeneSetInfo geneSetInfo = new GeneSetInfo();
+            geneSetInfo = DaoGeneSetInfo.getGeneSetInfo();
+            String databaseVersionValue = geneSetInfo.getVersion();
+            
+            // Check new version
+            geneSetInfo = new GeneSetInfo();
+            geneSetInfo.setVersion(options.valueOf(newVersionArgument));
+            
+            // Check if geneset tables are empty. In that case, no extra argument is required
+
+        	// Geneset tables are not empty. Need to specify if we update info or add new version
+            if ((!updateInfo && !newVersion) || (updateInfo && newVersion)) {      
                 throw new UsageException(
                         progName, description, parser,
-                        "'version' argument required");
-            }
-            
-            // import geneset data file and/or supplemental geneset data file
-            boolean allowUpdates = options.has("update");
-            
-            //TODO parse version from command line args
-            //TODO WARNINGS for wrong versions: if version 2 and 1 already exists: give error saying version 1 needs to be removed first
-            // if version 1 and update option not given: check if geneset already exists in version 1, if exists give error (tell user to use update option)
-            
-            // Check database version
-            GeneSetInfo geneSetInfo = new GeneSetInfo();
-            geneSetInfo = daoGeneSetInfo.getGeneSetVersion();
-            String databaseVersion = geneSetInfo.getVersion();
-            
-            // Check new database version
-            String dataVersion = options.valueOf(version);
-            
-            // New geneSetInfo for new data version, to add or update later.
-            geneSetInfo = new GeneSetInfo();
-            geneSetInfo.setVersion(dataVersion);
+                        "Please specify 1 of 2 options:\n" +
+                        "--update-info             Only update gene info (Ref Link, name, description). Genes will not be updated.\n" +
+                		"--new-version <Version>   Import new gene set version. This will REMOVE all previous loaded genesets, gene set genetic profiles and geneset hierarchy.\n");
     
-            // Print gene set versions for testing purposes.
-            System.out.println("DB: " + databaseVersion);
-            System.out.println("GS: " + dataVersion);
+        	// In case of updating info only
+            } else if (updateInfo) {
 
-            // Empty database
-            if (databaseVersion == null) {
-            	System.out.println("Filling empty database.\n");
-            	startImport(options, data, supp, allowUpdates, dataVersion);
-                daoGeneSetInfo.setGeneSetVersion(geneSetInfo);;
-                
-            // Not empty database, different version
-            } else if (!dataVersion.equals(databaseVersion)) {
-            	System.out.println("Input gene set version is different from database version.\n");
-            	
-            	if (allowUpdates) {
-                	System.out.println("Updates are allowed. Updating gene sets.\n");
-                	startImport(options, data, supp, allowUpdates, dataVersion);
-                    daoGeneSetInfo.updateGeneSetVersion(geneSetInfo);;
-                    
-            	} else {
-            		throw new RuntimeException("Input geneset version '" + dataVersion + "' differs from database geneset version '" + databaseVersion + "'.\n" +
-                            "Set option '--update' to REMOVE database GSVA Scores and Pvalues and allow updates to existing genesets.");
+            	// Check if there is something in the database before updating
+            	if (databaseVersionValue == null) {	
+	        		throw new UsageException(
+	                    progName, description, parser,
+	    				"Attempted to update gene sets, but gene set tables are empty. You can import with --new-version <Version>");
             	}
             	
-            // Not empty database, same version	
+            	ProgressMonitor.setCurrentMessage("Updating gene set information.\n");
+
+            	// Only update info
+            	startImport(options, data, supp, updateInfo, newVersion);
+            	
+        	// In case of new version
             } else {
-            	System.out.println("Same version database. Updating gene sets.\n");
-            	startImport(options, data, supp, allowUpdates, dataVersion);
+            	
+            	if (databaseVersionValue == null) {
+	            	ProgressMonitor.setCurrentMessage("New version of gene sets specified. Loading to empty database.");
+            		DaoGeneSet.deleteAllRecords();
+	            	
+	            	ProgressMonitor.setCurrentMessage("Adding new gene sets.\n");
+	            	startImport(options, data, supp, updateInfo, newVersion);
+	            	DaoGeneSetInfo.setGeneSetInfo(geneSetInfo);
+
+            	} else {
+            		// If automatic confirm is not set, prompt the user with question to confirm.
+            		if (!confirmEmptyGeneSets) {
+            			ProgressMonitor.setCurrentMessage("Are you sure you want to remove all previous gene sets, gene set hierarchy and gene set genetic profiles?");
+		                ProgressMonitor.setCurrentMessage("Type `yes` to continue or anything else to abort.");
+		            	
+		                try (Scanner scanner = new Scanner(System.in)) {
+		
+			            	String confirmEmptyingGeneSets = scanner.next().toLowerCase();
+			            	ProgressMonitor.setCurrentMessage(confirmEmptyingGeneSets);
+			            	if (confirmEmptyingGeneSets.equals("yes")) {
+			            		confirmEmptyGeneSets = true;
+			            	} else {
+			            		throw new UsageException(
+			    	                    progName, description, parser,
+			    	    				"User did not confirm to empty gene sets. For update of gene sets please use --update-info.");
+			            	}
+		                }
+            		} else {
+            			ProgressMonitor.setCurrentMessage("Auto confirm to empty gene sets, gene set hierarchy and gene set genetic profiles is set.");
+            		}
+            		
+            		// Empty gene set tables  and import new gene sets
+	            	ProgressMonitor.setCurrentMessage("New version of gene sets specified.\nRemoving old gene sets, gene set hierarchy and gene set genetic profiles.");
+	            		            	
+	            	DaoGeneSet.deleteAllRecords();
+	            	ProgressMonitor.setCurrentMessage("Adding new gene sets.");
+	            	startImport(options, data, supp, updateInfo, newVersion);
+            		DaoGeneSetInfo.updateGeneSetInfo(geneSetInfo);
+            	}
+        		ProgressMonitor.setCurrentMessage("It is now possible to import gene set hierarchy data and gene set genetic profiles such as GSVA scores.");
             }
         }
         catch (Exception ex) {
@@ -147,11 +178,11 @@ public class ImportGeneSetData extends ConsoleRunnable {
     /**
      * Start import process for gene set file and supplementary file.
      */  
-    public void startImport(OptionSet options, OptionSpec<String> data, OptionSpec<String> supp, boolean allowUpdates, String dataVersion){
+    public static void startImport(OptionSet options, OptionSpec<String> data, OptionSpec<String> supp, boolean updateInfo, boolean newVersion){
     	try {
        	 	if (options.hasArgument(data)) {
 	             File genesetFile = new File(options.valueOf(data));
-	             importData(genesetFile, allowUpdates, dataVersion);
+	             importData(genesetFile, updateInfo, newVersion);
        	 	}            
 	         if (options.hasArgument(supp)) {
 	             File genesetSuppFile = new File(options.valueOf(supp));
@@ -171,15 +202,16 @@ public class ImportGeneSetData extends ConsoleRunnable {
      * @param version 
      * @throws Exception 
      */
-    public int importData(File genesetFile, boolean allowUpdates, String version) throws Exception {
-
-        ProgressMonitor.setCurrentMessage("Reading data from: " + genesetFile.getCanonicalPath());
+    public static int importData(File genesetFile,  boolean updateInfo, boolean newVersion) throws Exception {
+    	
+    	ProgressMonitor.setCurrentMessage("Reading data from: " + genesetFile.getCanonicalPath());
    
         // read geneset data file - note: this file does not contain headers
         FileReader reader = new FileReader(genesetFile);
         BufferedReader buf = new BufferedReader(reader);        
         String line = buf.readLine();
-                
+
+
         while (line != null) {            
             String[] parts = line.split("\t");
                         
@@ -191,41 +223,35 @@ public class ImportGeneSetData extends ConsoleRunnable {
             // by default name and nameshort are the same as external id, and can be overriden in importSuppGeneSetData:
             geneSet.setName(geneSet.getExternalId());
             geneSet.setNameShort(geneSet.getExternalId());
-            
-            // Set version
-            GeneSetInfo geneSetInfo = new GeneSetInfo();
-            geneSetInfo.setVersion(version);
-            
+                
             // parse entrez ids for geneset
-            List<Integer> genesetGenes = new ArrayList();
+            Set<Long> genesetGenes = new HashSet<Long>();
             for (int i=2; i<parts.length; i++) {
-                genesetGenes.add(Integer.valueOf(parts[i]));
+                genesetGenes.add(Long.valueOf(parts[i]));
             }
             geneSet.setGenesetGenes(genesetGenes);
-            
+                     
             // check if geneset already exists by external id
-            GeneSet existingGeneSet = daoGeneSet.getGeneSetByExternalId(geneSet.getExternalId());
-            // if geneset exists then check usage
-            if (existingGeneSet != null) {
-                // if geneset in use by other studies and option to allow updates 
-                // was not set then alert user and throw RuntimeException
-                if (daoGeneSet.checkUsage(existingGeneSet.getGeneticEntityId()) && !allowUpdates) {
-                    throw new RuntimeException("Geneset " + geneSet.getExternalId() + " exists and is already in use in DB. " +
-                            "Set option 'update' to allow updates to existing genesets.");
-                }                
-                // assumed that ref link and geneset genes are updated
-                existingGeneSet.setRefLink(geneSet.getRefLink());
-                existingGeneSet.setGenesetGenes(geneSet.getGenesetGenes());
-                //existingGeneSet.setVersion(version);
+            GeneSet existingGeneSet = DaoGeneSet.getGeneSetByExternalId(geneSet.getExternalId());
+            
+            // Update only reflink
+        	if (updateInfo) {
+                if ( existingGeneSet == null) {
+            		ProgressMonitor.logWarning("Could not find gene set " + parts[0] + " in DB. Record will be skipped.");
+            	} else {
+            		ProgressMonitor.setCurrentMessage("Updating gene set: " + geneSet.getExternalId());
+            		
+            		// Get geneSet id for the already existing gene
+            		geneSet.setId(existingGeneSet.getId());
+                    DaoGeneSet.updateGeneSet(geneSet, true);
+            	}
                 
-                // update geneset record and geneset genes in db
-                daoGeneSet.updateGeneSet(existingGeneSet, true);                
-            }
-            else {
-                // import new geneset record
-                daoGeneSet.addGeneSet(geneSet);
-                
-            }
+            // Add a new gene
+        	} else {
+        		ProgressMonitor.setCurrentMessage("Adding geneset: " + geneSet.getExternalId());
+                DaoGeneSet.addGeneSet(geneSet);            
+        	}
+
             line = buf.readLine();
         }
         // close file
@@ -238,6 +264,9 @@ public class ImportGeneSetData extends ConsoleRunnable {
         		+ "2. The Entrez gene IDs are depricated. Consider updating gene sets and recalculating GSVA scores.\n"
         		+ "3. Invalid Entrez gene IDs. Please check .gmt file to verify genes are in Entrez gene ID format.\n\n");
         }
+        
+    	ProgressMonitor.setCurrentMessage("Finished loading gene sets.\n");
+  
         return skippedGenes;
     }
 
@@ -247,8 +276,8 @@ public class ImportGeneSetData extends ConsoleRunnable {
      * @throws Exception 
      */
     static void importSuppGeneSetData(File suppFile) throws Exception {
+    	
         ProgressMonitor.setCurrentMessage("Reading data from: " + suppFile.getCanonicalPath());
-        DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         
         // read supplemental geneset data file - note: this file does not contain headers
         FileReader reader = new FileReader(suppFile);
@@ -259,11 +288,11 @@ public class ImportGeneSetData extends ConsoleRunnable {
             String[] parts = line.split("\t");
             
             // assumed that fields contain: geneset id, name, short name
-            GeneSet geneSet = daoGeneSet.getGeneSetByExternalId(parts[0]);
+            GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId(parts[0]);
             
             // if geneset does not already exist then alert user and skip record
             if (geneSet == null) {
-                ProgressMonitor.logWarning("Could not find geneset " + parts[0] + " in DB. Record will be skipped.");
+                ProgressMonitor.logWarning("Could not find gene set " + parts[0] + " in DB. Record will be skipped.");
             }
             else {
                 // update name and short name for geneset
@@ -271,13 +300,15 @@ public class ImportGeneSetData extends ConsoleRunnable {
                 geneSet.setName(parts[2]);
                 
                 // update geneset record in db without updating geneset genes
-                daoGeneSet.updateGeneSet(geneSet, false);
+                DaoGeneSet.updateGeneSet(geneSet, false);
             }
             
             line = buf.readLine();
         }
         // close file
         reader.close();
+        
+    	ProgressMonitor.setCurrentMessage("Finished loading supplementary gene set info.\n");
     }
 
     public ImportGeneSetData(String[] args) {
@@ -287,8 +318,5 @@ public class ImportGeneSetData extends ConsoleRunnable {
     public static void main(String[] args) {
         ConsoleRunnable runner = new ImportGeneSetData(args);
         runner.runInConsole();        
-    }
-
-
-    
+    }   
 }

@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.List;
 
 import org.mskcc.cbio.portal.dao.DaoGeneSet;
 import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchy;
@@ -58,36 +59,34 @@ public class TestImportGeneSetHierarchyData {
 
 	@Test
     public void testImportGeneSetHierarchyData() throws Exception {
-		DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
-		DaoGeneSetHierarchy daoGeneSetHierarchy = DaoGeneSetHierarchy.getInstance();
-		DaoGeneSetHierarchyLeaf daoGeneSetHierarchyLeaf = DaoGeneSetHierarchyLeaf.getInstance();
-
         ProgressMonitor.setConsoleMode(false);
         
         File file = new File("src/test/resources/genesetshierarchy_test_genesets.txt");
-        boolean allowUpdates = true;
-        String version = "";
-        ImportGeneSetData.importData(file, allowUpdates, version);
+
+        boolean updateInfo = false;
+        boolean newVersion = true;
+        int skippedGenes = ImportGeneSetData.importData(file, updateInfo, newVersion);
         
         file = new File("src/test/resources/genesetshierarchy_test.yaml");
-        ImportGeneSetHierarchy.importData(file, true);
+        boolean validate = false;
+        ImportGeneSetHierarchy.importData(file, validate);
 
         // Test database entries
         
         // Get geneSet id
-        GeneSet geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET4");
+        GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
         
         // Get parent node id from geneSetHierarchyLeaf
-        GeneSetHierarchyLeaf geneSetHierarchyLeaf = daoGeneSetHierarchyLeaf.getGeneSetHierarchyLeafsByGeneSetId(geneSet.getId());
+        List<GeneSetHierarchyLeaf> geneSetHierarchyLeafs = DaoGeneSetHierarchyLeaf.getGeneSetHierarchyLeafsByGeneSetId(geneSet.getId());
+        
+        // Select the first and only gene set
+        GeneSetHierarchyLeaf geneSetHierarchyLeaf = geneSetHierarchyLeafs.get(0);
         
         // Get node name from geneSetHierarchy
-        GeneSetHierarchy geneSetHierarchy = daoGeneSetHierarchy.getGeneSetHierarchyFromNodeId(geneSetHierarchyLeaf.getNodeId());
+        GeneSetHierarchy geneSetHierarchy = DaoGeneSetHierarchy.getGeneSetHierarchyFromNodeId(geneSetHierarchyLeaf.getNodeId());
         
         // Check if node name is as expected
-        assertEquals("Institutes Subcategory 1", geneSetHierarchy.getNodeName());
-        
-        // TODO Test warning message
-        
+        assertEquals("Institutes Subcategory 2", geneSetHierarchy.getNodeName());
     }
 }
 

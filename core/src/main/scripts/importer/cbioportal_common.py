@@ -204,7 +204,8 @@ META_FIELD_MAP = {
         'source_stable_id': True,
         'profile_name': True,
         'profile_description': True,
-        'data_filename': True
+        'data_filename': True,
+		'geneset_def_version': True
     },
     MetaFileTypes.GSVA_SCORES: {
         'cancer_study_identifier': True,
@@ -214,7 +215,8 @@ META_FIELD_MAP = {
         'source_stable_id': True,
         'profile_name': True,
         'profile_description': True,
-        'data_filename': True
+        'data_filename': True,
+		'geneset_def_version': True
     }
 }
 
@@ -682,6 +684,15 @@ def parse_metadata_file(filename,
                 extra={'filename_': filename,
                        'cause': metaDictionary['swissprot_identifier']})
             meta_file_type = None
+			
+	### TODO: Need WEB-API to get geneset def version from geneset_info in database.
+	#database_version = some_future_web_api()
+	#if meta_file_type in (MetaFileTypes.GSVA_SCORES, MetaFileTypes.GSVA_PVALUES):
+		#if ('geneset_def_version' in metaDictionary and 
+		#	metaDictionary['geneset_def_version'] not database_version):
+		#		logger.error("Database gene set version and score/pvalue version does not match")
+
+			
 
     logger.info('Validation of meta file complete', extra={'filename_': filename})
     return metaDictionary, meta_file_type

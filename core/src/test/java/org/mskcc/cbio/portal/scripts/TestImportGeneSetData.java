@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016 The Hyve B.V.
-*/
+ */
 
 /*
  * This file is part of cBioPortal.
@@ -54,34 +54,51 @@ public class TestImportGeneSetData {
 
 	@Test
     public void testImportGeneSetData() throws Exception {
-		// Initiate daoGeneSet to connect to database
-    	DaoGeneSet daoGeneSet = DaoGeneSet.getInstance();
         ProgressMonitor.setConsoleMode(false);
         
         // Open genesets test data file
         File file = new File("src/test/resources/genesets_test.txt");
-        boolean allowUpdates = true;
-        String version = "";
-        int skippedGenes = ImportGeneSetData.importData(file, allowUpdates, version);
+        boolean updateInfo = false;
+        boolean newVersion = true;
+        int skippedGenes = ImportGeneSetData.importData(file, updateInfo, newVersion);
 
         // Open supplementary file
         file = new File("src/test/resources/supp-genesets.txt");
         ImportGeneSetData.importSuppGeneSetData(file);
         
         // Test database entries
-        GeneSet geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET5");
+        GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET5");
         assertEquals("UNITTEST_GENESET5", geneSet.getExternalId());
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET10");
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET10");
         assertEquals("http://www.broadinstitute.org/gsea/msigdb/cards/GCNP_SHH_UP_EARLY.V1_UP", geneSet.getRefLink());
         
         // Test warning message
         assertEquals(5, skippedGenes);
         
         // Test database entries supplementary file
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
         assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getName());
-        geneSet = daoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
         assertEquals("UNITTEST_GENESET8", geneSet.getNameShort());
+        
+        // Test update of genes 
+        // Open genesets test data file
+        file = new File("src/test/resources/genesets_test2.txt");
+        newVersion = false;
+        updateInfo = true;
+        skippedGenes = ImportGeneSetData.importData(file, updateInfo, newVersion);
+
+        // Open supplementary file
+        file = new File("src/test/resources/supp-genesets2.txt");
+        ImportGeneSetData.importSuppGeneSetData(file);
+        
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
+        assertEquals("A made up description is suited for this a fake gene.", geneSet.getName());
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET1");
+        assertEquals("Thought of new nice name for this geneset", geneSet.getNameShort());
+        geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET1");
+        assertEquals("http://www.thehyve.nl/", geneSet.getRefLink());
+        
     }
 }
 

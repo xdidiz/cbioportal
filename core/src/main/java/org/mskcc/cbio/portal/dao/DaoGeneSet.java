@@ -30,9 +30,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+ * @author Sander Tan
+*/
+
 package org.mskcc.cbio.portal.dao;
 
 import org.cbioportal.model.GeneSet;
+import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchy;
 import org.mskcc.cbio.portal.model.CanonicalGene;
 import org.mskcc.cbio.portal.scripts.ImportGeneSetData;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
@@ -42,27 +47,17 @@ import java.util.*;
 
 public class DaoGeneSet {
     
-	// Initialise DaoGeneSet instance
-	private static DaoGeneSet instance = new DaoGeneSet();
-	
 	// Keep Constructor empty
 	private DaoGeneSet() {
 	}
-	
-	// Access instance from outside the class
-	public static DaoGeneSet getInstance(){
-		return instance;
-	}
     
-    private static DaoGeneOptimized daoGene = null;
-
     /**
      * Adds a new GeneSet record to the database.
      * @param geneSet
      * @return number of records successfully added
      * @throws DaoException 
      */
-    public int addGeneSet(GeneSet geneSet) throws DaoException {
+    public static int addGeneSet(GeneSet geneSet) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -108,38 +103,17 @@ public class DaoGeneSet {
      * @return number of records successfully added
      * @throws DaoException 
      */
-    public int addGeneSetGenes(GeneSet geneSet) throws DaoException {
+    public static int addGeneSetGenes(GeneSet geneSet) throws DaoException {
     	DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
-
-        if (MySQLbulkLoader.isBulkLoad()) {
-            // write to temp file maintained by the MySQLbulkLoader
-            List<Integer> entrezGeneIds = geneSet.getGenesetGenes();
-            for (Integer entrezGeneId : entrezGeneIds) {
-            	//validate:
-            	if (daoGeneOptimized.getGene(entrezGeneId.intValue()) == null) {
-            		//throw error with clear message:
-            		ProgressMonitor.logWarning(geneSet.getExternalId() + " contains Entrez gene ID not found in local gene table: " + entrezGeneId);
-            		ImportGeneSetData.skippedGenes++;
-            		continue;
-            	}
-                MySQLbulkLoader.getMySQLbulkLoader("geneset_gene").insertRecord(
-                        Integer.toString(geneSet.getId()),
-                        Integer.toString(entrezGeneId)
-                );
-            }
-            
-            // return 1 because normal insert will return 1 if no error occurs
-            return 1;            
-        }
         
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            List<Integer> entrezGeneIds = geneSet.getGenesetGenes();
+            Set<Long> entrezGeneIds = geneSet.getGenesetGenes();
             int rows = 0;
-            for (Integer entrezGeneId : entrezGeneIds) {
+            for (Long entrezGeneId : entrezGeneIds) {
             	//validate:
             	if (daoGeneOptimized.getGene(entrezGeneId.intValue()) == null) {
             		//throw error with clear message:
@@ -151,7 +125,7 @@ public class DaoGeneSet {
                         + "(`GENESET_ID`, `ENTREZ_GENE_ID`)"
                         + "VALUES(?,?)");
                 pstmt.setInt(1, geneSet.getId());
-                pstmt.setInt(2, entrezGeneId);
+                pstmt.setLong(2, entrezGeneId);
                 rows += pstmt.executeUpdate();
             }
             
@@ -166,13 +140,56 @@ public class DaoGeneSet {
         
     }
     
+    
+    /**
+     * Given a GeneSet record, returns list of CanonicalGene records.
+     * @param geneSet
+     * @return list of geneset genes
+     * @throws DaoException 
+     */
+    public static List<CanonicalGene> getGeneSetGenes(GeneSet geneSet) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+    	DaoGeneOptimized daoGeneOptimized = DaoGeneOptimized.getInstance();
+
+        try {
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
+            pstmt = con.prepareStatement("SELECT * FROM geneset_gene WHERE GENESET_ID = ?");
+            pstmt.setInt(1, geneSet.getId());
+            rs = pstmt.executeQuery();
+            
+            // get list of entrez gene ids for geneset record
+            Set<Long> entrezGeneIds = new HashSet<Long>();
+            while (rs.next()) {
+                entrezGeneIds.add(rs.getLong("ENTREZ_GENE_ID"));
+            }
+            
+            // get list of genes by entrez gene ids
+            List<CanonicalGene> genes = new ArrayList<CanonicalGene>();
+            for (Long entrezGeneId : entrezGeneIds) {
+                CanonicalGene gene = daoGeneOptimized.getGene(entrezGeneId);
+                genes.add(gene);
+            }
+            
+            return genes;
+        }
+        catch (SQLException e) {
+            throw new DaoException(e);
+        } 
+        finally {
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
+        }
+    }
+    
+    
     /**
      * Given an external id, returns a GeneSet record.
      * @param externalId
      * @return GeneSet record
      * @throws DaoException 
      */
-    public GeneSet getGeneSetByExternalId(String externalId) throws DaoException {
+    public static GeneSet getGeneSetByExternalId(String externalId) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;        
@@ -198,44 +215,6 @@ public class DaoGeneSet {
         }
     }
 
-    /**
-     * Given a GeneSet record, returns list of CanonicalGene records.
-     * @param geneSet
-     * @return list of geneset genes
-     * @throws DaoException 
-     */
-    public List<CanonicalGene> getGeneSetGenes(GeneSet geneSet) throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            pstmt = con.prepareStatement("SELECT * FROM geneset_gene WHERE GENESET_ID = ?");
-            pstmt.setInt(1, geneSet.getId());
-            rs = pstmt.executeQuery();
-            
-            // get list of entrez gene ids for geneset record
-            Set<Long> entrezGeneIds = new HashSet<>();
-            while (rs.next()) {
-                entrezGeneIds.add(rs.getLong("ENTREZ_GENE_ID"));
-            }
-            
-            // get list of genes by entrez gene ids
-            List<CanonicalGene> genes = new ArrayList();
-            for (Long entrezGeneId : entrezGeneIds) {
-                CanonicalGene gene = daoGene.getGene(entrezGeneId);
-                genes.add(gene);
-            }
-            
-            return genes;
-        }
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
-        }
-    }
     
     /**
      * Get GeneSet record.
@@ -262,6 +241,7 @@ public class DaoGeneSet {
             JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
+
     
     /**
      * Extracts GeneSet record from ResultSet.
@@ -270,7 +250,7 @@ public class DaoGeneSet {
      * @throws SQLException
      * @throws DaoException 
      */
-    private GeneSet extractGeneSet(ResultSet rs) throws SQLException, DaoException {
+    private static GeneSet extractGeneSet(ResultSet rs) throws SQLException, DaoException {
         Integer id = rs.getInt("ID");
         Integer geneticEntityId = rs.getInt("GENETIC_ENTITY_ID");
         String externalId = rs.getString("EXTERNAL_ID");
@@ -289,13 +269,38 @@ public class DaoGeneSet {
         return geneSet;
     }
     
+    
+    public static Set<Long> getGeneSetGeneticEntityIds() throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
+            pstmt = con.prepareStatement("SELECT ID FROM genetic_entity WHERE ENTITY_TYPE = 'GENE_SET'");
+            rs = pstmt.executeQuery();
+            
+            Set<Long> geneticEntities = new HashSet<Long>();
+            while (rs.next()) {
+            	geneticEntities.add(rs.getLong("ID"));
+            }
+            return geneticEntities;
+            
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
+        }
+    }
+    
+ 
+    
     /**
      * Checks the usage of a geneset by genetic entity id.
      * @param geneticEntityId
      * @return boolean indicating whether geneset is in use by other studies
      * @throws DaoException 
      */
-    public boolean checkUsage(Integer geneticEntityId) throws DaoException {
+    public static boolean checkUsage(Integer geneticEntityId) throws DaoException {
         String SQL = "SELECT COUNT(DISTINCT `CANCER_STUDY_ID`) FROM genetic_profile " +
                 "WHERE `GENETIC_PROFILE_ID` IN (SELECT `GENETIC_PROFILE_ID` FROM genetic_alteration WHERE `GENETIC_ENTITY_ID` = ?)";
         
@@ -320,7 +325,7 @@ public class DaoGeneSet {
         }
     }
     
-    public void updateGeneSet(GeneSet geneSet, boolean updateGeneSetGenes) throws DaoException {
+    public static void updateGeneSet(GeneSet geneSet, boolean updateGeneSetGenes) throws DaoException {
         String SQL = "UPDATE geneset SET " + 
                 "`NAME_SHORT` = ?, `NAME` = ?, `REF_LINK` = ?" +
                 "WHERE `ID` = ?";
@@ -337,10 +342,9 @@ public class DaoGeneSet {
             pstmt.setInt(4, geneSet.getId());
             pstmt.executeUpdate();
 
-            // update geneset genes as well if indicated
-            if (updateGeneSetGenes) {
-                updateGeneSetGenes(geneSet);
-            }            
+            // We decided that when updating genesets, it's not a good idea to update genes it contains, because
+            // in that case, data could be still from old version of the geneset.
+            // A solution would be to update geneset database to new version, and include new genes in that.
         } 
         catch (SQLException e) {
             throw new DaoException(e);
@@ -349,110 +353,66 @@ public class DaoGeneSet {
             JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
+
     
     /**
-     * Updates geneset genes for given geneset. 
-     * @param geneSet
-     * @throws DaoException 
+     * Delete GeneSet genetic entity records.
      */
-    public void updateGeneSetGenes(GeneSet geneSet) throws DaoException {
-        // first delete existing genes for geneset
-        deleteGeneSetGenes(geneSet.getId());
-            
-        // insert new geneset genes for given geneset
-        addGeneSetGenes(geneSet);        
-    }
-    
-    /**
-     * Deletes a GeneSet record from geneset related tables:
-     * geneset, geneset_gene, geneset_hierarchy_parent, geneset_hierarchy
-     * @param id
-     * @throws DaoException 
-     */
-    public void deleteGeneSetRecord(Integer id) throws DaoException {
-        String[] SQLs = {"DELETE FROM geneset WHERE `ID` = ?", 
-                                "DELETE FROM geneset_gene WHERE `GENESET_ID` = ?", 
-                                "DELETE FROM geneset_hierarchy_parent WHERE `GENESET_ID` = ?"};        
+    public static void deleteGeneSetGeneticEntityRecords() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            for (String sql : SQLs) {
-                pstmt = con.prepareStatement(sql);
-                pstmt.setInt(1, id);
-                pstmt.executeUpdate();
-            }
-        } 
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
-        }
-    }
-    
-    /**
-     * Deletes from geneset_genes all records associated with given geneset id.
-     * @param id
-     * @throws DaoException 
-     */
-    public void deleteGeneSetGenes(Integer id) throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            pstmt = con.prepareStatement("DELETE FROM geneset_gene WHERE `GENESET_ID` = ?");
-            pstmt.setInt(1, id);
+            pstmt = con.prepareStatement("DELETE FROM genetic_entity WHERE ENTITY_TYPE = 'GENE_SET'");
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
+        }
+    }
+    
+    
+    /**
+     * Deletes GeneSet data such as GSVA Scores and Pvalues by genetic entity id
+     * @param id
+     * @throws DaoException 
+     */
+    public static void deleteGeneSetGeneticProfiles() throws DaoException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+        	connection = JdbcUtil.getDbConnection(DaoGeneSet.class);
+        	
+        	// Prepare statment
+        	preparedStatement = connection.prepareStatement("DELETE FROM `genetic_profile` WHERE `GENETIC_ALTERATION_TYPE` = 'GENESET_SCORE'");
+
+            // Execute statement
+            preparedStatement.executeUpdate();
         } 
         catch (SQLException e) {
             throw new DaoException(e);
         } 
         finally {
-            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
+            JdbcUtil.closeAll(DaoGeneSet.class, connection, preparedStatement, resultSet);
         }
     }
+    
     
     /**
      * Deletes all records from 'geneset' table in database and records in related tables.
      * @throws DaoException 
      */
-    public void deleteAllRecords() throws DaoException {
+    public static void deleteAllGeneSetRecords() throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            JdbcUtil.disableForeignKeyCheck(con);
-            pstmt = con.prepareStatement("TRUNCATE TABLE geneset");
-            pstmt.executeUpdate();
-            JdbcUtil.enableForeignKeyCheck(con);
-        }
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
-        }
-        deleteAllGeneSetGeneRecords();
-        // Moved this to DaeoGeneSetHierarchy.java
-        // deleteAllGeneSetHierarchyRecords();
-        deleteAllGeneSetHierarchyParentRecords();
-    }
 
-    /**
-     * Deletes all records from 'geneset_gene' table in database.
-     * @throws DaoException 
-     */    
-    public void deleteAllGeneSetGeneRecords() throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            pstmt = con.prepareStatement("TRUNCATE TABLE geneset_gene");
+            pstmt = con.prepareStatement("DELETE FROM geneset");
             pstmt.executeUpdate();
         }
         catch (SQLException e) {
@@ -462,37 +422,18 @@ public class DaoGeneSet {
             JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
         }
     }
-
+    
+    
     /**
-     * Deletes all records from 'geneset_hierarchy_parent' table in database.
+     * Deletes all records from 'geneset' table in database and records in related tables.
      * @throws DaoException 
      */
-    public void deleteAllGeneSetHierarchyParentRecords() throws DaoException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            con = JdbcUtil.getDbConnection(DaoGeneSet.class);
-            pstmt = con.prepareStatement("TRUNCATE TABLE geneset_hierarchy_parent");
-            pstmt.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGeneSet.class, con, pstmt, rs);
-        }
+    public static void deleteAllRecords() throws DaoException {
+    	deleteAllGeneSetRecords();
+    	deleteGeneSetGeneticProfiles();
+    	deleteGeneSetGeneticEntityRecords();
+    	DaoGeneSetHierarchy.deleteAllGeneSetHierarchyRecords();
     }
 }
 
-/**
- * Compares two genes by their HUGO Symbols--ignores case
- */
-class GeneComparator implements Comparator {
 
-    public int compare(Object o, Object o1) {
-        CanonicalGene gene0 = (CanonicalGene) o;
-        CanonicalGene gene1 = (CanonicalGene) o1;
-        return (gene0.getHugoGeneSymbolAllCaps().compareTo(gene1.getHugoGeneSymbolAllCaps()));
-    }
-}

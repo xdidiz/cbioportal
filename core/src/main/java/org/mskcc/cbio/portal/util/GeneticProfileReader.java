@@ -41,6 +41,8 @@ import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.GeneticAlterationType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.scripts.TrimmedProperties;
+import org.cbioportal.model.GeneSetInfo;
+
 
 /**
  * Prepare a GeneticProfile for having its data loaded.
@@ -90,6 +92,28 @@ public class GeneticProfileReader {
                 return gp;
             }
         }
+
+		// For GSVA profiles, we want to check that the version in the meta file 
+        // is the same as the version of the gene sets in the database (genesets_info table)
+    	if (geneticProfile.getGeneticAlterationType() == GeneticAlterationType.GENESET_SCORE) {
+            GeneSetInfo geneSetInfo = DaoGeneSetInfo.getGeneSetInfo();
+
+            // Check if version is present in database
+            if (geneSetInfo.getVersion() == null) {
+            	throw new RuntimeException("Attempted to import GENESET_SCORE data, but all gene set tables are empty. "
+            			+ "Please load gene sets with ImportGeneSetData first.");
+            // Check if version is present in meta file
+    		} else if (geneticProfile.getOtherMetaDataField("geneset_def_version") == null) {
+                throw new RuntimeException("Missing geneset_def_version property in '" + file.getPath() + "'. This version must be "
+                		+ "the same as the gene set version loaded with ImportGeneSetData.");
+                
+            // Check if version is same as database version
+    		} else if (!geneticProfile.getOtherMetaDataField("geneset_def_version").equals(geneSetInfo.getVersion())) {
+                throw new RuntimeException("'geneset_def_version' property (" + geneticProfile.getOtherMetaDataField("geneset_def_version") +
+                		") in '" + file.getPath() + "' differs from database version (" + geneSetInfo.getVersion() + ").");
+    		}
+    	}
+
         // add new profile
         DaoGeneticProfile.addGeneticProfile(geneticProfile);
         // Get ID
@@ -158,6 +182,7 @@ public class GeneticProfileReader {
         if (showProfileInAnalysisTabStr != null && showProfileInAnalysisTabStr.equalsIgnoreCase("FALSE")) {
             showProfileInAnalysisTab = false;
         }
+        
         profileDescription = profileDescription.replaceAll("\t", " ");
         GeneticAlterationType alterationType = GeneticAlterationType.valueOf(geneticAlterationTypeString);
         GeneticProfile geneticProfile = new GeneticProfile();

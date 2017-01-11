@@ -33,7 +33,7 @@
 package org.cbioportal.model;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -47,7 +47,7 @@ public class GeneSet implements Serializable {
     private String nameShort;
     private String name;
     private String refLink;
-    private List<Integer> genesetGenes;
+    private Set<Long> genesetGenes;
 
     /**
      * @return the id
@@ -136,14 +136,14 @@ public class GeneSet implements Serializable {
     /**
      * @return the genesetGenes
      */
-    public List<Integer> getGenesetGenes() {
+    public Set<Long> getGenesetGenes() {
         return genesetGenes;
     }
 
     /**
      * @param genesetGenes the genesetGenes to set
      */
-    public void setGenesetGenes(List<Integer> genesetGenes) {
+    public void setGenesetGenes(Set<Long> genesetGenes) {
         this.genesetGenes = genesetGenes;
     }
     

@@ -1,16 +1,5 @@
 /*
  * Copyright (c) 2016 The Hyve B.V.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
- * FOR A PARTICULAR PURPOSE. The software and documentation provided hereunder
- * is on an "as is" basis, and Memorial Sloan-Kettering Cancer Center has no
- * obligations to provide maintenance, support, updates, enhancements or
- * modifications. In no event shall Memorial Sloan-Kettering Cancer Center be
- * liable to any party for direct, indirect, special, incidental or
- * consequential damages, including lost profits, arising out of the use of this
- * software and its documentation, even if Memorial Sloan-Kettering Cancer
- * Center has been advised of the possibility of such damage.
  */
 
 /*
@@ -35,29 +24,22 @@
 */
 
 package org.mskcc.cbio.portal.dao;
+
 import org.cbioportal.model.GeneSetHierarchyLeaf;
 import java.sql.*;
+import java.util.*;
 
 public class DaoGeneSetHierarchyLeaf {
-	
-	// Initialise DaoGeneSetHierarchy instance
-	private static DaoGeneSetHierarchyLeaf instance = new DaoGeneSetHierarchyLeaf();
-	
+
 	// Keep Constructor empty
 	private DaoGeneSetHierarchyLeaf() {
 	}
-	
-	// Access instance from outside the class
-	public static DaoGeneSetHierarchyLeaf getInstance(){
-		return instance;
-	}
     
-
 	/**
      * Add gene set hierarchy object to geneset_hierarchy table in database.
      * @throws DaoException 
      */	
-	public void addGeneSetHierarchyLeaf(GeneSetHierarchyLeaf geneSetHierarchyLeaf) throws DaoException {
+	public static void addGeneSetHierarchyLeaf(GeneSetHierarchyLeaf geneSetHierarchyLeaf) throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -89,7 +71,7 @@ public class DaoGeneSetHierarchyLeaf {
      * Retrieve gene set hierarchy leaf objects from geneset_hierarchy_leaf table in database.
      * @throws DaoException 
      */
-	public GeneSetHierarchyLeaf getGeneSetHierarchyLeafsByNodeId(int nodeId) throws DaoException {
+	public static List<GeneSetHierarchyLeaf> getGeneSetHierarchyLeafsByNodeId(int nodeId) throws DaoException {
 		Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -105,12 +87,16 @@ public class DaoGeneSetHierarchyLeaf {
             // Execute statement
             resultSet = preparedStatement.executeQuery();
             
-            GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
-            resultSet.next();
-            geneSetHierarchyLeaf.setNodeId(resultSet.getInt("NODE_ID"));
-            geneSetHierarchyLeaf.setGeneSetId(resultSet.getInt("GENESET_ID"));
+            List<GeneSetHierarchyLeaf> geneSetHierarchyLeafs = new ArrayList<GeneSetHierarchyLeaf>();
+
+            while (resultSet.next()) {
+                GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
+            	geneSetHierarchyLeaf.setNodeId(resultSet.getInt("NODE_ID"));
+                geneSetHierarchyLeaf.setGeneSetId(resultSet.getInt("GENESET_ID"));
+                geneSetHierarchyLeafs.add(geneSetHierarchyLeaf);
+            }
             
-            return geneSetHierarchyLeaf;
+            return geneSetHierarchyLeafs;
 
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -119,7 +105,7 @@ public class DaoGeneSetHierarchyLeaf {
         }
 	}
 	
-	public GeneSetHierarchyLeaf getGeneSetHierarchyLeafsByGeneSetId(int geneSetId) throws DaoException {
+	public static List<GeneSetHierarchyLeaf> getGeneSetHierarchyLeafsByGeneSetId(int geneSetId) throws DaoException {
 		Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -135,12 +121,16 @@ public class DaoGeneSetHierarchyLeaf {
             // Execute statement
             resultSet = preparedStatement.executeQuery();
             
-            GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
-            resultSet.next();
-            geneSetHierarchyLeaf.setNodeId(resultSet.getInt("NODE_ID"));
-            geneSetHierarchyLeaf.setGeneSetId(resultSet.getInt("GENESET_ID"));
+            List<GeneSetHierarchyLeaf> geneSetHierarchyLeafs = new ArrayList<GeneSetHierarchyLeaf>();
+
+            while (resultSet.next()) {
+                GeneSetHierarchyLeaf geneSetHierarchyLeaf = new GeneSetHierarchyLeaf();
+            	geneSetHierarchyLeaf.setNodeId(resultSet.getInt("NODE_ID"));
+                geneSetHierarchyLeaf.setGeneSetId(resultSet.getInt("GENESET_ID"));
+                geneSetHierarchyLeafs.add(geneSetHierarchyLeaf);
+            }
             
-            return geneSetHierarchyLeaf;
+            return geneSetHierarchyLeafs;
 
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -148,34 +138,4 @@ public class DaoGeneSetHierarchyLeaf {
             JdbcUtil.closeAll(DaoGeneSetHierarchyLeaf.class, connection, preparedStatement, resultSet);
         }
 	}
-
-	
-    /**
-     * Deletes all records from 'geneset_hierarchy_parent' table in database
-     * @throws DaoException 
-     */   
-	public void deleteAllGeneSetHierarchyLeafRecords() throws DaoException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-        	connection = JdbcUtil.getDbConnection(DaoGeneSetHierarchyLeaf.class);
-//        	preparedStatement = connection.prepareStatement("DELETE FROM geneset_hierarchy");
-//        	preparedStatement.executeUpdate();
-        	
-        	String[] SQLs = {"DELETE FROM geneset_hierarchy", 
-        			"ALTER TABLE geneset_hierarchy_leaf AUTO_INCREMENT = 1"};
-            for (String sql : SQLs) {
-            	preparedStatement = connection.prepareStatement(sql);
-            	preparedStatement.executeUpdate();
-            }
-        }
-        catch (SQLException e) {
-            throw new DaoException(e);
-        } 
-        finally {
-            JdbcUtil.closeAll(DaoGeneSetHierarchyLeaf.class, connection, preparedStatement, resultSet);
-        }
-    }
-    
 }
