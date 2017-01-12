@@ -79,6 +79,13 @@ var CoExpView = (function() {
                     "<td>Calculating and rendering... (this may take up to 1 minute)</td></tr></table>" +
                     "</div></div>");
             });
+            $.each(window.QuerySession.getQueryGenesets(), function(index, value) {
+                $("#coexp-tabs-content").append("<div id='" + Prefix.divPrefix + cbio.util.safeProperty(value) + "'>" +
+                    "<div id='" + Prefix.loadingImgPrefix + cbio.util.safeProperty(value) + "'>" +
+                    "<table><tr><td><img style='padding:20px;' src='images/ajax-loader.gif' alt='loading' /></td>" +
+                    "<td>Calculating and rendering... (this may take up to 1 minute)</td></tr></table>" +
+                    "</div></div>");
+            });
         }
 
         function generateTabs() {
@@ -113,7 +120,7 @@ var CoExpView = (function() {
 
     var ProfileSelector = (function() {
 
-        function filterProfiles(_profileList) {
+        function filterProfiles(_profileList, geneSetProfile) {
             $.each(_profileList, function(i, obj) {
                 if (obj["GENETIC_ALTERATION_TYPE"] === "MRNA_EXPRESSION") {
                     if (obj["STABLE_ID"].toLowerCase().indexOf("zscores") !== -1) {
@@ -125,6 +132,8 @@ var CoExpView = (function() {
                     }
                 } else if (obj["GENETIC_ALTERATION_TYPE"] === "MUTATION_EXTENDED") {
                     has_mutation_data = true;
+                } else if (obj["GENETIC_ALTERATION_TYPE"] === "GSVA-SCORE") {
+                		geneSetProfile = obj;
                 }
             });
             //swap the rna seq profile to the top
@@ -152,7 +161,7 @@ var CoExpView = (function() {
                 var geneIds = window.QuerySession.getQueryGenes();
                 geneIds.concat(window.QuerySession.getQueryGenesets());
                 $.each(geneIds, function(index, value) {
-                    //Distroy all the subview instances
+                    //Destroy all the sub-view instances
                     var element =  document.getElementById(Prefix.tableDivPrefix + cbio.util.safeProperty(value));
                     if (typeof(element) !== 'undefined' && element !== null) { 
                         element.parentNode.removeChild(element); //destroy all the existing instances
@@ -185,8 +194,8 @@ var CoExpView = (function() {
         }
 
         return {
-            init: function(_profileList) {
-                filterProfiles(_profileList);
+            init: function(_profileList, geneSetProfile) {
+                filterProfiles(_profileList, geneSetProfile);
                 drawProfileSelector();
                 bindListener();
             }
@@ -205,7 +214,8 @@ var CoExpView = (function() {
                 tableDivId: "", //Id for the div of the co-expression table
                 plotsId: "" //Id for the plots on the right
             },
-            geneEntityId = "", //Gene of this sub tab instance
+            geneEntityId = "", //Genetic entity of this sub tab instance
+            geneEntityType = "", //Type of genetic entity (gene or gene set)
             coexpTableArr = [], //Data array for the datatable
             coExpTableInstance = "",
             entityProfileMap = {},
@@ -354,7 +364,7 @@ var CoExpView = (function() {
         		                        genetic_entity: geneEntityId,
         		                        profile_id: $("#coexp-profile-selector :selected").val(),
         		                        correlated_entities_to_find: "GENESET",
-        		                        genetic_entity_type: "GENE", 
+        		                        genetic_entity_type: geneEntityType, 
         		                        case_set_id: window.QuerySession.getCaseSetId(),
         		                        case_ids_key: window.QuerySession.getCaseIdsKey(),
         		                        is_full_result: "false"
@@ -400,7 +410,13 @@ var CoExpView = (function() {
                         $("#" + Names.plotId).empty();
                         $("#" + Names.plotId).append("<img style='padding:220px;' src='images/ajax-loader.gif' alt='loading' />");
                         var coexpPlots = new CoexpPlots();
-                        var profile1Id = $("#coexp-profile-selector :selected").val();//TODO - this is not true if the tab is geneset type
+                        var profile1Id = null;
+                        if (geneEntityType == "GENE") {
+                        	profile1Id = $("#coexp-profile-selector :selected").val();
+                        } else if (geneEntityType == "GENESET") {
+                        	profile1Id = geneSetProfile;
+                        }
+                        //var profile1Id = $("#coexp-profile-selector :selected").val();//TODO - this is not true if the tab is geneset type
                         var entity1Id = geneEntityId;
                         var entity2Id = aData[0];
                         var profile2Id = entityProfileMap[entity2Id];
@@ -525,6 +541,7 @@ var CoExpView = (function() {
             init: function(_geneEntityId, _geneEntityType) {
                 //Set the attributes of the sub-view instance
                 geneEntityId = _geneEntityId;
+                geneEntityType = _geneEntityType;
                 //TODO: Just a quick fix for the sub-tab collapse bug
                 $(window).trigger("resize");
                 //Get the div id of the right sub-tab
@@ -533,12 +550,13 @@ var CoExpView = (function() {
                     assembleNames();
                     drawLayout();
                     var coExpTable = new CoExpTable();
-                    coExpTable.init(geneEntityId, _geneEntityType);
+                    coExpTable.init(geneEntityId, geneEntityType);
                 }
             },
         	app: function(_geneEntityId, _geneEntityType) {
                 //Set the attributes of the sub-view instance
                 geneEntityId = _geneEntityId;
+                geneEntityType = _geneEntityType;
                 //TODO: Just a quick fix for the sub-tab collapse bug
                 $(window).trigger("resize");
                 //Get the div id of the right sub-tab
@@ -546,7 +564,7 @@ var CoExpView = (function() {
                 assembleNames();
                 drawLayout();
                 var coExpTable = new CoExpTable();
-                coExpTable.init(geneEntityId, _geneEntityType);
+                coExpTable.init(geneEntityId, geneEntityType);
             }
         };
 
@@ -554,12 +572,14 @@ var CoExpView = (function() {
 
     function getGeneticProfileCallback(result) {
         var _genes = window.QuerySession.getQueryGenes(); //TODO: support only geneset queries (without genes)
+        //Set gene set profile variable
+    	geneSetProfile ='';
         //Init Profile selector
         var _profile_list = {};
         _.each(_genes, function(_gene) {
             _profile_list = _.extend(_profile_list, result[_gene]);
         });
-        ProfileSelector.init(_profile_list);
+        ProfileSelector.init(_profile_list, geneSetProfile);
         if (profileList.length === 1) {
             $("#coexp-profile-selector-dropdown").hide();
         }
