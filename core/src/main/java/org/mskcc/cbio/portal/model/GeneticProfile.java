@@ -69,7 +69,8 @@ public class GeneticProfile {
     		GeneticAlterationType.PHOSPHORYLATION,
     		GeneticAlterationType.PROTEIN_LEVEL,
     		GeneticAlterationType.PROTEIN_ARRAY_PROTEIN_LEVEL,
-    		GeneticAlterationType.PROTEIN_ARRAY_PHOSPHORYLATION);
+    		GeneticAlterationType.PROTEIN_ARRAY_PHOSPHORYLATION,
+    		GeneticAlterationType.GENESET_SCORE);
     
     public GeneticProfile() {
       super();
