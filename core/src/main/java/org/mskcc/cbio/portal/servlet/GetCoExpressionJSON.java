@@ -75,7 +75,7 @@ import org.mskcc.cbio.portal.util.XssRequestWrapper;
  */
 public class GetCoExpressionJSON extends HttpServlet {
 
-    private double coExpScoreThreshold = 0.3;
+    private double coExpScoreThreshold = 0.0;
     //private int resultLength = 250;
     
     // class which process access control to cancer studies
