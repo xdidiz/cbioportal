@@ -139,7 +139,8 @@ public class GetCoExpressionJSON extends HttpServlet {
         	queryGeneticEntity = ((XssRequestWrapper) httpServletRequest).getRawParameter("genetic_entity");
         }
         String queryGeneticEntityType = httpServletRequest.getParameter("genetic_entity_type");
-        String profileId = httpServletRequest.getParameter("profile_id");//always an expression profile, never a gsva-scores one
+        String subjectProfileId = httpServletRequest.getParameter("genetic_entity_profile_id");
+        String queryProfileId = httpServletRequest.getParameter("correlated_entities_profile_id");
         String correlated_entities_to_find = httpServletRequest.getParameter("correlated_entities_to_find");
         String caseSetId = httpServletRequest.getParameter("case_set_id");
         String caseIdsKey = httpServletRequest.getParameter("case_ids_key");
@@ -162,29 +163,8 @@ public class GetCoExpressionJSON extends HttpServlet {
 
         if (!isFullResult) {
         	//validation:
-        	GeneticProfile subjectProfile;
-            GeneticProfile queryProfile;
-            //queryGeneticEntityType and correlated_entities_to_find are used to determine
-            //the subjectProfile and queryProfile:
-            if ((EntityType.GENE.name().equals(correlated_entities_to_find))) {
-            	queryProfile = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
-            	if (EntityType.GENE.name().equals(queryGeneticEntityType)) {
-            		subjectProfile = queryProfile;
-            	} else {
-            		subjectProfile = getReferringGenesetProfile(profileId);
-            	}
-            }
-            else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
-            	queryProfile = getReferringGenesetProfile(profileId);
-            	if (EntityType.GENE.name().equals(queryGeneticEntityType)) {
-            		subjectProfile = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
-            	} else {
-            		subjectProfile = queryProfile;
-            	}
-            }
-            else {
-            	throw new IllegalArgumentException("The entity to find " + correlated_entities_to_find +" is not supported");
-            }
+            GeneticProfile queryProfile = DaoGeneticProfile.getGeneticProfileByStableId(queryProfileId);
+            GeneticProfile subjectProfile = DaoGeneticProfile.getGeneticProfileByStableId(subjectProfileId);
             	
             if (queryProfile != null) {
                 try {
@@ -256,10 +236,10 @@ public class GetCoExpressionJSON extends HttpServlet {
             } else {
             	 mapper.writeValue(out, new JSONObject());
             }
-        } else {
+        } else { //TODO: check how to download data from the table, maybe remove that if an alternative way is found?
             StringBuilder fullResutlStr = new StringBuilder();
             fullResutlStr.append("Gene Symbol\tPearson Score\tSpearman Score\n");
-            GeneticProfile final_gp = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
+            GeneticProfile final_gp = DaoGeneticProfile.getGeneticProfileByStableId(queryProfileId); //TODO: Check this, not true
             if (final_gp != null) {
                 try {
                     Map<Integer, double[]> map = CoExpUtil.getExpressionMap(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey);
