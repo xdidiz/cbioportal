@@ -192,6 +192,16 @@ var OncoprintTrackOptionsView = (function () {
 	    $dropdown.append($sort_dec_li);
 	    $dropdown.append($dont_sort_li);
 	}
+	if (model.isTrackExpandable(track_id)) {
+	    $dropdown.append($makeDropdownOption(
+		    'Toggle expanded',
+		    (model.isTrackExpanded(track_id) ? 'bold' : 'normal'),
+		    function (evt) {
+			evt.stopPropagation();
+			var expansionCallback = model.getTrackExpansionCallback(track_id);
+			return expansionCallback(track_id);
+		    }));
+	}
     };
 
     OncoprintTrackOptionsView.prototype.enableInteraction = function () {
