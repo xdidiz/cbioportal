@@ -212,6 +212,7 @@ var CoExpView = (function() {
             },
             geneEntityId = "", //Genetic entity of this sub tab instance
             geneEntityType = "", //Type of genetic entity (gene or gene set)
+            geneticEntityProfile = ""; //Profile of the genetic entity of the sub-tab
             coexpTableArr = [], //Data array for the datatable
             coExpTableInstance = "",
             entityProfileMap = {},
@@ -358,8 +359,10 @@ var CoExpView = (function() {
         		            	var paramsGetCoExpData = {
         		                        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
         		                        genetic_entity: geneEntityId,
-        		                        profile_id: $("#coexp-profile-selector :selected").val(),
+        		                        genetic_entity_profile_id: geneSetProfile,
+        		                        genetic_entity_profile_id: geneticEntityProfile,
         		                        correlated_entities_to_find: "GENESET",
+        		                        correlated_entities_profile_id: geneSetProfile,
         		                        genetic_entity_type: geneEntityType, 
         		                        case_set_id: window.QuerySession.getCaseSetId(),
         		                        case_ids_key: window.QuerySession.getCaseIdsKey(),
@@ -412,7 +415,6 @@ var CoExpView = (function() {
                         } else if (geneEntityType == "GENESET") {
                         	profile1Id = geneSetProfile;
                         }
-                        //var profile1Id = $("#coexp-profile-selector :selected").val();//TODO - this is not true if the tab is geneset type
                         var entity1Id = geneEntityId;
                         var entity2Id = aData[0];
                         var profile2Id = entityProfileMap[entity2Id];
@@ -481,12 +483,19 @@ var CoExpView = (function() {
                 init: function(_geneticEntityId, _geneticEntityType) {
                     //Getting co-exp data (for currently selected gene/profile) from servlet
                     $("#" + Names.plotId).empty();
+                    //Determine the profile for the correlated entities
+                    if (_geneticEntityType == "GENE") {
+                    	geneticEntityProfile = $("#coexp-profile-selector :selected").val();
+                    } else if (_geneticEntityType == "GENESET") {
+                    	geneticEntityProfile = geneSetProfile;
+                    }
                     //Make the first call only with genes (we have always genes in our query)
                     var paramsGetCoExpData = {
                          cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
                          genetic_entity: _geneticEntityId,
-                         profile_id: $("#coexp-profile-selector :selected").val(),
+                         genetic_entity_profile_id: geneticEntityProfile,
                          correlated_entities_to_find: "GENE",
+                         correlated_entities_profile_id: $("#coexp-profile-selector :selected").val(),
                          genetic_entity_type: _geneticEntityType, 
                          case_set_id: window.QuerySession.getCaseSetId(),
                          case_ids_key: window.QuerySession.getCaseIdsKey(),
