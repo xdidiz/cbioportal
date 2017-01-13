@@ -168,6 +168,9 @@
     <mockito.version>1.10.19</mockito.version>
 
     <final.war.name>cbioportal-${project.version}</final.war.name>
+    
+    <!-- default value for this saml attribute, in case saml is chosen -->
+    <saml.idp.comm.binding.settings>defaultBinding</saml.idp.comm.binding.settings>
 
   <db.test.driver>com.mysql.jdbc.Driver</db.test.driver>
     <!-- For MySQL < 5.5 change 'default_storage_engine' to 'storage_engine' -->

@@ -87,6 +87,12 @@ googleplus.consumer.secret=
 saml.sp.metadata.entityid=
 saml.idp.metadata.location=
 saml.idp.metadata.entityid=
+# How to send SAML request messages to the IDP. Options: bindings:HTTP-POST, bindings:HTTP-Redirect, bindings:PAOS, profiles:holder-of-key:SSO:browser.
+# Enable these 2 properties to configure specific binding:
+#saml.idp.comm.binding.settings=specificBinding
+#saml.idp.comm.binding.type=bindings:HTTP-Redirect
+# Enable this to configure to something other than the default org.mskcc.cbio.portal.authentication.saml.SAMLUserDetailsServiceImpl
+#saml.custom.userservice.class=
 saml.keystore.location=
 saml.keystore.password=
 saml.keystore.private-key.key=

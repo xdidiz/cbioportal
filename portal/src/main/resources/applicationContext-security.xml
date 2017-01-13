@@ -261,11 +261,16 @@
     </b:bean>
 
     <b:bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
-        <b:property name="defaultProfileOptions">
-            <b:bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
-                <b:property name="includeScoping" value="false"/>
-            </b:bean>
-        </b:property>
+        <b:property name="defaultProfileOptions" ref="${saml.idp.comm.binding.settings}"/><!-- should be defaultBinding or specificBinding -->
+    </b:bean>
+
+    <b:bean id="defaultBinding" class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+	<b:property name="includeScoping" value="false"/>
+    </b:bean>
+    
+    <b:bean id="specificBinding" class="org.springframework.security.saml.websso.WebSSOProfileOptions">
+	<b:property name="includeScoping" value="false"/>
+	<b:property name="binding" value="urn:oasis:names:tc:SAML:2.0:${saml.idp.comm.binding.type}"/>
     </b:bean>
 
     <!-- IDP Discovery Service -->
@@ -320,7 +325,7 @@
         <b:property name="userDetails" ref="customUserService" />
     </b:bean>
 
-    <b:bean id="customUserService" class="org.mskcc.cbio.portal.authentication.saml.MSKCCPortalUserDetailsService">
+    <b:bean id="customUserService" class="${saml.custom.userservice.class}">
         <b:constructor-arg ref="portalUserDAO"/>
     </b:bean>
 
