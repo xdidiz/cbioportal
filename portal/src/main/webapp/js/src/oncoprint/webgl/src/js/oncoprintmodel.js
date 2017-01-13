@@ -142,6 +142,8 @@ var OncoprintModel = (function () {
 	this.track_active_rules = {}; // from track id to active rule map (map with rule ids as keys)
 	this.track_info = {};
 	this.track_has_column_spacing = {}; // track id -> boolean
+	this.track_expansion_callback = {}; // track id -> function that adds expansion tracks
+	this.track_expansion_tracks = {}; // track id -> array of track ids if applicable
 	
 	// Rule Set Properties
 	this.rule_sets = {}; // map from rule set id to rule set
@@ -698,13 +700,23 @@ var OncoprintModel = (function () {
     }
 
     var _getContainingTrackGroup = function (oncoprint_model, track_id, return_reference) {
-	var group;
+	var group = null, i;
 	track_id = parseInt(track_id);
-	for (var i = 0; i < oncoprint_model.track_groups.length; i++) {
-	    if (oncoprint_model.track_groups[i].indexOf(track_id) > -1) {
-		group = oncoprint_model.track_groups[i];
+	// see if the track is part of a track's expansion group
+	for (i in oncoprint_model.track_expansion_tracks) {
+	    if (oncoprint_model.track_expansion_tracks[i].indexOf(track_id) !== -1) {
+		group = oncoprint_model.track_expansion_tracks[i];
 		break;
 	    }
+	}
+	// if not part of an expansion group, try regular track groups
+	if (group === null) {
+            for (i = 0; i < oncoprint_model.track_groups.length; i++) {
+                if (oncoprint_model.track_groups[i].indexOf(track_id) !== -1) {
+                    group = oncoprint_model.track_groups[i];
+                    break;
+                }
+            }
 	}
 	if (group) {
 	    return (return_reference ? group : group.slice());
@@ -965,7 +977,20 @@ var OncoprintModel = (function () {
     OncoprintModel.prototype.isTrackSortDirectionChangeable = function (track_id) {
 	return this.track_sort_direction_changeable[track_id];
     }
-
+    
+    OncoprintModel.prototype.isTrackExpandable = function (track_id) {
+	return this.track_expansion_callback.hasOwnProperty(track_id);
+    }
+    
+    OncoprintModel.prototype.isTrackExpanded = function (track_id) {
+	return this.track_expansion_tracks.hasOwnProperty(track_id) &&
+		this.track_expansion_tracks[track_id].length > 0;
+    }
+    
+    OncoprintModel.prototype.getExpansionCallback = function (track_id) {
+	return this.track_expansion_callback[track_id] || null;
+    }
+    
     OncoprintModel.prototype.getRuleSet = function (track_id) {
 	return this.rule_sets[this.track_rule_set_id[track_id]];
     }

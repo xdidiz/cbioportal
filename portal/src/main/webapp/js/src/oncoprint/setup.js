@@ -1112,39 +1112,70 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    },
 	    'addHeatmapTrack': function (genetic_profile_id, gene) {
 		oncoprint.suppressRendering();
-		State.heatmap_track_groups[genetic_profile_id] = State.heatmap_track_groups[genetic_profile_id] || {
-		    genetic_profile_id: genetic_profile_id,
-		    track_group_id: State.getNewTrackGroupId(),
-		    gene_to_track_id: {}
-		};
 		var heatmap_track_group = State.heatmap_track_groups[genetic_profile_id];
-		    var track_params = {
-			'rule_set_params': {
-			    'type': 'gradient',
-			    'legend_label': "Heatmap",
-			    'value_key': 'profile_data',
-			    'value_range': [-3, 3],
-			    'colors': [[0,0,255,1],[0,0,0,1],[255,0,0,1]],
-			    'value_stop_points': [-3,0,3],
-			    'null_color': 'rgba(224,224,224,1)'
-			},
-			'has_column_spacing': false,
-			'track_padding': 0,
-			'label': gene,
-			'target_group': heatmap_track_group.track_group_id,
-			'removable': true,
-			'removeCallback': makeRemoveHeatmapHandler(genetic_profile_id, gene),
-			//'sortCmpFn': function(d1, d2) {return 0;},
-			'description': gene + ' data from ' + genetic_profile_id,
-			//'track_group_header': genetic_profile_id
-		    };
-		    var any_hm_id = State.getAnyHeatmapTrackId();
-		    var new_hm_id = oncoprint.addTracks([track_params])[0];
-		    heatmap_track_group.gene_to_track_id[gene] = new_hm_id;
-		    if (any_hm_id !== null) {
-			oncoprint.shareRuleSet(any_hm_id, new_hm_id);
-		    }
+		if (typeof heatmap_track_group === 'undefined') {
+                    heatmap_track_group = State.heatmap_track_groups[genetic_profile_id] = {
+                        genetic_profile_id: genetic_profile_id,
+                        track_group_id: State.getNewTrackGroupId(),
+                        gene_to_track_id: {}
+                    };
+		}
+		var track_params = {
+		    'rule_set_params': {
+			'type': 'gradient',
+			'legend_label': "Expression heatmap",
+			'value_key': 'profile_data',
+			'value_range': [-3, 3],
+			'colors': [[0,0,255,1],[0,0,0,1],[255,0,0,1]],
+			'value_stop_points': [-3,0,3],
+			'null_color': 'rgba(224,224,224,1)'
+		    },
+		    'has_column_spacing': false,
+		    'track_padding': 0,
+		    'label': gene,
+		    'target_group': heatmap_track_group.track_group_id,
+		    'removable': true,
+		    'removeCallback': makeRemoveHeatmapHandler(genetic_profile_id, gene),
+		    //'sortCmpFn': function(d1, d2) {return 0;},
+		    'description': gene + ' data from ' + genetic_profile_id,
+		    //'track_group_header': genetic_profile_id
+		};
+		var any_hm_id = State.getAnyHeatmapTrackId();
+		var new_hm_id = oncoprint.addTracks([track_params])[0];
+		heatmap_track_group.gene_to_track_id[gene] = new_hm_id;
+		if (any_hm_id !== null) {
+		    oncoprint.shareRuleSet(any_hm_id, new_hm_id);
+		}
 		URL.update();
+		oncoprint.releaseRendering();
+		return new_hm_id;
+	    },
+	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, group_track_id) {
+		oncoprint.suppressRendering();
+		var track_params = {
+		    'rule_set_params': {
+			'type': 'gradient',
+			'legend_label': "Expression heatmap",
+			'value_key': 'profile_data',
+			'value_range': [-3, 3],
+			'colors': [[0,0,255,1],[0,0,0,1],[255,0,0,1]],
+			'value_stop_points': [-3,0,3],
+			'null_color': 'rgba(224,224,224,1)'
+		    },
+		    'has_column_spacing': false,
+		    'track_padding': 0,
+		    'label': gene,
+		    'expansion_of': group_track_id,
+		    'removable': true,
+		    //'sortCmpFn': function(d1, d2) {return 0;},
+		    'description': gene + ' data from ' + genetic_profile_id,
+		    //'track_group_header': genetic_profile_id
+		};
+		var any_hm_id = State.getAnyHeatmapTrackId();
+		var new_hm_id = oncoprint.addTracks([track_params])[0];
+		if (any_hm_id !== null) {
+		    oncoprint.shareRuleSet(any_hm_id, new_hm_id);
+		}
 		oncoprint.releaseRendering();
 		return new_hm_id;
 	    },
@@ -1163,8 +1194,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'addGenesetTracks': function (geneset_data_by_line) {
 		oncoprint.suppressRendering();
 		var gs_ids = [];
-		for (var i = 0; i < geneset_data_by_line.length; i++) {
-		    var track_params = {
+		var track_params, i, source_profile_id, source_gene_symbols;
+		for (i = 0; i < geneset_data_by_line.length; i++) {
+		    track_params = {
 			'rule_set_params': {
 			    'type': 'gradient',
 			    'legend_label': 'Geneset score',
@@ -1202,15 +1234,31 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'removable': true,
 			'description': geneset_data_by_line[i].geneset_id,
 		    };
+		    // TODO: replace the mocked gene info by API calls
+		    source_profile_id = "brca_tcga_mrna";
+		    source_gene_symbols = ['ATOX1', 'VEGFA'];
+		    if (source_profile_id !== null) {
+			track_params.expansion_callback = State.expandTrack.bind(
+				source_profile_id, source_gene_symbols);
+		    }
 		    var new_gs_id = oncoprint.addTracks([track_params])[0];
 		    gs_ids.push(new_gs_id);
-		    if (typeof State.geneset_tracks[0] !== "undefined") {
+		    if (typeof State.geneset_tracks[0] !== 'undefined') {
 			oncoprint.shareRuleSet(State.geneset_tracks[0], new_gs_id);
 		    }
 		    State.geneset_tracks[i] = new_gs_id;
 		}
 		oncoprint.releaseRendering();
 		return gs_ids;
+	    },
+	    'expandTrack': function(genetic_profile_id, gene_symbols, group_track_id) {
+		var symbol, i, subtrack_id, promise_list = [];
+		for (i=0; i<= gene_symbols.length; ) {
+		    symbol = gene_symbols[i];
+                    subtrack_id = self.addExpansionHeatmapTrack(genetic_profile_id, gene, group_track_id);
+                    promise_list.push(populateHeatmapTrack(genetic_profile_id, gene, subtrack_id));
+		}
+		return $.when.apply(null, promise_list);
 	    },
 	    'useAndAddAttribute': function(attr_id) {
 		var attr = this.useAttribute(attr_id);
