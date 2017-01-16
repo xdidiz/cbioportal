@@ -144,7 +144,6 @@ public class GetCoExpressionJSON extends HttpServlet {
         String correlated_entities_to_find = httpServletRequest.getParameter("correlated_entities_to_find");
         String caseSetId = httpServletRequest.getParameter("case_set_id");
         String caseIdsKey = httpServletRequest.getParameter("case_ids_key");
-        boolean isFullResult = Boolean.parseBoolean(httpServletRequest.getParameter("is_full_result"));
 
         PearsonsCorrelation pearsonsCorrelation = new PearsonsCorrelation();
         SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation();
@@ -161,148 +160,80 @@ public class GetCoExpressionJSON extends HttpServlet {
         	throw new IllegalArgumentException("Not supported: " + queryGeneticEntityType);
         }        
 
-        if (!isFullResult) {
-        	//validation:
-            GeneticProfile queryProfile = DaoGeneticProfile.getGeneticProfileByStableId(queryProfileId);
-            GeneticProfile subjectProfile = DaoGeneticProfile.getGeneticProfileByStableId(subjectProfileId);
-            	
-            if (queryProfile != null) {
-                try {
-                    Map<Integer, double[]> map = CoExpUtil.getExpressionMap(queryProfile.getGeneticProfileId(), caseSetId, caseIdsKey);
-                    int mapSize = map.size();
-                    List<Integer> genetic_entities = new ArrayList<Integer>(map.keySet());
-                    //expression of the query item. All other expression lists in the map are compared to this: 
-                    double[] subject_gene_entity_exp = CoExpUtil.getExpressionList(subjectProfile.getGeneticProfileId(), caseSetId, caseIdsKey, queryGeneticEntityId);
-                    //iterate over all the other items, comparing to the query_gene_entity_exp:
-                    for (int i = 0; i < mapSize; i++) {
-                        Integer compared_gene_entity_id = genetic_entities.get(i);
-                        double[] compared_gene_entity_exp = map.get(compared_gene_entity_id);
-                        if (compared_gene_entity_exp != null && subject_gene_entity_exp != null) {
-                            //Filter out cases with empty value on either side
-                            int min_length = subject_gene_entity_exp.length < compared_gene_entity_exp.length ? subject_gene_entity_exp.length : compared_gene_entity_exp.length;
-                            ArrayList<Double> subject_gene_entity_exp_arrlist = new ArrayList<Double>();
-                            ArrayList<Double> new_compared_gene_entity_exp_arrlist = new ArrayList<Double>();
-                            for (int k = 0; k < min_length; k++) {
-                                if (!Double.isNaN(subject_gene_entity_exp[k]) && !Double.isNaN(compared_gene_entity_exp[k])) {
-                                    subject_gene_entity_exp_arrlist.add(subject_gene_entity_exp[k]);
-                                    new_compared_gene_entity_exp_arrlist.add(compared_gene_entity_exp[k]);
-                                }
+    	//validation:
+        GeneticProfile queryProfile = DaoGeneticProfile.getGeneticProfileByStableId(queryProfileId);
+        GeneticProfile subjectProfile = DaoGeneticProfile.getGeneticProfileByStableId(subjectProfileId);
+        	
+        if (queryProfile != null) {
+            try {
+                Map<Integer, double[]> map = CoExpUtil.getExpressionMap(queryProfile.getGeneticProfileId(), caseSetId, caseIdsKey);
+                int mapSize = map.size();
+                List<Integer> genetic_entities = new ArrayList<Integer>(map.keySet());
+                //expression of the query item. All other expression lists in the map are compared to this: 
+                double[] subject_gene_entity_exp = CoExpUtil.getExpressionList(subjectProfile.getGeneticProfileId(), caseSetId, caseIdsKey, queryGeneticEntityId);
+                //iterate over all the other items, comparing to the query_gene_entity_exp:
+                for (int i = 0; i < mapSize; i++) {
+                    Integer compared_gene_entity_id = genetic_entities.get(i);
+                    double[] compared_gene_entity_exp = map.get(compared_gene_entity_id);
+                    if (compared_gene_entity_exp != null && subject_gene_entity_exp != null) {
+                        //Filter out cases with empty value on either side
+                        int min_length = subject_gene_entity_exp.length < compared_gene_entity_exp.length ? subject_gene_entity_exp.length : compared_gene_entity_exp.length;
+                        ArrayList<Double> subject_gene_entity_exp_arrlist = new ArrayList<Double>();
+                        ArrayList<Double> new_compared_gene_entity_exp_arrlist = new ArrayList<Double>();
+                        for (int k = 0; k < min_length; k++) {
+                            if (!Double.isNaN(subject_gene_entity_exp[k]) && !Double.isNaN(compared_gene_entity_exp[k])) {
+                                subject_gene_entity_exp_arrlist.add(subject_gene_entity_exp[k]);
+                                new_compared_gene_entity_exp_arrlist.add(compared_gene_entity_exp[k]);
                             }
-                            Double[] _subject_query_gene_entity_exp = subject_gene_entity_exp_arrlist.toArray(new Double[0]);
-                            Double[] _new_compared_gene_entity_exp = new_compared_gene_entity_exp_arrlist.toArray(new Double[0]);
-                            //convert double object to primitive data
-                            double[] subject_query_gene_entity_exp = new double[_subject_query_gene_entity_exp.length];
-                            double[] new_compared_gene_entity_exp = new double[_new_compared_gene_entity_exp.length];
-                            for (int m = 0; m < _subject_query_gene_entity_exp.length; m++) {
-                                subject_query_gene_entity_exp[m] = _subject_query_gene_entity_exp[m].doubleValue();
-                                new_compared_gene_entity_exp[m] = _new_compared_gene_entity_exp[m].doubleValue();
-                            }
-                                                        
-                            if (subject_query_gene_entity_exp.length != 0 && new_compared_gene_entity_exp.length != 0) {
-                                double pearson = pearsonsCorrelation.correlation(subject_query_gene_entity_exp, new_compared_gene_entity_exp);
-                                if ((pearson >= coExpScoreThreshold ||
-                                    pearson <= (-1) * coExpScoreThreshold) &&
-                                    (compared_gene_entity_id != queryGeneticEntityId)) {
-                                    //Only calculate spearman with high scored pearson gene pairs.
-                                    double spearman = spearmansCorrelation.correlation(subject_query_gene_entity_exp, new_compared_gene_entity_exp);
-                                    if ((spearman >= coExpScoreThreshold || spearman <= (-1) * coExpScoreThreshold) &&
-                                        ((spearman > 0 && pearson > 0) || (spearman < 0 && pearson < 0))) {
-                                    	//!! here another gene/geneset switch is needed to query either DaoGeneOptimized or CoExpUtil(temp method) for gene or geneset name
-                                        //if ()
-                                        ObjectNode _scores = mapper.createObjectNode();
+                        }
+                        Double[] _subject_query_gene_entity_exp = subject_gene_entity_exp_arrlist.toArray(new Double[0]);
+                        Double[] _new_compared_gene_entity_exp = new_compared_gene_entity_exp_arrlist.toArray(new Double[0]);
+                        //convert double object to primitive data
+                        double[] subject_query_gene_entity_exp = new double[_subject_query_gene_entity_exp.length];
+                        double[] new_compared_gene_entity_exp = new double[_new_compared_gene_entity_exp.length];
+                        for (int m = 0; m < _subject_query_gene_entity_exp.length; m++) {
+                            subject_query_gene_entity_exp[m] = _subject_query_gene_entity_exp[m].doubleValue();
+                            new_compared_gene_entity_exp[m] = _new_compared_gene_entity_exp[m].doubleValue();
+                        }
+                                                    
+                        if (subject_query_gene_entity_exp.length != 0 && new_compared_gene_entity_exp.length != 0) {
+                            double pearson = pearsonsCorrelation.correlation(subject_query_gene_entity_exp, new_compared_gene_entity_exp);
+                            if ((pearson >= coExpScoreThreshold ||
+                                pearson <= (-1) * coExpScoreThreshold) &&
+                                (compared_gene_entity_id != queryGeneticEntityId)) {
+                                //Only calculate spearman with high scored pearson gene pairs.
+                                double spearman = spearmansCorrelation.correlation(subject_query_gene_entity_exp, new_compared_gene_entity_exp);
+                                if ((spearman >= coExpScoreThreshold || spearman <= (-1) * coExpScoreThreshold) &&
+                                    ((spearman > 0 && pearson > 0) || (spearman < 0 && pearson < 0))) {
+                                	//!! here another gene/geneset switch is needed to query either DaoGeneOptimized or CoExpUtil(temp method) for gene or geneset name
+                                    //if ()
+                                    ObjectNode _scores = mapper.createObjectNode();
 
-                                    	if ((EntityType.GENE.name().equals(correlated_entities_to_find))) {
-                                        	CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id);
-                                            _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
-                                        }
-                                        else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
-                                        	String entityStableId = CoExpUtil.getEntityStableIdForGenesetEntityId(compared_gene_entity_id);
-                                            _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name                                        	
-                                        }
-                                        _scores.put("profileId", queryProfile.getStableId());
-                                        _scores.put("pearson", pearson);
-                                        _scores.put("spearman", spearman);
-                                        fullResultJson.add(_scores);
+                                	if ((EntityType.GENE.name().equals(correlated_entities_to_find))) {
+                                    	CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id);
+                                        _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
                                     }
-                                }
-                            } 
-                        }
-                    } 
-                    mapper.writeValue(out, fullResultJson);
-                } catch (DaoException e) {
-                    System.out.println(e.getMessage());
-                    mapper.writeValue(out, new JSONObject());
-                }
-            } else {
-            	 mapper.writeValue(out, new JSONObject());
-            }
-        } else { //TODO: check how to download data from the table, maybe remove that if an alternative way is found?
-            StringBuilder fullResutlStr = new StringBuilder();
-            fullResutlStr.append("Gene Symbol\tPearson Score\tSpearman Score\n");
-            GeneticProfile final_gp = DaoGeneticProfile.getGeneticProfileByStableId(queryProfileId); //TODO: Check this, not true
-            if (final_gp != null) {
-                try {
-                    Map<Integer, double[]> map = CoExpUtil.getExpressionMap(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey);
-                    int mapSize = map.size();
-                    List<Integer> gene_entities = new ArrayList<Integer>(map.keySet());
-                    //expression of the query item. All other expression lists in the map are compared to this: 
-                    double[] query_gene_entity_exp = CoExpUtil.getExpressionList(final_gp.getGeneticProfileId(), caseSetId, caseIdsKey, queryGeneticEntityId);
-
-                    for (int i = 0; i < mapSize; i++) {
-                        Integer compared_gene_entity_id = gene_entities.get(i);
-                        double[] compared_gene_entity_exp = map.get(compared_gene_entity_id);
-                        if (compared_gene_entity_exp != null && query_gene_entity_exp != null) {
-                            //Filter out cases with empty value on either side
-                            int min_length = (query_gene_entity_exp.length < compared_gene_entity_exp.length) ? query_gene_entity_exp.length : compared_gene_entity_exp.length;
-                            ArrayList<Double> new_query_gene_entity_exp_arrlist = new ArrayList<Double>();
-                            ArrayList<Double> new_compared_gene_entity_exp_arrlist = new ArrayList<Double>();
-                            for (int k = 0; k < min_length; k++) {
-                                if (!Double.isNaN(query_gene_entity_exp[k]) && !Double.isNaN(compared_gene_entity_exp[k])) {
-                                    new_query_gene_entity_exp_arrlist.add(query_gene_entity_exp[k]);
-                                    new_compared_gene_entity_exp_arrlist.add(compared_gene_entity_exp[k]);
+                                    else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
+                                    	String entityStableId = CoExpUtil.getEntityStableIdForGenesetEntityId(compared_gene_entity_id);
+                                        _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name                                        	
+                                    }
+                                    _scores.put("profileId", queryProfile.getStableId());
+                                    _scores.put("pearson", pearson);
+                                    _scores.put("spearman", spearman);
+                                    fullResultJson.add(_scores);
                                 }
                             }
-                            Double[] _new_query_gene_entity_exp = new_query_gene_entity_exp_arrlist.toArray(new Double[0]);
-                            Double[] _new_compared_gene_entity_exp = new_compared_gene_entity_exp_arrlist.toArray(new Double[0]);
-                            //convert double object to primitive data
-                            double[] new_query_gene_entity_exp = new double[_new_query_gene_entity_exp.length];
-                            double[] new_compared_gene_entity_exp = new double[_new_compared_gene_entity_exp.length];
-                            for (int m = 0; m < _new_query_gene_entity_exp.length; m++) {
-                                new_query_gene_entity_exp[m] = _new_query_gene_entity_exp[m].doubleValue();
-                                new_compared_gene_entity_exp[m] = _new_compared_gene_entity_exp[m].doubleValue();
-                            }
-                            if (new_query_gene_entity_exp.length != 0 && new_compared_gene_entity_exp.length != 0 &&
-                                compared_gene_entity_id != queryGeneticEntityId) {
-                                double pearson = pearsonsCorrelation.correlation(new_query_gene_entity_exp, new_compared_gene_entity_exp);
-                                double spearman = spearmansCorrelation.correlation(new_query_gene_entity_exp, new_compared_gene_entity_exp);
-                                CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id); //TODO - Change CanonicalGene
-                                fullResutlStr.append(
-                                    comparedGene.getHugoGeneSymbolAllCaps() + "\t" +
-                                    (double) Math.round(pearson * 100) / 100 + "\t" +
-                                    (double) Math.round(spearman * 100) / 100 + "\n"
-                                );
-                            }
-                        }
+                        } 
                     }
-                    //construct file name
-                    String fileName = "coexpression_" + queryGeneticEntityId + "_" +
-                        final_gp.getProfileName().replaceAll("\\s+", "_") + "_" +
-                        cancerStudyIdentifier.replaceAll("\\s+", "_") + ".txt";
-
-                    httpServletResponse.setContentType("text/html");
-                    httpServletResponse.setContentType("application/force-download");
-                    httpServletResponse.setHeader("content-disposition", "inline; filename='" + fileName + "'");
-                    out = httpServletResponse.getWriter();
-                    JSONValue.writeJSONString(fullResutlStr, out);
-                } catch (DaoException e) {
-                    System.out.println(e.getMessage());
-                    JSONValue.writeJSONString(new JSONObject(), out);
-                }
-            } else {
-                JSONValue.writeJSONString(new JSONObject(), out);
+                } 
+                mapper.writeValue(out, fullResultJson);
+            } catch (DaoException e) {
+                System.out.println(e.getMessage());
+                mapper.writeValue(out, new JSONObject());
             }
+        } else {
+        	 mapper.writeValue(out, new JSONObject());
         }
-
     }
 
 	private GeneticProfile getReferringGenesetProfile(String profileId) {
