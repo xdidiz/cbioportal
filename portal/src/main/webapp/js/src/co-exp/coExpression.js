@@ -298,9 +298,9 @@ var CoExpView = (function() {
                 });  
             }
 
-            function attachDownloadFullResultButton() {
-                //Append download full result button at the bottom of the table
-                $("#" + Names.tableDivId).append("<button id='download_button' style='float:right;'>Download Full Results</button>");
+            function attachDownloadResultButton() {
+                //Append download result button at the bottom of the table
+                $("#" + Names.tableDivId).append("<button id='download_button' style='float:right;'>Download Results</button>");
                 document.getElementById("download_button").onclick = function() {
 	            	//Function that creates the document to download the table in the data
 	            	var tableData=coExpTableInstance.fnGetData();
@@ -369,7 +369,9 @@ var CoExpView = (function() {
 				        		if (genesRetrieved == true){ //Add the genes into the coexpTable again if they are not there
 				        			if (geneArr.length >= 1) {
 			        					coExpTableInstance.fnAddData(geneArr);
-			        				}
+			        				} else {
+    		            				$("center").append("<div id='no_genes' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No genes with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
+    		            			}
 		        				} 
 		        			} else { //Button not checked, clear the whole table
 		        				coExpTableInstance.fnClearTable();
@@ -492,17 +494,45 @@ var CoExpView = (function() {
                 });
             }
 
-            function getCoExpDataCallBack(result, correlatedEntitiesToFind) {
+            function getCoExpDataCallBack(_result, correlatedEntitiesToFind, geneticEntityId, _geneticEntityType) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
-                if (result.length === 0) {
-                    $("#" + Names.tableDivId).append("There are no gene pairs with a Pearson or Spearman score > 0.3 or < -0.3. To see the scores for all gene pairs, use the button below.");
-                    attachDownloadFullResultButton();                    
+                if (_result.length === 0) { //If there are no genes available, call the gene sets
+	        		var paramsGetCoExpData = {
+	                        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	                        genetic_entity: geneticEntityId,
+	                        genetic_entity_profile_id: geneticEntityProfile,
+	                        correlated_entities_to_find: "GENESET",
+	                        correlated_entities_profile_id: geneSetProfile,
+	                        genetic_entity_type: _geneticEntityType, 
+	                        case_set_id: window.QuerySession.getCaseSetId(),
+	                        case_ids_key: window.QuerySession.getCaseIdsKey(),
+	                   };
+	                   $.post(
+	                       "getCoExp.do", 
+	                       paramsGetCoExpData, 
+	                       function(result) {
+	                    	   if (result.length === 0) { 
+	                    		   $("#" + Names.tableDivId).append("There are no genes or gene sets paired with the queried genetic entity with a Pearson or Spearman score > 0.3 or < -0.3.");
+	                    	   } else {
+	                        	   convertData(result, correlatedEntitiesToFind);
+	                        	   overWriteFilters(); 
+	                               configTable();
+	                               attachDownloadResultButton();
+	                               attachPearsonFilter();
+	                               attachGeneticEntityButtons();
+	                               attachRowListener();
+	                               initTable();
+	                    	   }
+	                    	   geneSetsRetrieved = true;
+	                      },
+	                      "json"
+	                   );
                 } else {
-                	convertData(result, correlatedEntitiesToFind);
+                	convertData(_result, correlatedEntitiesToFind);
                 	overWriteFilters(); 
                     configTable();
-                    attachDownloadFullResultButton();
+                    attachDownloadResultButton();
                     attachPearsonFilter();
                     attachGeneticEntityButtons();
                     attachRowListener();
@@ -535,7 +565,7 @@ var CoExpView = (function() {
                         "getCoExp.do", 
                         paramsGetCoExpData, 
                         function(result) {
-                            getCoExpDataCallBack(result, "GENE");
+                            getCoExpDataCallBack(result, "GENE", _geneticEntityId, _geneticEntityType);
                             genesRetrieved = true;
                        },
                        "json"
