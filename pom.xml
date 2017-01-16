@@ -169,9 +169,6 @@
 
     <final.war.name>cbioportal-${project.version}</final.war.name>
     
-    <!-- default value for this saml attribute, in case saml is chosen -->
-    <saml.idp.comm.binding.settings>defaultBinding</saml.idp.comm.binding.settings>
-
   <db.test.driver>com.mysql.jdbc.Driver</db.test.driver>
     <!-- For MySQL < 5.5 change 'default_storage_engine' to 'storage_engine' -->
   <db.test.url>jdbc:mysql://127.0.0.1:3306/cgds_test?sessionVariables=default_storage_engine=InnoDB</db.test.url>
