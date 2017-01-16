@@ -302,39 +302,40 @@ var CoExpView = (function() {
                 //Append download full result button at the bottom of the table
                 $("#" + Names.tableDivId).append("<button id='download_button' style='float:right;'>Download Full Results</button>");
                 document.getElementById("download_button").onclick = function() {
-            	//Function that creates the document to download the table in the data
-            	var tableData=coExpTableInstance.fnGetData();
-            	//Create a string with the full results, containing also the header
-            	fullResultStr = ("Genetic Entity Symbol\tPearson Score\tSpearman Score\n");
-            	tableData.forEach(function(geneticEntity) {
-            		_row = "";
-            		geneticEntity.forEach(function(value) {
-            			_row += value + "\t";
-            		});
-            		//Replace last '\t' for '\n'
-            		_row = _row.slice(0,-1);
-            		_row += "\n";
-            		//Add the genetic entity to the final string
-            		fullResultStr += _row;
-            	});
-            	//construct file name
-            	_comparedGeneticEntities ="";
-            	if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-            		if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-            			_comparedGeneticEntities = "genes_and_gene_sets";
-            		} else {
-            			_comparedGeneticEntities +="genes";
-            		}
-            	} else {
-            		if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-                		_comparedGeneticEntities += "gene_sets";
-                	}
-            	}
-                _fileName = "coexpression_" + geneEntityId + "_(" +
-                geneticEntityProfile.replace(/\\s+/g, "_") + ")_vs_" +
-                _comparedGeneticEntities + ".txt";
-                //Download the file
-            	cbio.download.initDownload(fullResultStr, {filename: _fileName, contentType: 'text/plain', preProcess: null});
+	            	//Function that creates the document to download the table in the data
+	            	var tableData=coExpTableInstance.fnGetData();
+	            	//Create a string with the full results, containing also the header
+	            	fullResultStr = ("Genetic Entity Symbol\tPearson Score\tSpearman Score\n");
+	            	tableData.forEach(function(geneticEntity) {
+	            		_row = "";
+	            		geneticEntity.forEach(function(value) {
+	            			_row += value + "\t";
+	            		});
+	            		//Replace last '\t' for '\n'
+	            		_row = _row.slice(0,-1);
+	            		_row += "\n";
+	            		//Add the genetic entity to the final string
+	            		fullResultStr += _row;
+	            	});
+	            	//construct file name
+	            	_comparedGeneticEntities ="";
+	            	if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+	            		if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+	            			_comparedGeneticEntities = "genes_and_gene_sets";
+	            		} else {
+	            			_comparedGeneticEntities +="genes";
+	            		}
+	            	} else {
+	            		if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
+	                		_comparedGeneticEntities += "gene_sets";
+	                	}
+	            	}
+	                _fileName = "coexpression_" + geneEntityId + "_(" +
+	                geneticEntityProfile.replace(/\\s+/g, "_") + ")_vs_" +
+	                _comparedGeneticEntities + ".txt";
+	                //Download the file
+	            	cbio.download.initDownload(fullResultStr, {filename: _fileName, contentType: 'text/plain', preProcess: null});
+                }
             }
 
             function attachPearsonFilter() { 
