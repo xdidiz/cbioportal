@@ -401,6 +401,8 @@ var CoExpView = (function() {
         		            			convertData(result, "GENESET");
         		            			if (geneSetArr.length >= 1) { //Only add gene sets if we have them
         		            				coExpTableInstance.fnAddData(geneSetArr);
+        		            			} else {
+        		            				$("center").append("<div id='no_genesets' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No gene sets with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
         		            			}
         		            			geneSetsRetrieved = true;
         		            		},
@@ -409,14 +411,17 @@ var CoExpView = (function() {
 		        				} else { //Add the gene sets into the coexpTable again
 		        					if (geneSetArr.length >= 1) { //Only add gene sets if we have them
     		            				coExpTableInstance.fnAddData(geneSetArr);
+    		            			} else {
+    		            				$("center").append("<div id='no_genesets' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No gene sets with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
     		            			}
 		        				} 
 		        			} else { //Button not checked, clear the whole table
 		                		coExpTableInstance.fnClearTable();
+		                		document.getElementById("no_genesets").remove();
 		                		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) { //If the gene box is checked, keep the genes
 		                			if (geneArr.length >= 1) {
 			        					coExpTableInstance.fnAddData(geneArr);
-			        				}
+			        				} 
 		                		}
 		        			}
 		        		});
