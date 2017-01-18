@@ -44,8 +44,8 @@ public class GeneSet implements Serializable {
     private int id;
     private int geneticEntityId;
     private String externalId;
-    private String nameShort;
     private String name;
+    private String description;
     private String refLink;
     private Set<Long> genesetGenes;
 
@@ -92,20 +92,6 @@ public class GeneSet implements Serializable {
     }
 
     /**
-     * @return the nameShort
-     */
-    public String getNameShort() {
-        return nameShort;
-    }
-
-    /**
-     * @param nameShort the nameShort to set
-     */
-    public void setNameShort(String nameShort) {
-        this.nameShort = nameShort;
-    }
-
-    /**
      * @return the name
      */
     public String getName() {
@@ -117,6 +103,20 @@ public class GeneSet implements Serializable {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

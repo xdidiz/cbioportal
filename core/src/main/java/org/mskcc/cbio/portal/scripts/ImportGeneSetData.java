@@ -220,9 +220,9 @@ public class ImportGeneSetData extends ConsoleRunnable {
             geneSet.setExternalId(parts[0]);
             geneSet.setRefLink(parts[1]);
             
-            // by default name and nameshort are the same as external id, and can be overriden in importSuppGeneSetData:
+            // by default name and desciption are the same as external id, and can be overriden in importSuppGeneSetData:
             geneSet.setName(geneSet.getExternalId());
-            geneSet.setNameShort(geneSet.getExternalId());
+            geneSet.setDescription(geneSet.getExternalId());
                 
             // parse entrez ids for geneset
             Set<Long> genesetGenes = new HashSet<Long>();
@@ -296,8 +296,8 @@ public class ImportGeneSetData extends ConsoleRunnable {
             }
             else {
                 // update name and short name for geneset
-                geneSet.setNameShort(parts[1]);
-                geneSet.setName(parts[2]);
+                geneSet.setName(parts[1]);
+                geneSet.setDescription(parts[2]);
                 
                 // update geneset record in db without updating geneset genes
                 DaoGeneSet.updateGeneSet(geneSet, false);

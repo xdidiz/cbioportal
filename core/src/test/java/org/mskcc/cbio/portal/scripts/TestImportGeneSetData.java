@@ -77,9 +77,9 @@ public class TestImportGeneSetData {
         
         // Test database entries supplementary file
         geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
-        assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getName());
+        assertEquals("Genes up-regulated in RK3E cells (kidney epithelium) over-expressing GLI1 [GeneID=2735].", geneSet.getDescription());
         geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
-        assertEquals("UNITTEST_GENESET8", geneSet.getNameShort());
+        assertEquals("UNITTEST_GENESET8", geneSet.getName());
         
         // Test update of genes 
         // Open genesets test data file
@@ -93,9 +93,9 @@ public class TestImportGeneSetData {
         ImportGeneSetData.importSuppGeneSetData(file);
         
         geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET2");
-        assertEquals("A made up description is suited for this a fake gene.", geneSet.getName());
+        assertEquals("A made up description is suited for this a fake gene.", geneSet.getDescription());
         geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET1");
-        assertEquals("Thought of new nice name for this geneset", geneSet.getNameShort());
+        assertEquals("Thought of new nice name for this geneset", geneSet.getName());
         geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET1");
         assertEquals("http://www.thehyve.nl/", geneSet.getRefLink());
         

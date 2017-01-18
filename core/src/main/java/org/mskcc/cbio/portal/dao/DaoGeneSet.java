@@ -70,12 +70,12 @@ public class DaoGeneSet {
             
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement("INSERT INTO geneset " 
-                    + "(`GENETIC_ENTITY_ID`, `EXTERNAL_ID`, `NAME_SHORT`, `NAME`, `REF_LINK`) "
+                    + "(`GENETIC_ENTITY_ID`, `EXTERNAL_ID`, `NAME`, `DESCRIPTION`, `REF_LINK`) "
                     + "VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             pstmt.setInt(1, geneSet.getGeneticEntityId());
             pstmt.setString(2, geneSet.getExternalId());
-            pstmt.setString(3, geneSet.getNameShort());
-            pstmt.setString(4, geneSet.getName());
+            pstmt.setString(3, geneSet.getName());
+            pstmt.setString(4, geneSet.getDescription());
             pstmt.setString(5, geneSet.getRefLink());
             rows += pstmt.executeUpdate();
             //get the auto generated key:
@@ -254,16 +254,16 @@ public class DaoGeneSet {
         Integer id = rs.getInt("ID");
         Integer geneticEntityId = rs.getInt("GENETIC_ENTITY_ID");
         String externalId = rs.getString("EXTERNAL_ID");
-        String nameShort = rs.getString("NAME_SHORT");
-        String name = rs.getString("NAME");
+        String nameShort = rs.getString("NAME");
+        String name = rs.getString("DESCRIPTION");
         String refLink = rs.getString("REF_LINK");
         
         GeneSet geneSet = new GeneSet();
         geneSet.setId(id);
         geneSet.setGeneticEntityId(geneticEntityId);
         geneSet.setExternalId(externalId);
-        geneSet.setNameShort(nameShort);
-        geneSet.setName(name);
+        geneSet.setName(nameShort);
+        geneSet.setDescription(name);
         geneSet.setRefLink(refLink);
         
         return geneSet;
@@ -327,7 +327,7 @@ public class DaoGeneSet {
     
     public static void updateGeneSet(GeneSet geneSet, boolean updateGeneSetGenes) throws DaoException {
         String SQL = "UPDATE geneset SET " + 
-                "`NAME_SHORT` = ?, `NAME` = ?, `REF_LINK` = ?" +
+                "`NAME` = ?, `DESCRIPTION` = ?, `REF_LINK` = ?" +
                 "WHERE `ID` = ?";
                 
         Connection con = null;
@@ -336,8 +336,8 @@ public class DaoGeneSet {
         try {
             con = JdbcUtil.getDbConnection(DaoGeneSet.class);
             pstmt = con.prepareStatement(SQL);
-            pstmt.setString(1, geneSet.getNameShort());
-            pstmt.setString(2, geneSet.getName());
+            pstmt.setString(1, geneSet.getName());
+            pstmt.setString(2, geneSet.getDescription());
             pstmt.setString(3, geneSet.getRefLink());
             pstmt.setInt(4, geneSet.getId());
             pstmt.executeUpdate();
