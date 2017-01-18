@@ -254,16 +254,16 @@ public class DaoGeneSet {
         Integer id = rs.getInt("ID");
         Integer geneticEntityId = rs.getInt("GENETIC_ENTITY_ID");
         String externalId = rs.getString("EXTERNAL_ID");
-        String nameShort = rs.getString("NAME");
-        String name = rs.getString("DESCRIPTION");
+        String name = rs.getString("NAME");
+        String description = rs.getString("DESCRIPTION");
         String refLink = rs.getString("REF_LINK");
         
         GeneSet geneSet = new GeneSet();
         geneSet.setId(id);
         geneSet.setGeneticEntityId(geneticEntityId);
         geneSet.setExternalId(externalId);
-        geneSet.setName(nameShort);
-        geneSet.setDescription(name);
+        geneSet.setName(name);
+        geneSet.setDescription(description);
         geneSet.setRefLink(refLink);
         
         return geneSet;
