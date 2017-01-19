@@ -38,7 +38,7 @@ package org.cbioportal.model;
 
 import java.io.Serializable;
 
-public class GeneSetInfo implements Serializable {
+public class GenesetInfo implements Serializable {
 	private String version;
 	
     public String getVersion() {

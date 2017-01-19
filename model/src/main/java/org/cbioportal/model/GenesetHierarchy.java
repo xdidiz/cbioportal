@@ -25,13 +25,13 @@
 
 package org.cbioportal.model;
 
-public class GeneSetHierarchy {
+public class GenesetHierarchy {
 
 	private int nodeId;
 	private String nodeName;
 	private int parentId;
 
-	public GeneSetHierarchy() {
+	public GenesetHierarchy() {
 	}
 
 	public int getNodeId() {

@@ -26,9 +26,9 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import org.cbioportal.model.GeneSet;
-import org.cbioportal.model.GeneSetHierarchy;
-import org.cbioportal.model.GeneSetHierarchyLeaf;
+import org.cbioportal.model.Geneset;
+import org.cbioportal.model.GenesetHierarchy;
+import org.cbioportal.model.GenesetHierarchyLeaf;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +38,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.List;
 
-import org.mskcc.cbio.portal.dao.DaoGeneSet;
-import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchy;
-import org.mskcc.cbio.portal.dao.DaoGeneSetHierarchyLeaf;
+import org.mskcc.cbio.portal.dao.DaoGeneset;
+import org.mskcc.cbio.portal.dao.DaoGenesetHierarchy;
+import org.mskcc.cbio.portal.dao.DaoGenesetHierarchyLeaf;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -48,45 +48,45 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /*
- * JUnit tests for ImportGeneSetData class.
+ * JUnit tests for ImportGenesetData class.
 */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/applicationContext-dao.xml" })
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @Transactional
-public class TestImportGeneSetHierarchyData {
+public class TestImportGenesetHierarchyData {
 
 	@Test
-    public void testImportGeneSetHierarchyData() throws Exception {
+    public void testImportGenesetHierarchyData() throws Exception {
         ProgressMonitor.setConsoleMode(false);
         
         File file = new File("src/test/resources/genesetshierarchy_test_genesets.txt");
 
         boolean updateInfo = false;
         boolean newVersion = true;
-        int skippedGenes = ImportGeneSetData.importData(file, updateInfo, newVersion);
+        int skippedGenes = ImportGenesetData.importData(file, updateInfo, newVersion);
         
         file = new File("src/test/resources/genesetshierarchy_test.yaml");
         boolean validate = false;
-        ImportGeneSetHierarchy.importData(file, validate);
+        ImportGenesetHierarchy.importData(file, validate);
 
         // Test database entries
         
-        // Get geneSet id
-        GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId("UNITTEST_GENESET8");
+        // Get geneset id
+        Geneset geneset = DaoGeneset.getGenesetByExternalId("UNITTEST_GENESET8");
         
-        // Get parent node id from geneSetHierarchyLeaf
-        List<GeneSetHierarchyLeaf> geneSetHierarchyLeafs = DaoGeneSetHierarchyLeaf.getGeneSetHierarchyLeafsByGeneSetId(geneSet.getId());
+        // Get parent node id from genesetHierarchyLeaf
+        List<GenesetHierarchyLeaf> genesetHierarchyLeafs = DaoGenesetHierarchyLeaf.getGenesetHierarchyLeafsByGenesetId(geneset.getId());
         
         // Select the first and only gene set
-        GeneSetHierarchyLeaf geneSetHierarchyLeaf = geneSetHierarchyLeafs.get(0);
+        GenesetHierarchyLeaf genesetHierarchyLeaf = genesetHierarchyLeafs.get(0);
         
-        // Get node name from geneSetHierarchy
-        GeneSetHierarchy geneSetHierarchy = DaoGeneSetHierarchy.getGeneSetHierarchyFromNodeId(geneSetHierarchyLeaf.getNodeId());
+        // Get node name from genesetHierarchy
+        GenesetHierarchy genesetHierarchy = DaoGenesetHierarchy.getGenesetHierarchyFromNodeId(genesetHierarchyLeaf.getNodeId());
         
         // Check if node name is as expected
-        assertEquals("Institutes Subcategory 2", geneSetHierarchy.getNodeName());
+        assertEquals("Institutes Subcategory 2", genesetHierarchy.getNodeName());
     }
 }
 

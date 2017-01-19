@@ -2,10 +2,10 @@ package org.cbioportal.model;
 
 import java.io.Serializable;
 
-public class GeneSetHierarchyLeaf implements Serializable {
+public class GenesetHierarchyLeaf implements Serializable {
 
 	private int nodeId;
-	private int geneSetId;
+	private int genesetId;
 
 	public void setNodeId(int nodeId) {
 		this.nodeId = nodeId;
@@ -15,11 +15,11 @@ public class GeneSetHierarchyLeaf implements Serializable {
 		return nodeId;
 	}
 
-	public void setGeneSetId(int geneSetId) {
-		this.geneSetId = geneSetId;
+	public void setGenesetId(int genesetId) {
+		this.genesetId = genesetId;
 	}
-	public int getGeneSetId() {
-		return geneSetId;
+	public int getGenesetId() {
+		return genesetId;
 	}
 }
 

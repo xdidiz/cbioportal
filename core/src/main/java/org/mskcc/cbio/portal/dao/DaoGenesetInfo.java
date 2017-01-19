@@ -26,27 +26,27 @@
 
 package org.mskcc.cbio.portal.dao;
 
-import org.cbioportal.model.GeneSetInfo;
+import org.cbioportal.model.GenesetInfo;
 import java.sql.*;
 
-public class DaoGeneSetInfo {
+public class DaoGenesetInfo {
 	
 	// Keep Constructor empty
-	private DaoGeneSetInfo() {
+	private DaoGenesetInfo() {
 	}
 	
 	/**
      * Set gene set version in geneset_info table in database.
      * @throws DaoException 
      */
-    public static void setGeneSetInfo(GeneSetInfo geneSetInfo) throws DaoException {
+    public static void setGenesetInfo(GenesetInfo genesetInfo) throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         
         try {
         	// Open connection to database
-            connection = JdbcUtil.getDbConnection(DaoGeneSetHierarchy.class);
+            connection = JdbcUtil.getDbConnection(DaoGenesetHierarchy.class);
 	        
 	        // Prepare SQL statement
             preparedStatement = connection.prepareStatement("INSERT INTO geneset_info " 
@@ -60,7 +60,7 @@ public class DaoGeneSetInfo {
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            JdbcUtil.closeAll(DaoGeneSetInfo.class, connection, preparedStatement, resultSet);
+            JdbcUtil.closeAll(DaoGenesetInfo.class, connection, preparedStatement, resultSet);
         }
     }	
     	
@@ -68,24 +68,24 @@ public class DaoGeneSetInfo {
      * Set gene set version in geneset_info table in database.
      * @throws DaoException 
      */
-    public static void updateGeneSetInfo(GeneSetInfo geneSetInfo) throws DaoException {
+    public static void updateGenesetInfo(GenesetInfo genesetInfo) throws DaoException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         
         try {
         	// Open connection to database
-            connection = JdbcUtil.getDbConnection(DaoGeneSetHierarchy.class);
+            connection = JdbcUtil.getDbConnection(DaoGenesetHierarchy.class);
 	        
 	        // Prepare SQL statement
-            preparedStatement = connection.prepareStatement("UPDATE geneset_info SET GENESET_VERSION=" + geneSetInfo.getVersion());
+            preparedStatement = connection.prepareStatement("UPDATE geneset_info SET GENESET_VERSION=" + genesetInfo.getVersion());
             
             // Execute statement
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            JdbcUtil.closeAll(DaoGeneSetInfo.class, connection, preparedStatement, resultSet);
+            JdbcUtil.closeAll(DaoGenesetInfo.class, connection, preparedStatement, resultSet);
         }
     }	
     
@@ -93,7 +93,7 @@ public class DaoGeneSetInfo {
      * Get gene set version from geneset_info table in database.
      * @throws DaoException 
      */
-    public static GeneSetInfo getGeneSetInfo() throws DaoException {
+    public static GenesetInfo getGenesetInfo() throws DaoException {
     	
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -101,7 +101,7 @@ public class DaoGeneSetInfo {
         
         try {
         	// Open connection to database
-        	connection = JdbcUtil.getDbConnection(DaoGeneSetInfo.class);
+        	connection = JdbcUtil.getDbConnection(DaoGenesetInfo.class);
         	
 	        // Prepare SQL statement
         	preparedStatement = connection.prepareStatement(
@@ -109,17 +109,17 @@ public class DaoGeneSetInfo {
         	
             // Execute statement
         	resultSet = preparedStatement.executeQuery();
-        	GeneSetInfo geneSetInfo = new GeneSetInfo();
+        	GenesetInfo genesetInfo = new GenesetInfo();
 
             // Extract version from result
             if (resultSet.next()) {
-                geneSetInfo.setVersion(resultSet.getString("GENESET_VERSION"));
+                genesetInfo.setVersion(resultSet.getString("GENESET_VERSION"));
             }    
-        	return geneSetInfo;
+        	return genesetInfo;
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            JdbcUtil.closeAll(DaoGeneSetInfo.class, connection, preparedStatement, resultSet);
+            JdbcUtil.closeAll(DaoGenesetInfo.class, connection, preparedStatement, resultSet);
         }
     }
 }

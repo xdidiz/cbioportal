@@ -41,7 +41,7 @@ import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.GeneticAlterationType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.scripts.TrimmedProperties;
-import org.cbioportal.model.GeneSetInfo;
+import org.cbioportal.model.GenesetInfo;
 
 
 /**
@@ -96,21 +96,21 @@ public class GeneticProfileReader {
 		// For GSVA profiles, we want to check that the version in the meta file 
         // is the same as the version of the gene sets in the database (genesets_info table)
     	if (geneticProfile.getGeneticAlterationType() == GeneticAlterationType.GENESET_SCORE) {
-            GeneSetInfo geneSetInfo = DaoGeneSetInfo.getGeneSetInfo();
+            GenesetInfo genesetInfo = DaoGenesetInfo.getGenesetInfo();
 
             // Check if version is present in database
-            if (geneSetInfo.getVersion() == null) {
+            if (genesetInfo.getVersion() == null) {
             	throw new RuntimeException("Attempted to import GENESET_SCORE data, but all gene set tables are empty. "
-            			+ "Please load gene sets with ImportGeneSetData first.");
+            			+ "Please load gene sets with ImportGenesetData first.");
             // Check if version is present in meta file
     		} else if (geneticProfile.getOtherMetaDataField("geneset_def_version") == null) {
                 throw new RuntimeException("Missing geneset_def_version property in '" + file.getPath() + "'. This version must be "
-                		+ "the same as the gene set version loaded with ImportGeneSetData.");
+                		+ "the same as the gene set version loaded with ImportGenesetData.");
                 
             // Check if version is same as database version
-    		} else if (!geneticProfile.getOtherMetaDataField("geneset_def_version").equals(geneSetInfo.getVersion())) {
+    		} else if (!geneticProfile.getOtherMetaDataField("geneset_def_version").equals(genesetInfo.getVersion())) {
                 throw new RuntimeException("'geneset_def_version' property (" + geneticProfile.getOtherMetaDataField("geneset_def_version") +
-                		") in '" + file.getPath() + "' differs from database version (" + geneSetInfo.getVersion() + ").");
+                		") in '" + file.getPath() + "' differs from database version (" + genesetInfo.getVersion() + ").");
     		}
     	}
 

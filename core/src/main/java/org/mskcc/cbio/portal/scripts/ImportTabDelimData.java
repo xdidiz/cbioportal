@@ -54,7 +54,7 @@ public class ImportTabDelimData {
     public static final String CNA_VALUE_HOMOZYGOUS_DELETION = "-2";
     public static final String CNA_VALUE_PARTIAL_DELETION = "-1.5";
     public static final String CNA_VALUE_ZERO = "0";
-    private HashSet<Long> importedGeneSet = new HashSet<Long>();
+    private HashSet<Long> importedGeneset = new HashSet<Long>();
     private HashSet<Integer> importedGeneticEntitySet = new HashSet<>(); 
     private File mutationFile;
     private String targetLine;
@@ -119,8 +119,6 @@ public class ImportTabDelimData {
         boolean gsvaProfile = geneticProfile!=null
                                 && geneticProfile.getGeneticAlterationType() == GeneticAlterationType.GENESET_SCORE
                                 && parts[0].equalsIgnoreCase("geneset_id");
-        System.err.println(geneticProfile.getGeneticAlterationType());
-        System.err.println(parts[0]);
         
         int numRecordsToAdd = 0;
         int samplesSkipped = 0;
@@ -134,7 +132,11 @@ public class ImportTabDelimData {
 	        	if (rppaGeneRefIndex == -1) {
 	        		throw new RuntimeException("Error: the following column should be present for RPPA data: Composite.Element.Ref");
 				}
-	        } else if (!gsvaProfile && hugoSymbolIndex == -1 && entrezGeneIdIndex == -1) {
+	        } else if (gsvaProfile) {
+	        	if (genesetIdIndex == -1) {
+	        		throw new RuntimeException("Error: the following column should be present for gene set score data: geneset_id");
+	        	}
+	        } else if (hugoSymbolIndex == -1 && entrezGeneIdIndex == -1) {
 				throw new RuntimeException("Error: at least one of the following columns should be present: Hugo_Symbol or Entrez_Gene_Id");
 	        }
 	        
@@ -218,7 +220,7 @@ public class ImportTabDelimData {
                     
                     // either parse line as geneset or gene for importing into 'genetic_alteration' table
                     if (gsvaProfile) {
-                        recordAdded = parseGeneSetLine(line, lenParts, sampleStartIndex, genesetIdIndex, 
+                        recordAdded = parseGenesetLine(line, lenParts, sampleStartIndex, genesetIdIndex, 
                                 filteredSampleIndices, daoGeneticAlteration);
                     }
                     else {
@@ -272,7 +274,7 @@ public class ImportTabDelimData {
      * @return
      * @throws DaoException 
      */
-    private boolean parseGeneSetLine(String line, int nrColumns, int sampleStartIndex, int genesetIdIndex,
+    private boolean parseGenesetLine(String line, int nrColumns, int sampleStartIndex, int genesetIdIndex,
              List<Integer> filteredSampleIndices, DaoGeneticAlteration daoGeneticAlteration) throws DaoException {
         boolean storedRecord = false;
         
@@ -290,11 +292,11 @@ public class ImportTabDelimData {
             String values[] = (String[]) ArrayUtils.subarray(parts, sampleStartIndex, parts.length>nrColumns?nrColumns:parts.length);
             values = filterOutNormalValues(filteredSampleIndices, values);
             
-            // necessary to specify GeneSet from model pkg for now, until GeneSet in core model pkg removed
-            org.cbioportal.model.GeneSet geneSet = DaoGeneSet.getGeneSetByExternalId(parts[genesetIdIndex]);
-            if (geneSet !=  null) {
-                storedRecord = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneSet.getGeneticEntityId(), 
-                        DaoGeneticEntity.EntityTypes.GENE_SET, geneSet.getExternalId());
+            // necessary to specify Geneset from model pkg for now, until Geneset in core model pkg removed
+            org.cbioportal.model.Geneset geneset = DaoGeneset.getGenesetByExternalId(parts[genesetIdIndex]);
+            if (geneset !=  null) {
+                storedRecord = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneset.getGeneticEntityId(), 
+                        DaoGeneticEntity.EntityTypes.GENE_SET, geneset.getExternalId());
             }
             else {
                 ProgressMonitor.logWarning("Geneset " + parts[genesetIdIndex] + " not found in DB. Record will be skipped.");
@@ -513,9 +515,9 @@ public class ImportTabDelimData {
     //  This is an important check, because a GISTIC or RAE file may contain
     //  multiple rows for the same gene, and we only want to import the first row.
             try {
-            if (!importedGeneSet.contains(gene.getEntrezGeneId())) {
+            if (!importedGeneset.contains(gene.getEntrezGeneId())) {
                 daoGeneticAlteration.addGeneticAlterations(geneticProfileId, gene.getEntrezGeneId(), values);
-                importedGeneSet.add(gene.getEntrezGeneId());
+                importedGeneset.add(gene.getEntrezGeneId());
                 return true;
             }
             else {

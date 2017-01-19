@@ -39,7 +39,7 @@ import java.util.Set;
  *
  * @author ochoaa
  */
-public class GeneSet implements Serializable {
+public class Geneset implements Serializable {
     
     private int id;
     private int geneticEntityId;
