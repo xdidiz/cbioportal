@@ -26,10 +26,6 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import org.cbioportal.model.Geneset;
-import org.cbioportal.model.GenesetHierarchy;
-import org.cbioportal.model.GenesetHierarchyLeaf;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,6 +34,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.List;
 
+import org.mskcc.cbio.portal.Geneset;
+import org.mskcc.cbio.portal.GenesetHierarchy;
+import org.mskcc.cbio.portal.GenesetHierarchyLeaf;
 import org.mskcc.cbio.portal.dao.DaoGeneset;
 import org.mskcc.cbio.portal.dao.DaoGenesetHierarchy;
 import org.mskcc.cbio.portal.dao.DaoGenesetHierarchyLeaf;

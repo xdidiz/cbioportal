@@ -26,7 +26,6 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import org.cbioportal.model.Geneset;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import org.mskcc.cbio.portal.Geneset;
 import org.mskcc.cbio.portal.dao.DaoGeneset;
 
 import org.mskcc.cbio.portal.util.ProgressMonitor;

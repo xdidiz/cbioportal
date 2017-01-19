@@ -36,7 +36,7 @@
 
 package org.mskcc.cbio.portal.dao;
 
-import org.cbioportal.model.Geneset;
+import org.mskcc.cbio.portal.Geneset;
 import org.mskcc.cbio.portal.dao.DaoGenesetHierarchy;
 import org.mskcc.cbio.portal.model.CanonicalGene;
 import org.mskcc.cbio.portal.scripts.ImportGenesetData;

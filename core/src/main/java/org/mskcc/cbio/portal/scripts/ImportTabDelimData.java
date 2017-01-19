@@ -293,7 +293,7 @@ public class ImportTabDelimData {
             values = filterOutNormalValues(filteredSampleIndices, values);
             
             // necessary to specify Geneset from model pkg for now, until Geneset in core model pkg removed
-            org.cbioportal.model.Geneset geneset = DaoGeneset.getGenesetByExternalId(parts[genesetIdIndex]);
+            org.mskcc.cbio.portal.Geneset geneset = DaoGeneset.getGenesetByExternalId(parts[genesetIdIndex]);
             if (geneset !=  null) {
                 storedRecord = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneset.getGeneticEntityId(), 
                         DaoGeneticEntity.EntityTypes.GENE_SET, geneset.getExternalId());

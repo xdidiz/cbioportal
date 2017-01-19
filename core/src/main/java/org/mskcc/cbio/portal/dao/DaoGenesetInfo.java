@@ -26,8 +26,9 @@
 
 package org.mskcc.cbio.portal.dao;
 
-import org.cbioportal.model.GenesetInfo;
 import java.sql.*;
+
+import org.mskcc.cbio.portal.GenesetInfo;
 
 public class DaoGenesetInfo {
 	

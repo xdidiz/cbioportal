@@ -28,12 +28,13 @@ package org.mskcc.cbio.portal.scripts;
 import java.io.*;
 import java.util.*;
 import joptsimple.*;
+
+import org.mskcc.cbio.portal.Geneset;
+import org.mskcc.cbio.portal.GenesetHierarchy;
+import org.mskcc.cbio.portal.GenesetHierarchyLeaf;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.yaml.snakeyaml.Yaml;
-import org.cbioportal.model.Geneset;
-import org.cbioportal.model.GenesetHierarchy;
-import org.cbioportal.model.GenesetHierarchyLeaf;
 
 public class ImportGenesetHierarchy extends ConsoleRunnable {
 	

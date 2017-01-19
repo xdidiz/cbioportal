@@ -36,12 +36,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+
+import org.mskcc.cbio.portal.GenesetInfo;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.GeneticAlterationType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.scripts.TrimmedProperties;
-import org.cbioportal.model.GenesetInfo;
 
 
 /**

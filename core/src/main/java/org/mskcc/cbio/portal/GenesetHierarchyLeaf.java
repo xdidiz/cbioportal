@@ -1,4 +1,4 @@
-package org.cbioportal.model;
+package org.mskcc.cbio.portal;
 
 import java.io.Serializable;
 

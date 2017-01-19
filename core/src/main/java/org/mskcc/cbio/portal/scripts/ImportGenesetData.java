@@ -39,8 +39,9 @@ package org.mskcc.cbio.portal.scripts;
 import java.io.*;
 import java.util.*;
 import joptsimple.*;
-import org.cbioportal.model.Geneset;
-import org.cbioportal.model.GenesetInfo;
+
+import org.mskcc.cbio.portal.Geneset;
+import org.mskcc.cbio.portal.GenesetInfo;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 

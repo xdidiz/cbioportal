@@ -23,7 +23,7 @@
  * @author Sander Tan
 */
 
-package org.cbioportal.model;
+package org.mskcc.cbio.portal;
 
 public class GenesetHierarchy {
 
