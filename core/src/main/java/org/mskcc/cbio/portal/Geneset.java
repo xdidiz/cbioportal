@@ -30,30 +30,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.model;
+package org.mskcc.cbio.portal;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
  * @author ochoaa
  */
-public class GeneSet implements Serializable {
+public class Geneset implements Serializable {
     
-    private Integer id;
-    private Integer geneticEntityId;
+    private int id;
+    private int geneticEntityId;
     private String externalId;
-    private String nameShort;
     private String name;
+    private String description;
     private String refLink;
-    private String version;
-    private List<Integer> genesetGenes;
+    private Set<Long> genesetGenes;
 
     /**
      * @return the id
      */
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
@@ -67,7 +66,7 @@ public class GeneSet implements Serializable {
     /**
      * @return the geneticEntityId
      */
-    public Integer getGeneticEntityId() {
+    public int getGeneticEntityId() {
         return geneticEntityId;
     }
 
@@ -93,20 +92,6 @@ public class GeneSet implements Serializable {
     }
 
     /**
-     * @return the nameShort
-     */
-    public String getNameShort() {
-        return nameShort;
-    }
-
-    /**
-     * @param nameShort the nameShort to set
-     */
-    public void setNameShort(String nameShort) {
-        this.nameShort = nameShort;
-    }
-
-    /**
      * @return the name
      */
     public String getName() {
@@ -118,6 +103,20 @@ public class GeneSet implements Serializable {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
@@ -135,30 +134,16 @@ public class GeneSet implements Serializable {
     }
 
     /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * @param version the version to set
-     */
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    /**
      * @return the genesetGenes
      */
-    public List<Integer> getGenesetGenes() {
+    public Set<Long> getGenesetGenes() {
         return genesetGenes;
     }
 
     /**
      * @param genesetGenes the genesetGenes to set
      */
-    public void setGenesetGenes(List<Integer> genesetGenes) {
+    public void setGenesetGenes(Set<Long> genesetGenes) {
         this.genesetGenes = genesetGenes;
     }
     
