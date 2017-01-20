@@ -47,9 +47,12 @@ import cbioportal_common
 # globals
 
 # Only supported reference genome build number and name
-# nb: keep this in synch with MutationDataUtils.getNcbiBuild
-NCBI_BUILD_NUMBER = 37
-GENOMIC_BUILD_NAME = 'hg19'
+# Get the builds from portal.properties
+NCBI_BUILD_NUMBER = 'ncbi.build'
+GENOMIC_BUILD_NAME = 'ucsc.build'
+
+#Get the species from portal.properties
+SPECIES = 'species'
 
 # study-specific globals
 DEFINED_SAMPLE_IDS = None
@@ -1120,9 +1123,12 @@ class MutationsExtendedValidator(Validator):
     def checkNCBIbuild(self, value):
         if value != '':
             # based on MutationDataUtils.getNcbiBuild
-            # TODO - make the supported build version a Portal property
-            if value not in [str(NCBI_BUILD_NUMBER), GENOMIC_BUILD_NAME, 'GRCh'+str(NCBI_BUILD_NUMBER)]:
-                return False
+            if SPECIES == "human":
+                if value not in [str(NCBI_BUILD_NUMBER), GENOMIC_BUILD_NAME, 'GRCh'+str(NCBI_BUILD_NUMBER)]:
+                    return False
+            elif SPECIES == "mouse":
+                if value not in [str(NCBI_BUILD_NUMBER), GENOMIC_BUILD_NAME, 'GRCm'+str(NCBI_BUILD_NUMBER)]:
+                    return False
         return True
     
     def checkMatchedNormSampleBarcode(self, value):
@@ -2321,9 +2327,10 @@ class GisticGenesValidator(Validator):
         super(GisticGenesValidator, self).__init__(*args, **kwargs)
         # checkLine() expects particular values here, for the 'amp' column
         if not self.meta_dict['reference_genome_id'].startswith('hg'):
-            raise RuntimeError(
-                    "GisticGenesValidator requires the metadata field "
-                    "reference_genome_id to start with 'hg'")
+            if not self.meta_dict['reference_genome_id'].startswith('mm'):
+                raise RuntimeError(
+                        "GisticGenesValidator requires the metadata field "
+                        "reference_genome_id to start with 'hg' or 'mm'")
         if self.meta_dict['genetic_alteration_type'] not in (
                 'GISTIC_GENES_AMP', 'GISTIC_GENES_DEL'):
             raise RuntimeError(
