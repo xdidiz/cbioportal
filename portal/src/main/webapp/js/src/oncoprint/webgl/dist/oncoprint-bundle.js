@@ -10108,7 +10108,7 @@ var OncoprintModel = (function () {
 		    params.data_id_key, params.tooltipFn,
 		    params.removable, params.removeCallback, params.label, params.description, params.track_info,
 		    params.sortCmpFn, params.sort_direction_changeable, params.init_sort_direction,
-		    params.data, params.rule_set);
+		    params.data, params.rule_set, params.expansion_callback);
 	}
 	this.track_tops.update();
     }
@@ -10118,7 +10118,7 @@ var OncoprintModel = (function () {
 	    data_id_key, tooltipFn,
 	    removable, removeCallback, label, description, track_info,
 	    sortCmpFn, sort_direction_changeable, init_sort_direction,
-	    data, rule_set) {
+	    data, rule_set, expansion_callback) {
 	model.track_label[track_id] = ifndef(label, "Label");
 	model.track_description[track_id] = ifndef(description, "");
 	model.cell_height[track_id] = ifndef(cell_height, 23);
@@ -10130,6 +10130,10 @@ var OncoprintModel = (function () {
 	});
 	model.track_removable[track_id] = ifndef(removable, false);
 	model.track_remove_callback[track_id] = ifndef(removeCallback, function() {});
+	
+	if (expansion_callback) {
+	    model.track_expansion_callback[track_id] = expansion_callback;
+	}
 	
 	model.track_sort_cmp_fn[track_id] = ifndef(sortCmpFn, function () {
 	    return 0;
