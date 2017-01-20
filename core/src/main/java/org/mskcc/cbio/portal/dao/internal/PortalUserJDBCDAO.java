@@ -78,6 +78,8 @@ public class PortalUserJDBCDAO implements PortalUserDAO {
 
 	/**
 	 * Implementaiton of {@code PortalUserDAO}
+	 * 
+	 * @throws EmptyResultDataAccessException is user is not found
 	 */
 	public User getPortalUser(final String username) {
 
