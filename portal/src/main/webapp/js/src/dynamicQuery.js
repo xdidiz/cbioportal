@@ -293,7 +293,8 @@ function reviewCurrentSelections(){
     // similarly with RPPA
     toggleThresholdPanel($("." + PROFILE_PROTEIN_EXPRESSION+"[type=checkbox]"), PROFILE_PROTEIN_EXPRESSION, "#rppa_score_threshold");
     
-    // similarly with gene sets button and text box
+    // This function controls the toggling of GSVA check box.
+    // This deterimines if an GSVA box is drawn.
     toggleGeneSets($("." + PROFILE_GSVA_SCORES+"[type=checkbox]"));
 
     // determine whether optional arguments section should be shown or hidden
