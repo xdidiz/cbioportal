@@ -1239,7 +1239,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    source_gene_symbols = ['ATOX1', 'VEGFA'];
 		    if (source_profile_id !== null) {
 			track_params.expansion_callback = State.expandTrack.bind(
-				source_profile_id, source_gene_symbols);
+				State, source_profile_id, source_gene_symbols);
 		    }
 		    var new_gs_id = oncoprint.addTracks([track_params])[0];
 		    gs_ids.push(new_gs_id);
@@ -1253,10 +1253,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    },
 	    'expandTrack': function(genetic_profile_id, gene_symbols, group_track_id) {
 		var symbol, i, subtrack_id, promise_list = [];
-		for (i=0; i<= gene_symbols.length; ) {
+		for (i=0; i< gene_symbols.length; i++) {
 		    symbol = gene_symbols[i];
-                    subtrack_id = self.addExpansionHeatmapTrack(genetic_profile_id, gene, group_track_id);
-                    promise_list.push(populateHeatmapTrack(genetic_profile_id, gene, subtrack_id));
+		    subtrack_id = this.addExpansionHeatmapTrack(genetic_profile_id, symbol, group_track_id);
+		    promise_list.push(populateHeatmapTrack(genetic_profile_id, symbol, subtrack_id));
 		}
 		return $.when.apply(null, promise_list);
 	    },
