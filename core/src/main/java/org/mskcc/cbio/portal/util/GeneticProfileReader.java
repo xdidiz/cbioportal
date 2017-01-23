@@ -113,6 +113,11 @@ public class GeneticProfileReader {
                 throw new RuntimeException("'geneset_def_version' property (" + geneticProfile.getOtherMetaDataField("geneset_def_version") +
                 		") in '" + file.getPath() + "' differs from database version (" + genesetInfo.getVersion() + ").");
     		}
+            
+            // We also want to set the show_in_profile_tab variable for GSVA p-value profiles to false by default
+            if (geneticProfile.getDatatype().equals("P-VALUE")) {
+                geneticProfile.setShowProfileInAnalysisTab(false);
+            }
     	}
 
         // add new profile
