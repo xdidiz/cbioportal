@@ -81,6 +81,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService
         	if (userId == null && cAttribute.getName().equals("mail"))
         	{
         		userId = credential.getAttributeAsString(cAttribute.getName());
+        		//userid = credential.getNameID().getValue(); needed to support OneLogin...?? Although with OneLogin we haven't gotten this far yet...
         	}
         	else if (name == null && cAttribute.getName().equals("displayName"))
         	{

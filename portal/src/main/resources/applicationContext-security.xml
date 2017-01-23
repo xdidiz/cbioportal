@@ -203,7 +203,11 @@
     <b:beans profile="saml">
 
     <http entry-point-ref="samlEntryPoint" use-expressions="true">
-<intercept-url pattern="/auth/*" access="permitAll"/><intercept-url pattern="/favicon.ico" access="permitAll"/><intercept-url pattern="/login.jsp*" access="permitAll"/><intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/><intercept-url pattern="/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/auth/*" access="permitAll"/>
+        <intercept-url pattern="/favicon.ico" access="permitAll"/>
+        <intercept-url pattern="/login.jsp*" access="permitAll"/>
+        <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
         <!-- used for saml authentication -->
         <custom-filter after="FIRST" ref="metadataGeneratorFilter"/>
         <custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
