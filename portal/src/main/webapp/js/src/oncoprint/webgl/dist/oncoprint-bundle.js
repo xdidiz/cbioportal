@@ -5922,7 +5922,7 @@ var OncoprintTrackOptionsView = (function () {
 		    (model.isTrackExpanded(track_id) ? 'bold' : 'normal'),
 		    function (evt) {
 			evt.stopPropagation();
-			var expansionCallback = model.getTrackExpansionCallback(track_id);
+			var expansionCallback = model.getExpansionCallback(track_id);
 			return expansionCallback(track_id);
 		    }));
 	}
