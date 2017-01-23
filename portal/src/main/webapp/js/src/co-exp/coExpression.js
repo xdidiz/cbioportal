@@ -419,7 +419,9 @@ var CoExpView = (function() {
 		        				} 
 		        			} else { //Button not checked, clear the whole table
 		                		coExpTableInstance.fnClearTable();
-		                		document.getElementById("no_genesets").remove();
+		                		if (geneSetArr.length < 1) {
+		                			document.getElementById("no_genesets").remove();
+		                		}
 		                		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) { //If the gene box is checked, keep the genes
 		                			if (geneArr.length >= 1) {
 			        					coExpTableInstance.fnAddData(geneArr);
