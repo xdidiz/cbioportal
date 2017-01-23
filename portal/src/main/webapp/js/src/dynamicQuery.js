@@ -233,7 +233,7 @@ function crossCancerStudySelected() {
      $('#step2').hide();
      $('#step2cross').show();     
      $('#step3').hide();
-     $('#toggle_gsva_dialog').hide();
+     $('#toggle_geneset_dialog').hide();
      $('#geneset_list').hide();
      $('#select_gene_sets').hide();
      $('#step5').hide();
@@ -613,17 +613,17 @@ function updateCaseListSmart() {
       });
 }
 
-// if GSVA profile is available and checked, display the gsva button and gene sets textbox
+// if GSVA profile is available and checked, display the geneset button and gene sets textbox
 function toggleGeneSets(profileClicked) {
 	
     if (profileClicked.prop('checked')){
-    	$('#toggle_gsva_dialog').show();
+    	$('#toggle_geneset_dialog').show();
     	$('#geneset_list').show();
     	$('#select_gene_sets').show();
     }
     // if checkbox is unselected, hide button and textbox
     else {
-    	$('#toggle_gsva_dialog').hide();
+    	$('#toggle_geneset_dialog').hide();
     	$('#geneset_list').hide();
     	$('#select_gene_sets').hide();
     }
