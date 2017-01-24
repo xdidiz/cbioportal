@@ -91,13 +91,21 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService
 
 		//check if this user exists in our DB
 		try {
-            log.debug("loadUserDetails(), IDP successfully authenticated user, userid: " + userId);
-            log.debug("loadUserDetails(), now attempting to fetch portal user authorities for userid: " + userId);
+			//validate parsing:
+	        if (userId == null) {
+	        	String errorMessage = "loadUserBySAML(), Could not parse the user details from credential message. Expected 'mail' attribute, but attribute was not found. "
+	        			+ " Previous debug messages show which attributes were found and parsed.";
+	        	log.error(errorMessage);
+	        	throw new Exception(errorMessage);
+	        }
+			
+            log.debug("loadUserBySAML(), IDP successfully authenticated user, userid: " + userId);
+            log.debug("loadUserBySAML(), now attempting to fetch portal user authorities for userid: " + userId);
             
             //try to find user in DB. If not found, will go to catch (EmptyResultDataAccessException) below:
             User user = portalUserDAO.getPortalUser(userId);
         	if (user.isEnabled()) {
-                log.debug("loadUserDetails(), user is enabled; attempting to fetch portal user authorities, userid: " + userId);
+                log.debug("loadUserBySAML(), user is enabled; attempting to fetch portal user authorities, userid: " + userId);
 
                 UserAuthorities authorities = portalUserDAO.getPortalUserAuthorities(userId);
                 if (authorities != null) {
@@ -108,7 +116,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService
                     toReturn.setEmail(userId);
                     toReturn.setName(userId);
                 } else {
-                    log.debug("loadUserDetails(), user authorities is null, userid: " + userId + ". Depending on property always_show_study_group, "
+                    log.debug("loadUserBySAML(), user authorities is null, userid: " + userId + ". Depending on property always_show_study_group, "
                     		+ "he could still have default access (to PUBLIC studies)");
                 	toReturn = new PortalUserDetails(userId, getInitialEmptyAuthoritiesList());
                     toReturn.setEmail(userId);
@@ -124,7 +132,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService
 			//user record not found at all in DB.
 			//if user is not in DB but is successfully authenticated, just give him the default empty access list.
         	//Depending on GlobalProperties.getAlwaysShowStudyGroup() he could still have access to PUBLIC studies:
-            log.debug("loadUserDetails(), user and user authorities is null, userid: " + userId + ". Depending on property always_show_study_group, "
+            log.debug("loadUserBySAML(), user and user authorities is null, userid: " + userId + ". Depending on property always_show_study_group, "
             		+ "he could still have default access (to PUBLIC studies)");
         	return new PortalUserDetails(userId, getInitialEmptyAuthoritiesList());
 		}
