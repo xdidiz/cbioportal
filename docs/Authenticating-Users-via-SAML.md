@@ -134,7 +134,15 @@ Some IDPs also like to provide their own logout page (e.g. when they don't suppo
 
     saml.logout.url=<idp specific logout URL>
 
+## More customizations
 
+If your IDP does not have the flexibility of sending the specific credential fields expected by our 
+default "user details parsers" implementation (i.e. `core/src/main/java/org/mskcc/cbio/portal/authentication/saml/SAMLUserDetailsServiceImpl.java` 
+expects field `mail` to be present in the SAML credential), then please let us know via a [new 
+issue at our issue tracking system](https://github.com/cBioPortal/cbioportal/issues/new), so we can 
+evaluate whether this is a scenario we would like to support in the default code. You can also consider 
+adding your own version of the `SAMLUserDetailsService` class. The class [MSKCCPortalUserDetailsService.java](https://github.com/cBioPortal/cbioportal/blob/master/core/src/main/java/org/mskcc/cbio/portal/authentication/saml/MSKCCPortalUserDetailsService.java) is an 
+example of this.
 
 
 ## Authorizing Users
