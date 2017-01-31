@@ -1060,15 +1060,16 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	    return this.oql_query;
 	},
 	'getQueryGenes': function () {
-	    return OQL.genes(this.oql_query);
+		if (this.oql_query.trim().length > 0) {
+		    return OQL.genes(this.oql_query);
+		} 
+		return null;
 	},
 	'getQueryGenesets': function () {
 		if (this.geneset_ids.trim().length > 0) {
 			return this.geneset_ids.split(" ");
 		}
-		else {
-			return null;
-		}
+		return null;
 	},
 	'getGeneticProfileIds': function () {
 	    return this.genetic_profile_ids;
