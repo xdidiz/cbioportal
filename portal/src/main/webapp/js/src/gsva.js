@@ -229,7 +229,7 @@ var updateGeneSetList = function() {
     var geneset_list = $('#geneset_list').val();
 
     // placeholder gene sets, necessary until the real selection method is implemented
-    var example_gene_sets = ["MORF_ATRX", "MORF_ATOX1"];
+    var example_gene_sets = ["AKT_UP.V1_DN", "CYCLIN_D1_KE_.V1_UP", "HINATA_NFKB_MATRIX"];
 
     // if gene_list is currently empty put all the checked gsva genes into it.
     if (geneset_list === "") {

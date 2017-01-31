@@ -122,10 +122,21 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
             JSONObject result = new JSONObject();
             ArrayList<GeneticProfile> list =
                     DaoGeneticProfile.getAllGeneticProfiles(cancerStudyId);
+            if ((sampleSetId == null && geneticEntityIdListStr == null) || (geneticEntityIdListStr == null && geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()))) {
+            	for (GeneticProfile geneticProfile : list) {
+            		if (geneticProfile.getDatatype().equals("GSVA-SCORE")) {
+            			try {
+            				list = DaoGeneticProfile.getGeneticProfilesReferredBy(geneticProfile);
+            			} catch (DaoException e) {
+                            System.out.println("DaoException Caught:" + e.getMessage());
+            			}
+            		}
+            	}
+            }
 
             if (list.size() > 0) {
                 //Retrieve all the profiles available for this cancer study
-                if (sampleSetId == null && geneticEntityIdListStr == null) {
+                if ((sampleSetId == null && geneticEntityIdListStr == null) || (geneticEntityIdListStr == null && geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()))) {
                     for (GeneticProfile geneticProfile : list) {
                         JSONObject tmpProfileObj = new JSONObject();
                         tmpProfileObj.put("STABLE_ID", geneticProfile.getStableId());
@@ -232,5 +243,5 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
         }
         return false;
     }
-
 }
+    

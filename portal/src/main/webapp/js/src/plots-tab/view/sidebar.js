@@ -16,13 +16,13 @@ var sidebar = (function() {
     	if (window.QuerySession.getQueryGenes() !== null &&
     			metaData.getGeneticProfilesMeta(window.QuerySession.getQueryGenes()[0]).length !== 0) {
     		geneProfileData = true;
-    	}
-    	
+    
     		// check if only mutation data
     		if (metaData.getGeneticProfilesMeta(window.QuerySession.getQueryGenes()[0]).length === 1 && 
                     metaData.getGeneticProfilesMeta(window.QuerySession.getQueryGenes()[0])[0].type === "MUTATION_EXTENDED") {
     			onlyMutData = true;
     		}
+    	}
     		
 		// check geneSet data
     	if (window.QuerySession.getQueryGenesets() !== null &&

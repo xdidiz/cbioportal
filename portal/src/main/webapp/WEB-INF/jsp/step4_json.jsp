@@ -36,6 +36,7 @@
 %>
 
 <div class="query_step_section">
+
     <span class="step_header">Select Genes:</span>
 
     <script language="javascript" type="text/javascript">
@@ -51,6 +52,16 @@
         <% out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='onco_query_lang_desc.jsp' onclick='return popitup('onco_query_lang_desc.jsp')'>Advanced: Onco Query Language (OQL)</a></span>"); %>
     <% } %>
     
+    <%
+	// Output step 4 form validation error
+	if (step4ErrorMsg != null) {
+	    out.println("<div class='ui-state-error ui-corner-all' style='margin-top:4px; padding:5px;'>"
+	            + "<span class='ui-icon ui-icon-alert' style='float: left; margin-right: .3em;'></span>"
+	            + "<strong>" + step4ErrorMsg + "</strong>");
+	    customCaseListStyle = "block";
+	}
+	%>
+	
     <div style='padding-top:10px;padding-bottom:5px;'>
         <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Gene Set"></select>
     </div>
@@ -66,38 +77,43 @@
         });
     </script>
 
-<textarea rows='5' cols='80' id='gene_list' placeholder="Enter HUGO Gene Symbols or Gene Aliases" required
-name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Aliases'><%
-    if (localGeneList != null && localGeneList.length() > 0) {
-	    String geneListWithSemis =
-			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneList);
-	    // this is for xss security
-	    geneListWithSemis = StringEscapeUtils.escapeJavaScript(geneListWithSemis);
-	    // ...but we want to keep newlines, and slashes so unescape them
-	    geneListWithSemis = geneListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
-        out.print(geneListWithSemis);
-    }
-%></textarea>
-
-<p id="genestatus"></p>
-
-<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
-<div style="padding-bottom:5px;margin-left:-3px;">
-       <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
-</div>
-
-<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
-name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
-    if (localGeneSetList != null && localGeneSetList.length() > 0) {
-	    String geneSetListWithSemis =
-			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
-	    // this is for xss security
-	    geneSetListWithSemis = StringEscapeUtils.escapeJavaScript(geneSetListWithSemis);
-	    // ...but we want to keep newlines, and slashes so unescape them
-	    geneSetListWithSemis = geneSetListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
-        out.print(geneSetListWithSemis);
-    }
-%></textarea>
+	<textarea rows='5' cols='80' id='gene_list' placeholder="Enter HUGO Gene Symbols or Gene Aliases" required
+	name='<%= QueryBuilder.GENE_LIST %>' title='Enter HUGO Gene Symbols or Gene Aliases'><%
+	    if (localGeneList != null && localGeneList.length() > 0) {
+		    String geneListWithSemis =
+				    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneList);
+		    // this is for xss security
+		    geneListWithSemis = StringEscapeUtils.escapeJavaScript(geneListWithSemis);
+		    // ...but we want to keep newlines, and slashes so unescape them
+		    geneListWithSemis = geneListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
+	        out.print(geneListWithSemis);
+	    }
+	%></textarea>
+	
+	<p id="genestatus"></p>
+	
+	<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
+	<div style="padding-bottom:5px;margin-left:-3px;">
+	       <button id="toggle_gsva_dialog" onclick="promptGsvaTable(); return false;" style="font-size: 1em; display: none;">Select Gene Sets scored with GSVA</button>
+	</div>
+	
+	<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
+	name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
+	    if (localGeneSetList != null && localGeneSetList.length() > 0) {
+		    String geneSetListWithSemis =
+				    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
+		    // this is for xss security
+		    geneSetListWithSemis = StringEscapeUtils.escapeJavaScript(geneSetListWithSemis);
+		    // ...but we want to keep newlines, and slashes so unescape them
+		    geneSetListWithSemis = geneSetListWithSemis.replaceAll("\\\\n", "\n").replaceAll("\\\\/", "/");
+	        out.print(geneSetListWithSemis);
+	    }
+	%></textarea>
+	<%
+	if (step4ErrorMsg != null) {
+	    out.println("</div>");
+	}
+	%>
 
 </div>
 <script type='text/javascript'>

@@ -1274,26 +1274,33 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	LoadingBar.show();
 	LoadingBar.msg(LoadingBar.DOWNLOADING_MSG);
 	oncoprint.setCellPaddingOn(State.cell_padding_on);
-	console.log("in initOncoprint, fetching genomic event data");
-	return QuerySession.getOncoprintSampleGenomicEventData()
-	.then(function (oncoprint_data) {
-	    console.log("in initOncoprint, adding genomic event tracks");
-	    State.addGeneticTracks(oncoprint_data);
-	    // return the promise needed for the next step
-	    return QuerySession.getDefaultHeatmapProfile();
-	}).then(function (heatmap_profile) {
-	    if (heatmap_profile !== null) {
-		console.log("in initOncoprint, fetching heatmap data");
-		return QuerySession.getSampleHeatmapData()
-		.then(function (heatmap_data) {
-		    console.log("in initOncoprint, heatmap data fetched, adding tracks");
-		    State.addHeatmapTracks(heatmap_data);
+	var step1 = new $.Deferred();
+	if (1 == 1) {
+		step1.resolve();
+	} else {
+		step1 = QuerySession.getOncoprintSampleGenomicEventData()
+		.then(function (oncoprint_data) {
+		    console.log("in initOncoprint, adding genomic event tracks");
+		    State.addGeneticTracks(oncoprint_data);
+		    // return the promise needed for the next step
+		    return QuerySession.getDefaultHeatmapProfile();
+		}).then(function (heatmap_profile) {
+		    if (heatmap_profile !== null) {
+			console.log("in initOncoprint, fetching heatmap data");
+			return QuerySession.getSampleHeatmapData()
+			.then(function (heatmap_data) {
+			    console.log("in initOncoprint, heatmap data fetched, adding tracks");
+			    State.addHeatmapTracks(heatmap_data);
+			});
+		    } else {
+			// heatmap not applicable, return a resolved Promise
+			return $.when();
+		    }
 		});
-	    } else {
-		// heatmap not applicable, return a resolved Promise
-		return $.when();
-	    }
-	}).then(function fetchClinicalAttributes() {
+	}
+	
+	console.log("in initOncoprint, fetching genomic event data");
+	return step1.then(function fetchClinicalAttributes() {
 	    console.log("in initOncoprint, fetching clinical attributes");
 	    QuerySession.getClinicalAttributes()
 	    .then(function (attrs) {
