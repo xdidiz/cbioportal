@@ -12329,6 +12329,7 @@ var OncoprintTrackOptionsView = (function () {
 	    $dropdown.append($sort_dec_li);
 	    $dropdown.append($dont_sort_li);
 	}
+	// TODO: add 'show (more) expression tracks' and 'remove expression tracks'
 	if (model.isTrackExpandable(track_id)) {
 	    $dropdown.append($makeDropdownOption(
 		    'Toggle expanded',
