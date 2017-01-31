@@ -214,6 +214,26 @@ var GeneSymbolValidator = (function($) {
 
 		$('.ui-validator').tipTip();
 
+		
+		// Check if gene set text box exists
+			// Check if box is empty or full
+				// Check if valid gene sets
+					// Set gene box valid
+		
+		
+		// Check if gene box full empty
+			// Check if gene set box is valid
+		// Else check if genes are valid
+		
+		// If gene set == valid && genes == valid
+			// Make query
+		// else if gene set == valid && genees != valid
+		// etc
+			
+		
+		
+		
+
 		if (allValid) {
 		    $("#main_submit").removeAttr("disabled")
 
@@ -234,7 +254,6 @@ var GeneSymbolValidator = (function($) {
 			$("<br>").appendTo(stateList);
 			$("<br>").appendTo(stateList);
 		    }
-
 		} else {
 		    var invalidState = $("<li>").addClass("ui-state-default ui-corner-all");
 		    var invalidSpan = $("<span>")

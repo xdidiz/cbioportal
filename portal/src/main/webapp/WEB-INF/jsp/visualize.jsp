@@ -85,35 +85,40 @@
 
                 if (values != null && values.length >0)
                 {
-                    for (int i=0; i<values.length; i++)
-                    {
+                    for (int i=0; i<values.length; i++) {
+                    	
+                    	Boolean genesetQuery = true;
+/*                     	if (window.QuerySession.getQueryGenesets() > 0) {
+                    		genesetQuery = true;
+                    	} */
+                    	
                         String currentValue = values[i].trim();
 
-                        if (currentValue.contains("mutation") && !disabledTabs.contains("mutations"))
+                        if ((currentValue.contains("mutation") && !disabledTabs.contains("mutations")) && !genesetQuery)
                         {
                             showMutTab = true;
-                        }                        
+                        }
                         if (disabledTabs.contains("co_expression")) 
                         {
                             showCoexpTab = false;
                         }                        
-                        if (disabledTabs.contains("IGV")) 
+                        if (disabledTabs.contains("IGV") || genesetQuery) 
                         {
                             showIGVtab = false;
                         }                        
-                        if (disabledTabs.contains("mutual_exclusivity")) 
+                        if (disabledTabs.contains("mutual_exclusivity") || genesetQuery) 
                         {
                             computeLogOddsRatio = false;
                         }                        
-                        if (disabledTabs.contains("enrichments")) 
+                        if (disabledTabs.contains("enrichments") || genesetQuery) 
                         {
                             showEnrichmentsTab = false;
                         }                        
-                        if (disabledTabs.contains("survival")) 
+                        if (disabledTabs.contains("survival") || genesetQuery) 
                         {
                             has_survival = false;
                         }                        
-                        if (disabledTabs.contains("network")) 
+                        if (disabledTabs.contains("network") || genesetQuery) 
                         {
                             includeNetworks = false;
                         }                        
@@ -121,11 +126,11 @@
                         {
                             showPlotsTab = false;
                         }
-                        if (disabledTabs.contains("download")) 
+                        if (disabledTabs.contains("download") || genesetQuery) 
                         {
                             showDownloadTab = false;
                         }
-                        if (disabledTabs.contains("bookmark")) {
+                        if (disabledTabs.contains("bookmark") || genesetQuery) {
                             showBookmarkTab = false;
                         }
                         
@@ -218,26 +223,28 @@
 	                out.print ("'");
                 } 
 	            out.println (">Bookmark</a></li>");
-            }            
+                       
+	
+	            out.println ("<div class=\"section\" id=\"bookmark_email\">");
+	
+	            if (!useSessionServiceBookmark && sampleSetId.equals("-1"))
+	            {
+	                out.println("<br>");
+	                out.println("<h4>The bookmark option is not available for user-defined case lists.</h4>");
+	            } 
+	            else 
+	            {
+	                out.println ("<h4>Right click on one of the links below to bookmark your results:</h4>");
+	                out.println("<br>");
+	                out.println("<div id='session-id'></div>");
+	                out.println("<br>");
+	                out.println("If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> url below:<BR>");
+	                out.println("<div id='bitly'></div>");
+	            }
+	            out.println("</div>");
+            } 
             out.println ("</ul>");
 
-            out.println ("<div class=\"section\" id=\"bookmark_email\">");
-
-            if (!useSessionServiceBookmark && sampleSetId.equals("-1"))
-            {
-                out.println("<br>");
-                out.println("<h4>The bookmark option is not available for user-defined case lists.</h4>");
-            } 
-            else 
-            {
-                out.println ("<h4>Right click on one of the links below to bookmark your results:</h4>");
-                out.println("<br>");
-                out.println("<div id='session-id'></div>");
-                out.println("<br>");
-                out.println("If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> url below:<BR>");
-                out.println("<div id='bitly'></div>");
-            }
-            out.println("</div>");
     %>
 
         <div class="section" id="summary">
@@ -286,7 +293,9 @@
             <%@ include file="enrichments_tab.jsp" %>
         <% } %>
 
-        <%@ include file="data_download.jsp" %>
+        <% if (showDownloadTab) { %>
+	        <%@ include file="data_download.jsp" %>
+        <% } %>
 
 </div> <!-- end tabs div -->
 
