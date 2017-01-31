@@ -1224,13 +1224,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'has_column_spacing': false,
 			'track_padding': 0,
 			'label': geneset_data_by_line[i].geneset_id,
-			'target_group': 10,
+			// should be enough to always be the last track group
+			'target_group': 30,
 			'removable': true,
 			'description': geneset_data_by_line[i].geneset_id,
 		    };
 		    // TODO: replace the mocked gene info by API calls
-		    source_profile_id = "brca_tcga_mrna";
-		    source_gene_symbols = ['ATOX1', 'VEGFA'];
+		    source_profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
+		    source_gene_symbols = ['VEGFA', 'BRCA1', 'TP53', 'KRAS', 'IGF1R', 'RB1', 'AR', 'NOTCH1', 'MYC'];
 		    if (source_profile_id !== null) {
 			track_params.expansion_callback = State.expandTrack.bind(
 				State, source_profile_id, source_gene_symbols);
