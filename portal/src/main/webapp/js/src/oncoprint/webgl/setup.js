@@ -1135,13 +1135,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return track_id;
 	    },
-	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, group_track_id) {
+	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, group_track_id, group_track_group) {
 		oncoprint.suppressRendering();
 		var track_params = {
 		    'rule_set_params': HEATMAP_RULE_SET_PARAMS,
 		    'has_column_spacing': false,
 		    'track_padding': 0,
 		    'label': gene,
+		    'target_group': group_track_group,
 		    'expansion_of': group_track_id,
 		    'removable': true,
 		    //'sortCmpFn': function(d1, d2) {return 0;},
@@ -1225,14 +1226,34 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return gs_ids;
 	    },
-	    'expandTrack': function(genetic_profile_id, gene_symbols, group_track_id) {
-		var symbol, i, subtrack_id, promise_list = [];
-		for (i=0; i< gene_symbols.length; i++) {
-		    symbol = gene_symbols[i];
-		    subtrack_id = this.addExpansionHeatmapTrack(genetic_profile_id, symbol, group_track_id);
-		    promise_list.push(populateHeatmapTrack(genetic_profile_id, symbol, subtrack_id));
+	    'expandTrack': function(genetic_profile_id, gene_symbols, geneset_track_id) {
+		var i;
+		var group_index = null, track_ids_in_group = null, track_index = null;
+		var all_groups = oncoprint.model.getTrackGroups();
+		for (i = 0; i < all_groups.length; i++) {
+		    track_index = all_groups[i].indexOf(geneset_track_id);
+		    if (track_index !== -1) {
+			group_index = i;
+			track_ids_in_group = all_groups[i].slice();
+			break;
+		    }
 		}
-		return $.when.apply(null, promise_list);
+		var symbol, subtrack_id, promise_list = [];
+		oncoprint.suppressRendering();
+		for (i = 0; i < gene_symbols.length; i++) {
+		    symbol = gene_symbols[i];
+		    subtrack_id = this.addExpansionHeatmapTrack(
+			    genetic_profile_id, symbol, geneset_track_id, group_index);
+		    promise_list.push(populateHeatmapTrack(genetic_profile_id, symbol, subtrack_id));
+		    // insert subtrack id after existing track index
+		    track_ids_in_group.splice(track_index + 1, 0, subtrack_id);
+		    track_index++;
+		}
+		return $.when.apply(null, promise_list)
+		.then(function() {
+		    oncoprint.setTrackGroupOrder(group_index, track_ids_in_group);
+		    oncoprint.releaseRendering();
+		});
 	    },
 	    'useAndAddAttribute': function(attr_id) {
 		var attr = this.useAttribute(attr_id);

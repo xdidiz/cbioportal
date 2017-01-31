@@ -599,7 +599,6 @@ var OncoprintWebGLCellView = (function () {
 	renderAllTracks(this, model);
     }
     OncoprintWebGLCellView.prototype.setTrackGroupOrder = function(model) {
-	clearZoneBuffers(this, model);
 	renderAllTracks(this, model);
     }
     
