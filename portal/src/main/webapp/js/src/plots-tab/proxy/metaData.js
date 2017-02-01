@@ -32,21 +32,22 @@ var metaData = (function() {
     
     //genes
     function fetchProfileMetaData() {
-        var paramsGetProfiles = {
-            cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-            case_set_id: window.QuerySession.getCaseSetId(),
-            case_ids_key: window.QuerySession.getCaseIdsKey(),
-            genetic_entity_list: window.QuerySession.getQueryGenes().join(" "),
-            genetic_entity_type: "GENE"
-        };
-        //fetch data and call fetchGenesetsProfileMetaData
-        $.post("getGeneticProfile.json", paramsGetProfiles, fetchGenesetsProfileMetaData, "json");  
+    	if (window.QuerySession.getQueryGenes() != null) {
+	
+	        var paramsGetProfiles = {
+	            cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	            case_set_id: window.QuerySession.getCaseSetId(),
+	            case_ids_key: window.QuerySession.getCaseIdsKey(),
+	            genetic_entity_list: window.QuerySession.getQueryGenes().join(" "),
+	            genetic_entity_type: "GENE"
+	        };
+
+	        $.post("getGeneticProfile.json", paramsGetProfiles, fetchClinicalAttrMetaData, "json");  
+    	}
     }
     
     //genesets
-    function fetchGenesetsProfileMetaData(geneProfileMetaDataResult) {
-    	//pass genes data to fetchClinicalAttrMetaData
-    	fetchClinicalAttrMetaData(geneProfileMetaDataResult, "GENE");
+    function fetchGenesetsProfileMetaData() {    	
     	
     	//get geneset data to pass to fetchClinicalAttrMetaData
     	if (window.QuerySession.getQueryGenesets() != null) {
@@ -174,6 +175,7 @@ var metaData = (function() {
         fetch: function(readyCallBack) {
         	readyCallBackFunction = readyCallBack;
             fetchProfileMetaData();
+            fetchGenesetsProfileMetaData();
         },
         getClinAttrsMeta: function() {
             return clinicalAttrs;
