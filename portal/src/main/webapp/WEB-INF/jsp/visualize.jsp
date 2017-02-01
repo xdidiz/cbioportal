@@ -200,7 +200,7 @@
             if (showCoexpTab) {
                 out.println ("<li><a href='#coexp' class='result-tab' id='coexp-result-tab'>Co-Expression</a></li>");
             }
-            if (has_mrna || has_copy_no || showMutTab && showEnrichmentsTab) {
+            if ((has_mrna || has_copy_no || showMutTab) && showEnrichmentsTab) {
                 out.println("<li><a href='#enrichementTabDiv' id='enrichments-result-tab' class='result-tab'>Enrichments</a></li>");
             }
             if (has_survival) {
@@ -289,7 +289,7 @@
             <%@ include file="co_expression.jsp" %>
         <% } %>
 
-        <% if (has_mrna || has_copy_no || showMutTab) { %>
+        <% if ((has_mrna || has_copy_no || showMutTab) && showEnrichmentsTab) { %>
             <%@ include file="enrichments_tab.jsp" %>
         <% } %>
 
