@@ -62,8 +62,14 @@ var CoExpView = (function() {
 
         function appendTabsContent() {
         	//Add a sub-tab for every queried genetic entity
-        	var geneIds = window.QuerySession.getQueryGenes();
-            var genesetIds = window.QuerySession.getQueryGenesets();
+        	var geneIds = [];
+        	if (window.QuerySession.getQueryGenes() != null) {
+        		geneIds = window.QuerySession.getQueryGenes();
+        	}
+        	var genesetIds = [];
+        	if (window.QuerySession.getQueryGenesets() != null) {
+        		genesetIds = window.QuerySession.getQueryGenesets();
+        	}
             var geneEntityIds = geneIds.concat(genesetIds); 
             $.each(geneEntityIds, function(index, value) {
                 $("#coexp-tabs-list").append("<li><a href='#" + Prefix.divPrefix + cbio.util.safeProperty(value) + 
@@ -72,8 +78,14 @@ var CoExpView = (function() {
         }
 
         function appendLoadingImgs() {
-        	var geneIds = window.QuerySession.getQueryGenes();
-            var genesetIds = window.QuerySession.getQueryGenesets();
+        	var geneIds = [];
+        	if (window.QuerySession.getQueryGenes() != null) {
+        		geneIds = window.QuerySession.getQueryGenes();
+        	}
+        	var genesetIds = [];
+        	if (window.QuerySession.getQueryGenesets() != null) {
+        		genesetIds = window.QuerySession.getQueryGenesets();
+        	}
             var geneEntityIds = geneIds.concat(genesetIds); 
             $.each(geneEntityIds, function(index, value) {
                 $("#coexp-tabs-content").append("<div id='" + Prefix.divPrefix + cbio.util.safeProperty(value) + "'>" +
@@ -95,10 +107,14 @@ var CoExpView = (function() {
             $("#coexp-tabs").on("tabsactivate", function(event, ui) {
                 var _genetic_entity = ui.newTab.text();
                 var _genetic_entity_type = null;
-                if ((window.QuerySession.getQueryGenes()).indexOf(_genetic_entity) !== -1) {
-                	_genetic_entity_type = "GENE";
-                } else if ((window.QuerySession.getQueryGenesets()).indexOf(_genetic_entity) !== -1) {
-                	_genetic_entity_type = "GENESET";
+                if (window.QuerySession.getQueryGenes() != null) {
+	                if ((window.QuerySession.getQueryGenes()).indexOf(_genetic_entity) !== -1) {
+	                	_genetic_entity_type = "GENE";
+	                }
+                } else if (window.QuerySession.getQueryGenesets() != null) {
+	                if ((window.QuerySession.getQueryGenesets()).indexOf(_genetic_entity) !== -1) {
+	                	_genetic_entity_type = "GENESET";
+	                }
                 }
                 var coExpSubTabView = new CoExpSubTabView();
                 coExpSubTabView.init(_genetic_entity, _genetic_entity_type);
@@ -127,7 +143,9 @@ var CoExpView = (function() {
                         profileList.push(obj);
                     }
                 } else if (obj["GENETIC_ALTERATION_TYPE"] === "MUTATION_EXTENDED") {
-                    has_mutation_data = true;
+                	if (window.QuerySession.getQueryGenes() != null) {
+                		has_mutation_data = true;
+                	}
                 }
             });
             //swap the rna seq profile to the top
@@ -152,8 +170,14 @@ var CoExpView = (function() {
 
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
-                var geneIds = window.QuerySession.getQueryGenes();
-                var genesetIds = window.QuerySession.getQueryGenesets();
+            	var geneIds = [];
+            	if (window.QuerySession.getQueryGenes() != null) {
+            		geneIds = window.QuerySession.getQueryGenes();
+            	}
+            	var genesetIds = [];
+            	if (window.QuerySession.getQueryGenesets() != null) {
+            		genesetIds = window.QuerySession.getQueryGenesets();
+            	}
                 var geneEntityIds = geneIds.concat(genesetIds);
                 
                 $.each(geneEntityIds, function(index, value) {
@@ -365,14 +389,16 @@ var CoExpView = (function() {
 	        		);
 	        	$("input#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
 		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-		        			//genesRetrieved will not be false since we always retrieve genes
 				        		if (genesRetrieved == true){ //Add the genes into the coexpTable again if they are not there
 				        			if (geneArr.length >= 1) {
 			        					coExpTableInstance.fnAddData(geneArr);
 			        				} else {
     		            				$("center").append("<div id='no_genes' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No genes with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
     		            			}
-		        				} 
+		        				} else { //Genes not retrieved, so append an error message
+		        					$("center").append("<div id='no_genes' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No genes with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
+    		            			
+		        				}
 		        			} else { //Button not checked, clear the whole table
 		        				coExpTableInstance.fnClearTable();
 		        				if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) { //If the gene sets box is checked, keep the gene sets
@@ -677,6 +703,10 @@ var CoExpView = (function() {
         } else {
         	throw new Error("This study contains more than one GSVA-scores profile");
         }
+        if (window.QuerySession.getQueryGenes() == null) {
+        	var coExpSubTabView = new CoExpSubTabView();
+            coExpSubTabView.init(_genesets[0], "GENESET");
+        }
     }
 
     return {
@@ -687,23 +717,27 @@ var CoExpView = (function() {
             Tabs.generateTabs();
             Tabs.bindListenerToTabs();
             //Get all the genetic profiles with data available 
-            var paramsGetProfiles = {
-                cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-                case_set_id: window.QuerySession.getCaseSetId(),
-                case_ids_key: window.QuerySession.getCaseIdsKey(),
-                genetic_entity_list: window.QuerySession.getQueryGenes().join(" "),
-                genetic_entity_type: "GENE"
-            };
-            $.post("getGeneticProfile.json", paramsGetProfiles, getGeneticProfileCallback, "json");
+            if (window.QuerySession.getQueryGenes() != null) {
+	            var paramsGetProfiles = {
+	                cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	                case_set_id: window.QuerySession.getCaseSetId(),
+	                case_ids_key: window.QuerySession.getCaseIdsKey(),
+	                genetic_entity_list: window.QuerySession.getQueryGenes().join(" "),
+	                genetic_entity_type: "GENE"
+	            };
+	            $.post("getGeneticProfile.json", paramsGetProfiles, getGeneticProfileCallback, "json");
+            }
             //Get the gene set profiles
-            var paramsGetGeneSetProfiles = {
-                cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-                case_set_id: window.QuerySession.getCaseSetId(),
-                case_ids_key: window.QuerySession.getCaseIdsKey(),
-                genetic_entity_list: window.QuerySession.getQueryGenesets().join(" "),
-                genetic_entity_type: "GENESET"
-           };
-           $.post("getGeneticProfile.json", paramsGetGeneSetProfiles, getGeneSetsProfileCallback, "json");
+            if (window.QuerySession.getQueryGenesets() != null) {
+	            var paramsGetGeneSetProfiles = {
+	                cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	                case_set_id: window.QuerySession.getCaseSetId(),
+	                case_ids_key: window.QuerySession.getCaseIdsKey(),
+	                genetic_entity_list: window.QuerySession.getQueryGenesets().join(" "),
+	                genetic_entity_type: "GENESET"
+	           };
+	           $.post("getGeneticProfile.json", paramsGetGeneSetProfiles, getGeneSetsProfileCallback, "json");
+	        }
         },
         has_mutation_data: function() {
             return has_mutation_data;
