@@ -1,5 +1,5 @@
 var OncoprintTrackOptionsView = (function () {
-    function OncoprintTrackOptionsView($div, moveUpCallback, moveDownCallback, removeCallback, sortChangeCallback) {
+    function OncoprintTrackOptionsView($div, moveUpCallback, moveDownCallback, removeCallback, sortChangeCallback, unexpandCallback) {
 	// removeCallback: function(track_id)
 	var position = $div.css('position');
 	if (position !== 'absolute' && position !== 'relative') {
@@ -10,13 +10,14 @@ var OncoprintTrackOptionsView = (function () {
 	this.moveDownCallback = moveDownCallback;
 	this.removeCallback = removeCallback; // function(track_id) { ... }
 	this.sortChangeCallback = sortChangeCallback; // function(track_id, dir) { ... }
+	this.unexpandCallback = unexpandCallback; // function(track_id)
 
 	this.$div = $div;
 	this.$ctr = $('<div></div>').css({'position': 'absolute', 'overflow-y':'hidden', 'overflow-x':'hidden'}).appendTo(this.$div);
 	this.$buttons_ctr = $('<div></div>').css({'position':'absolute'}).appendTo(this.$ctr);
 	this.$dropdown_ctr = $('<div></div>').css({'position': 'absolute'}).appendTo(this.$div);
 
-	this.img_size;
+	this.img_size = null;
 
 	this.rendering_suppressed = false;
 
@@ -192,15 +193,23 @@ var OncoprintTrackOptionsView = (function () {
 	    $dropdown.append($sort_dec_li);
 	    $dropdown.append($dont_sort_li);
 	}
-	// TODO: add 'show (more) expression tracks' and 'remove expression tracks'
 	if (model.isTrackExpandable(track_id)) {
 	    $dropdown.append($makeDropdownOption(
-		    'Toggle expanded',
-		    (model.isTrackExpanded(track_id) ? 'bold' : 'normal'),
+		    (model.isTrackExpanded(track_id) ? 'More' : 'Show') + ' genes',
+		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
-			var expansionCallback = model.getExpansionCallback(track_id);
-			return expansionCallback(track_id);
+			var expansion_callback = model.getExpansionCallback(track_id);
+			expansion_callback(track_id);
+		    }));
+	}
+	if (model.isTrackExpanded(track_id)) {
+	    $dropdown.append($makeDropdownOption(
+		    'Hide genes',
+		    'normal',
+		    function (evt) {
+			evt.stopPropagation();
+			view.unexpandCallback(track_id);
 		    }));
 	}
     };

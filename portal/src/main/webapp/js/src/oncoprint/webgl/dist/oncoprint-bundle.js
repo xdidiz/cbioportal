@@ -7297,7 +7297,7 @@ var Oncoprint = (function () {
 	}*/
 	
 	this.track_options_view = new OncoprintTrackOptionsView($track_options_div,
-								function(track_id) { 
+								function (track_id) {
 								    // move up
 								    var tracks = self.model.getContainingTrackGroup(track_id);
 								    var index = tracks.indexOf(track_id);
@@ -7309,7 +7309,7 @@ var Oncoprint = (function () {
 									self.moveTrack(track_id, new_previous_track);
 								    }
 								},
-								function(track_id) {
+								function (track_id) {
 								    // move down
 								    var tracks = self.model.getContainingTrackGroup(track_id);
 								    var index = tracks.indexOf(track_id);
@@ -7317,8 +7317,17 @@ var Oncoprint = (function () {
 									self.moveTrack(track_id, tracks[index+1]);
 								    }
 								},
-								function(track_id) { self.removeTrack(track_id); }, 
-								function(track_id, dir) { self.setTrackSortDirection(track_id, dir); });
+								function (track_id) { self.removeTrack(track_id); },
+								function (track_id, dir) { self.setTrackSortDirection(track_id, dir); },
+								function (track_id) {
+								    // remove all related expansion tracks
+								    var tracks_to_remove = self.model.track_expansion_tracks[track_id].slice(), i;
+								    self.suppressRendering();
+								    for (i = 0; i < tracks_to_remove.length; i++) {
+									self.removeTrack(tracks_to_remove[i]);
+								    }
+								    self.releaseRendering();
+								});
 	this.track_info_view = new OncoprintTrackInfoView($track_info_div);
 								
 	//this.track_info_view = new OncoprintTrackInfoView($track_info_div);
@@ -12203,7 +12212,7 @@ var OncoprintTrackInfoView = (function () {
 module.exports = OncoprintTrackInfoView;
 },{"./svgfactory.js":31}],28:[function(require,module,exports){
 var OncoprintTrackOptionsView = (function () {
-    function OncoprintTrackOptionsView($div, moveUpCallback, moveDownCallback, removeCallback, sortChangeCallback) {
+    function OncoprintTrackOptionsView($div, moveUpCallback, moveDownCallback, removeCallback, sortChangeCallback, unexpandCallback) {
 	// removeCallback: function(track_id)
 	var position = $div.css('position');
 	if (position !== 'absolute' && position !== 'relative') {
@@ -12214,13 +12223,14 @@ var OncoprintTrackOptionsView = (function () {
 	this.moveDownCallback = moveDownCallback;
 	this.removeCallback = removeCallback; // function(track_id) { ... }
 	this.sortChangeCallback = sortChangeCallback; // function(track_id, dir) { ... }
+	this.unexpandCallback = unexpandCallback; // function(track_id)
 
 	this.$div = $div;
 	this.$ctr = $('<div></div>').css({'position': 'absolute', 'overflow-y':'hidden', 'overflow-x':'hidden'}).appendTo(this.$div);
 	this.$buttons_ctr = $('<div></div>').css({'position':'absolute'}).appendTo(this.$ctr);
 	this.$dropdown_ctr = $('<div></div>').css({'position': 'absolute'}).appendTo(this.$div);
 
-	this.img_size;
+	this.img_size = null;
 
 	this.rendering_suppressed = false;
 
@@ -12396,15 +12406,23 @@ var OncoprintTrackOptionsView = (function () {
 	    $dropdown.append($sort_dec_li);
 	    $dropdown.append($dont_sort_li);
 	}
-	// TODO: add 'show (more) expression tracks' and 'remove expression tracks'
 	if (model.isTrackExpandable(track_id)) {
 	    $dropdown.append($makeDropdownOption(
-		    'Toggle expanded',
-		    (model.isTrackExpanded(track_id) ? 'bold' : 'normal'),
+		    (model.isTrackExpanded(track_id) ? 'More' : 'Show') + ' genes',
+		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
-			var expansionCallback = model.getExpansionCallback(track_id);
-			return expansionCallback(track_id);
+			var expansion_callback = model.getExpansionCallback(track_id);
+			expansion_callback(track_id);
+		    }));
+	}
+	if (model.isTrackExpanded(track_id)) {
+	    $dropdown.append($makeDropdownOption(
+		    'Hide genes',
+		    'normal',
+		    function (evt) {
+			evt.stopPropagation();
+			view.unexpandCallback(track_id);
 		    }));
 	}
     };
