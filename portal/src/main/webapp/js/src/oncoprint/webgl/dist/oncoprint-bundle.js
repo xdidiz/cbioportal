@@ -3629,7 +3629,8 @@ var OncoprintModel = (function () {
 		    params.data_id_key, params.tooltipFn,
 		    params.removable, params.removeCallback, params.label, params.description, params.track_info,
 		    params.sortCmpFn, params.sort_direction_changeable, params.init_sort_direction,
-		    params.data, params.rule_set, params.track_label_color, params.expansion_callback);
+		    params.data, params.rule_set, params.track_label_color, params.expansion_of,
+		    params.expansion_callback);
 	}
 	this.track_tops.update();
     }
@@ -3639,7 +3640,7 @@ var OncoprintModel = (function () {
 	    data_id_key, tooltipFn,
 	    removable, removeCallback, label, description, track_info,
 	    sortCmpFn, sort_direction_changeable, init_sort_direction,
-	    data, rule_set, track_label_color, expansion_callback) {
+	    data, rule_set, track_label_color, expansion_of, expansion_callback) {
 	model.track_label[track_id] = ifndef(label, "Label");
 	model.track_label_color[track_id] = ifndef(track_label_color, "black");
 	model.track_description[track_id] = ifndef(description, "");
@@ -3653,7 +3654,16 @@ var OncoprintModel = (function () {
 	model.track_removable[track_id] = ifndef(removable, false);
 	model.track_remove_callback[track_id] = ifndef(removeCallback, function() {});
 	
-	if (expansion_callback) {
+	if (typeof expansion_of !== 'undefined') {
+	    if (!model.track_expansion_tracks.hasOwnProperty(expansion_of)) {
+		model.track_expansion_tracks[expansion_of] = [];
+	    }
+	    if (model.track_expansion_tracks[expansion_of].indexOf(track_id) !== -1) {
+		throw new Error('Illegal state: duplicate expansion track ID');
+	    }
+	    model.track_expansion_tracks[expansion_of].push(track_id);
+	}
+	if (typeof expansion_callback !== 'undefined') {
 	    model.track_expansion_callback[track_id] = expansion_callback;
 	}
 	
@@ -3744,6 +3754,13 @@ var OncoprintModel = (function () {
 	if (containing_track_group !== null) {
 	    containing_track_group.splice(
 		    containing_track_group.indexOf(track_id), 1);
+	}
+	var i, index_in_group;
+	for (i in this.track_expansion_tracks) {
+	    index_in_group = this.track_expansion_tracks[i].indexOf(track_id);
+	    if (index_in_group !== -1) {
+		this.track_expansion_tracks[i].splice(index_in_group, 1);
+	    }
 	}
 	this.track_tops.update();
 	this.track_present_ids.update(this, track_id);
