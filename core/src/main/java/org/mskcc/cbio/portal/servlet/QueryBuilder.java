@@ -185,8 +185,8 @@ public class QueryBuilder extends HttpServlet {
 	    }
         geneList = servletXssUtil.getCleanInput(geneList);
         httpServletRequest.setAttribute(GENE_LIST, geneList);
-        
-    //  Get User Defined Gene Sets List
+                
+        //  Get User Defined Gene Sets List
 	    String geneSetList = httpServletRequest.getParameter(GENESET_LIST);
 	    if (httpServletRequest instanceof XssRequestWrapper) {
 		    geneSetList = ((XssRequestWrapper)httpServletRequest).getRawParameter(GENESET_LIST);
@@ -260,7 +260,7 @@ public class QueryBuilder extends HttpServlet {
                     exampleStudyQueries);
 
             boolean errorsExist = validateForm(action, profileList, geneticProfileIdSet,
-                                               sampleSetId, sampleIds, httpServletRequest);
+                                               sampleSetId, sampleIds, httpServletRequest, geneList, geneSetList);
             if (action != null && action.equals(ACTION_SUBMIT) && (!errorsExist)) {
 
                 processData(cancerTypeId, geneList, geneticProfileIdSet, profileList, sampleSetId,
@@ -480,7 +480,8 @@ public class QueryBuilder extends HttpServlet {
                                 ArrayList<GeneticProfile> profileList,
                                  HashSet<String> geneticProfileIdSet,
                                  String sampleSetId, String sampleIds,
-                                 HttpServletRequest httpServletRequest) throws DaoException {
+                                 HttpServletRequest httpServletRequest,
+                                 String geneList, String genesetList) throws DaoException {
         boolean errorsExist = false;
         String tabIndex = httpServletRequest.getParameter(QueryBuilder.TAB_INDEX);
         if (action != null) {
@@ -521,9 +522,7 @@ public class QueryBuilder extends HttpServlet {
                 	// empty patient list
                 	if (sampleIds.trim().length() == 0)
                 	{
-                		httpServletRequest.setAttribute(STEP3_ERROR_MSG,
-                				"Please enter at least one ID below. ");
-                		
+                		httpServletRequest.setAttribute(STEP3_ERROR_MSG, "Please enter at least one ID below. ");        		
                 		errorsExist = true;
                 	}
                 	else
@@ -542,14 +541,34 @@ public class QueryBuilder extends HttpServlet {
                     			sampleSetErrMsg += " " + sampleId;
                     		}
                     		
-                			httpServletRequest.setAttribute(STEP3_ERROR_MSG,
-                					sampleSetErrMsg);
-                    		
+                			httpServletRequest.setAttribute(STEP3_ERROR_MSG, sampleSetErrMsg);
                     		errorsExist = true;
                 		}
                 	}
                 }
+                
 
+                // Validate genes and gene sets
+                // TODO: Can we simply this arrayList? Just array would be good as well.
+                ArrayList<String> geneListArray = new ArrayList<>(Arrays.asList(geneList.split("( )|(\\n)")));
+                ArrayList<String> genesetListArray = new ArrayList<>(Arrays.asList(genesetList.split("( )|(\\n)")));
+                if (
+                		geneListArray.size() == 1 &&
+                		geneListArray.get(0).equals("") &&
+                		genesetListArray.size() == 1 && 
+                		genesetListArray.get(0).equals("")
+                		) {
+                	
+                	// Check if GENESET_SCORE selected
+                	if (1==1) {
+                    	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please select genes below. ");
+                		errorsExist = true;               		
+                	} else {
+                    	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please select genes or gene sets below. ");
+                		errorsExist = true;
+                	}
+                }
+                
                 //  Additional validation rules
                 //  If we have selected mRNA Expression Data Check Box, but failed to
                 //  select an mRNA profile, this is an error.
