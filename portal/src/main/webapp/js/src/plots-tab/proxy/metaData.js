@@ -42,7 +42,9 @@ var metaData = (function() {
 	            genetic_entity_type: "GENE"
 	        };
 
-	        $.post("getGeneticProfile.json", paramsGetProfiles, fetchClinicalAttrMetaData, "json");  
+	        $.post("getGeneticProfile.json", paramsGetProfiles, function(result){
+	        	fetchClinicalAttrMetaData(result, "GENE");
+	        }, "json");  
     	}
     }
     
@@ -58,7 +60,9 @@ var metaData = (function() {
 	            genetic_entity_list: window.QuerySession.getQueryGenesets().join(" "),
 	            genetic_entity_type: "GENESET"
 	        };
-	        $.post("getGeneticProfile.json", paramsGetProfiles, fetchClinicalAttrMetaData, "json");
+	        $.post("getGeneticProfile.json", paramsGetProfiles, function(result) {
+	        	fetchClinicalAttrMetaData(result, "GENESET");
+	        }, "json");
     	}
     }
 
@@ -181,7 +185,7 @@ var metaData = (function() {
             return clinicalAttrs;
         },
         getGeneticProfilesMeta: function(_gene) {
-            return geneticProfiles[_gene];
+        	return geneticProfiles[_gene];
         },
         getGeneSetsMeta: function(_gene) {
             return genesetProfiles[_gene];
