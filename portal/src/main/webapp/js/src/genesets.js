@@ -71,8 +71,8 @@ var initialize_geneset_jstree = function (data) {
 	  		{
 			    "id": "Custom Gene sets",
 			    "genesets": [
-			 		 {"genesetId": "UNITTEST_GENESET1", 
-			 		  "name": "UNITTEST_GENESET1",
+			 		 {"genesetId": "BCAT.100_UP.V1_DN", 
+			 		  "name": "BCAT.100_UP.V1_DN",
 			 		  "description": "description of UNITTEST_GENESET1",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": 0.08,
@@ -84,15 +84,15 @@ var initialize_geneset_jstree = function (data) {
 			  {
 			    "id": "Different Gene sets from Random Institute",
 			    "genesets": [
-			 		 {"genesetId": "UNITTEST_GENESET2", 
-			 		  "name": "UNITTEST_GENESET2",
+			 		 {"genesetId": "AKT_UP.V1_DN", 
+			 		  "name": "AKT_UP.V1_DN",
 					  "description": "description of UNITTEST_GENESET2",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": 0.83,
 			 		  "nrGenes": 5
 			 		 },
-			 		 {"genesetId": "UNITTEST_GENESET3", 
-			 		  "name": "UNITTEST_GENESET3",
+			 		 {"genesetId": "CYCLIN_D1_KE_.V1_UP", 
+			 		  "name": "CYCLIN_D1_KE_.V1_UP",
 					  "description": "description of UNITTEST_GENESET3",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": -0.548,
@@ -104,8 +104,8 @@ var initialize_geneset_jstree = function (data) {
 			  {
 			    "id": "Institutes Subcategory 1",
 			    "genesets": [
-			 		 {"genesetId": "UNITTEST_GENESET4", 
-			 		  "name": "UNITTEST_GENESET4",
+			 		 {"genesetId": "HINATA_NFKB_MATRIX", 
+			 		  "name": "HINATA_NFKB_MATRIX",
 					  "description": "description of UNITTEST_GENESET4",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": 0.82,
@@ -117,22 +117,22 @@ var initialize_geneset_jstree = function (data) {
 			  {
 			    "id": "Institutes Subcategory 2",
 			    "genesets": [
-			 		 {"genesetId": "UNITTEST_GENESET1", 
-			 		  "name": "UNITTEST_GENESET1",
+			 		 {"genesetId": "BCAT.100_UP.V1_DN", 
+			 		  "name": "BCAT.100_UP.V1_DN",
 					  "description": "description of UNITTEST_GENESET1",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.23,
+			 		  "representativeScore": 0.08,
 			 		  "nrGenes": 2
 			 		 },
-			 		 {"genesetId": "UNITTEST_GENESET8", 
-			 		  "name": "UNITTEST_GENESET8",
+			 		 {"genesetId": "GLI1_UP.V1_UP", 
+			 		  "name": "GLI1_UP.V1_UP",
 					  "description": "description of UNITTEST_GENESET8",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": 0.72,
 			 		  "nrGenes": 2000
 			 		 },
-			 		 {"genesetId": "UNITTEST_GENESET10", 
-			 		  "name": "UNITTEST_GENESET10",
+			 		 {"genesetId": "GLI1_UP.V1_DN", 
+			 		  "name": "GLI1_UP.V1_DN",
 					  "description": "description of UNITTEST_GENESET10",
 					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
 			 		  "representativeScore": 0.67,
@@ -198,7 +198,7 @@ var initialize_geneset_jstree = function (data) {
 			
 			// Add score to leaf
 			if (genesetRepresentativeScore != null) {
-				genesetNameText = genesetNameText + ', ' +  genesetRepresentativeScore + ' representative GSVA score';
+				genesetNameText = genesetNameText + ', representative GSVA score = ' +  genesetRepresentativeScore;
 			}
 
 			// Build label and add styling
