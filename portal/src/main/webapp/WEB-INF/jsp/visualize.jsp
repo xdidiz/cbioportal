@@ -87,10 +87,10 @@
                 {
                     for (int i=0; i<values.length; i++) {
                     	
-                    	Boolean genesetQuery = true;
-/*                     	if (window.QuerySession.getQueryGenesets() > 0) {
+                    	Boolean genesetQuery = false;
+		               	if (localGeneSetList.length() > 0 && localGeneList.length() == 0) {
                     		genesetQuery = true;
-                    	} */
+                    	}
                     	
                         String currentValue = values[i].trim();
 
