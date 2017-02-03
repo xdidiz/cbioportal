@@ -697,23 +697,13 @@ var OncoprintModel = (function () {
     }
 
     var _getContainingTrackGroup = function (oncoprint_model, track_id, return_reference) {
-	var group = null, i;
+	var group;
 	track_id = parseInt(track_id);
-	// see if the track is part of a track's expansion group
-	for (i in oncoprint_model.track_expansion_tracks) {
-	    if (oncoprint_model.track_expansion_tracks[i].indexOf(track_id) !== -1) {
-		group = oncoprint_model.track_expansion_tracks[i];
+	for (var i = 0; i < oncoprint_model.track_groups.length; i++) {
+	    if (oncoprint_model.track_groups[i].indexOf(track_id) > -1) {
+		group = oncoprint_model.track_groups[i];
 		break;
 	    }
-	}
-	// if not part of an expansion group, try regular track groups
-	if (group === null) {
-            for (i = 0; i < oncoprint_model.track_groups.length; i++) {
-                if (oncoprint_model.track_groups[i].indexOf(track_id) !== -1) {
-                    group = oncoprint_model.track_groups[i];
-                    break;
-                }
-            }
 	}
 	if (group) {
 	    return (return_reference ? group : group.slice());
