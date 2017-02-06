@@ -4,8 +4,9 @@ import junit.framework.Assert;
 import org.cbioportal.model.CopyNumberSampleCountByGene;
 import org.cbioportal.model.DiscreteCopyNumberData;
 import org.cbioportal.model.Gene;
-import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
+import org.cbioportal.model.GeneticProfile.DataType;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.DiscreteCopyNumberRepository;
 import org.cbioportal.service.GeneticDataService;
@@ -61,8 +62,8 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
 
         createGeneticProfile();
         
-        List<GeneticData> expectedGeneticDataList = new ArrayList<>();
-        GeneticData geneticData = new GeneticData();
+        List<GeneGeneticData> expectedGeneticDataList = new ArrayList<>();
+        GeneGeneticData geneticData = new GeneGeneticData();
         geneticData.setValue("-1");
         geneticData.setGeneticProfileId(GENETIC_PROFILE_ID);
         geneticData.setSampleId(SAMPLE_ID);
@@ -112,8 +113,8 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
 
         createGeneticProfile();
 
-        List<GeneticData> expectedGeneticDataList = new ArrayList<>();
-        GeneticData geneticData = new GeneticData();
+        List<GeneGeneticData> expectedGeneticDataList = new ArrayList<>();
+        GeneGeneticData geneticData = new GeneGeneticData();
         geneticData.setValue("-1");
         expectedGeneticDataList.add(geneticData);
 
@@ -155,8 +156,8 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
 
         createGeneticProfile();
 
-        List<GeneticData> expectedGeneticDataList = new ArrayList<>();
-        GeneticData geneticData = new GeneticData();
+        List<GeneGeneticData> expectedGeneticDataList = new ArrayList<>();
+        GeneGeneticData geneticData = new GeneGeneticData();
         geneticData.setValue("-1");
         geneticData.setGeneticProfileId(GENETIC_PROFILE_ID);
         geneticData.setSampleId(SAMPLE_ID);
@@ -206,8 +207,8 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
 
         createGeneticProfile();
 
-        List<GeneticData> expectedGeneticDataList = new ArrayList<>();
-        GeneticData geneticData = new GeneticData();
+        List<GeneGeneticData> expectedGeneticDataList = new ArrayList<>();
+        GeneGeneticData geneticData = new GeneGeneticData();
         geneticData.setValue("-1");
         expectedGeneticDataList.add(geneticData);
 
@@ -242,7 +243,7 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
         
         GeneticProfile geneticProfile = new GeneticProfile();
         geneticProfile.setGeneticAlterationType(GeneticProfile.GeneticAlterationType.COPY_NUMBER_ALTERATION);
-        geneticProfile.setDatatype("DISCRETE");
+        geneticProfile.setDatatype(DataType.DISCRETE);
         Mockito.when(geneticProfileService.getGeneticProfile(GENETIC_PROFILE_ID)).thenReturn(geneticProfile);
     }
 }

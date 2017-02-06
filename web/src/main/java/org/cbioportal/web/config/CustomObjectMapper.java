@@ -45,7 +45,7 @@ import org.cbioportal.model.ClinicalEvent;
 import org.cbioportal.model.ClinicalEventData;
 import org.cbioportal.model.CopyNumberSeg;
 import org.cbioportal.model.Gene;
-import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Gistic;
 import org.cbioportal.model.GisticToGene;
@@ -87,7 +87,7 @@ public class CustomObjectMapper extends ObjectMapper {
         mixinMap.put(ClinicalEventData.class, ClinicalEventDataMixin.class);
         mixinMap.put(CopyNumberSeg.class, CopyNumberSegMixin.class);
         mixinMap.put(Gene.class, GeneMixin.class);
-        mixinMap.put(GeneticData.class, GeneticDataMixin.class);
+        mixinMap.put(GeneGeneticData.class, GeneticDataMixin.class);
         mixinMap.put(GeneticProfile.class, GeneticProfileMixin.class);
         mixinMap.put(Gistic.class, GisticMixin.class);
         mixinMap.put(GisticToGene.class, GisticToGeneMixin.class);

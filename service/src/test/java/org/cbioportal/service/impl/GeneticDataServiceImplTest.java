@@ -1,8 +1,8 @@
 package org.cbioportal.service.impl;
 
 import junit.framework.Assert;
-import org.cbioportal.model.GeneticAlteration;
-import org.cbioportal.model.GeneticData;
+import org.cbioportal.model.GeneGeneticAlteration;
+import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
 import org.cbioportal.model.Sample;
 import org.cbioportal.persistence.GeneticDataRepository;
@@ -51,22 +51,22 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         Mockito.when(sampleService.fetchSamples(Arrays.asList(STUDY_ID), Arrays.asList(SAMPLE_ID), "ID"))
             .thenReturn(sampleList);
 
-        List<GeneticAlteration> geneticAlterationList = new ArrayList<>();
-        GeneticAlteration geneticAlteration = new GeneticAlteration();
+        List<GeneGeneticAlteration> geneticAlterationList = new ArrayList<>();
+        GeneGeneticAlteration geneticAlteration = new GeneGeneticAlteration();
         geneticAlteration.setEntrezGeneId(ENTREZ_GENE_ID);
         geneticAlteration.setValues("0.4674,-0.3456");
         geneticAlterationList.add(geneticAlteration);
 
         List<Integer> entrezGeneIds = new ArrayList<>();
         entrezGeneIds.add(ENTREZ_GENE_ID);
-        Mockito.when(geneticDataRepository.getGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
+        Mockito.when(geneticDataRepository.getGeneGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
             .thenReturn(geneticAlterationList);
 
-        List<GeneticData> result = geneticDataService.getGeneticData(GENETIC_PROFILE_ID, SAMPLE_ID, entrezGeneIds, 
+        List<GeneGeneticData> result = geneticDataService.getGeneticData(GENETIC_PROFILE_ID, SAMPLE_ID, entrezGeneIds, 
             PROJECTION);
 
         Assert.assertEquals(1, result.size());
-        GeneticData geneticData = result.get(0);
+        GeneGeneticData geneticData = result.get(0);
         Assert.assertEquals(ENTREZ_GENE_ID, geneticData.getEntrezGeneId());
         Assert.assertEquals(GENETIC_PROFILE_ID, geneticData.getGeneticProfileId());
         Assert.assertEquals(SAMPLE_ID, geneticData.getSampleId());
@@ -79,15 +79,15 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         Mockito.when(geneticDataRepository.getCommaSeparatedSampleIdsOfGeneticProfile(GENETIC_PROFILE_ID)).thenReturn(
             "1,2,");
 
-        List<GeneticAlteration> geneticAlterationList = new ArrayList<>();
-        GeneticAlteration geneticAlteration = new GeneticAlteration();
+        List<GeneGeneticAlteration> geneticAlterationList = new ArrayList<>();
+        GeneGeneticAlteration geneticAlteration = new GeneGeneticAlteration();
         geneticAlteration.setEntrezGeneId(ENTREZ_GENE_ID);
         geneticAlteration.setValues("0.4674,-0.3456");
         geneticAlterationList.add(geneticAlteration);
 
         List<Integer> entrezGeneIds = new ArrayList<>();
         entrezGeneIds.add(ENTREZ_GENE_ID);
-        Mockito.when(geneticDataRepository.getGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
+        Mockito.when(geneticDataRepository.getGeneGeneticAlterations(GENETIC_PROFILE_ID, entrezGeneIds, PROJECTION))
             .thenReturn(geneticAlterationList);
         
         List<Integer> internalIds = new ArrayList<>();
@@ -105,16 +105,16 @@ public class GeneticDataServiceImplTest extends BaseServiceImplTest {
         samples.add(sample2);
         Mockito.when(sampleService.getSamplesByInternalIds(internalIds)).thenReturn(samples);
 
-        List<GeneticData> result = geneticDataService.fetchGeneticData(GENETIC_PROFILE_ID, null, entrezGeneIds, 
+        List<GeneGeneticData> result = geneticDataService.fetchGeneticData(GENETIC_PROFILE_ID, null, entrezGeneIds, 
             PROJECTION);
 
         Assert.assertEquals(2, result.size());
-        GeneticData geneticData1 = result.get(0);
+        GeneGeneticData geneticData1 = result.get(0);
         Assert.assertEquals(ENTREZ_GENE_ID, geneticData1.getEntrezGeneId());
         Assert.assertEquals(GENETIC_PROFILE_ID, geneticData1.getGeneticProfileId());
         Assert.assertEquals(SAMPLE_ID, geneticData1.getSampleId());
         Assert.assertEquals("0.4674", geneticData1.getValue());
-        GeneticData geneticData2 = result.get(1);
+        GeneGeneticData geneticData2 = result.get(1);
         Assert.assertEquals(ENTREZ_GENE_ID, geneticData2.getEntrezGeneId());
         Assert.assertEquals(GENETIC_PROFILE_ID, geneticData2.getGeneticProfileId());
         Assert.assertEquals("sample_id_2", geneticData2.getSampleId());
