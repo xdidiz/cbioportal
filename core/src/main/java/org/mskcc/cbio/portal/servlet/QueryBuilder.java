@@ -109,7 +109,7 @@ public class QueryBuilder extends HttpServlet {
 
     private static Log LOG = LogFactory.getLog(QueryBuilder.class);
 
-    public static final String CANCER_TYPES_MAP = "cancer_types_map"; 
+    public static final String CANCER_TYPES_MAP = "cancer_types_map";
 
     private ServletXssUtil servletXssUtil;
 
@@ -477,7 +477,7 @@ public class QueryBuilder extends HttpServlet {
      * validate the portal web input form.
      */
     private boolean validateForm(String action,
-                                ArrayList<GeneticProfile> profileList,
+                            	 ArrayList<GeneticProfile> profileList,
                                  HashSet<String> geneticProfileIdSet,
                                  String sampleSetId, String sampleIds,
                                  HttpServletRequest httpServletRequest,
@@ -549,24 +549,21 @@ public class QueryBuilder extends HttpServlet {
                 
 
                 // Validate genes and gene sets
-                // TODO: Can we simply this arrayList? Just array would be good as well.
+                // TODO: Can we simplify this arrayList? A simple array would be good as well.
                 ArrayList<String> geneListArray = new ArrayList<>(Arrays.asList(geneList.split("( )|(\\n)")));
                 ArrayList<String> genesetListArray = new ArrayList<>(Arrays.asList(genesetList.split("( )|(\\n)")));
+                
+                // We only have to validate the scenario wheren both genebox and genesetbox are empty.
+                // When no geneset
                 if (
                 		geneListArray.size() == 1 &&
                 		geneListArray.get(0).equals("") &&
                 		genesetListArray.size() == 1 && 
                 		genesetListArray.get(0).equals("")
                 		) {
-                	
-                	// Check if GENESET_SCORE selected
-                	if (1==1) {
-                    	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please select genes below. ");
-                		errorsExist = true;               		
-                	} else {
-                    	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please select genes or gene sets below. ");
-                		errorsExist = true;
-                	}
+
+                	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please make selection for query. ");
+            		errorsExist = true;
                 }
                 
                 //  Additional validation rules

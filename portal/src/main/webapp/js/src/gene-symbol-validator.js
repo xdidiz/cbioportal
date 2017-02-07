@@ -48,13 +48,13 @@ var GeneSymbolValidator = (function($) {
 	
 		if ($("#gene_list").val().length === 0) {
 		    $("#genestatus").html("");
-		    
-		    // Remove the block of the submit button when no genes are selected. Might be that genesets are selected.
-		    // Else give warning after submtting. 
-	        $("#main_submit").removeAttr("disabled");
+
+		    // In case of no genes, gene set query should be possible, so enable Submit button.
+		    $("#main_submit").attr("disabled", false);
 		    return;
+		    
 		} else {
-	        $("#main_submit").attr("disabled", "disabled");
+	        $("#main_submit").attr("disabled", true);
 		}
 	
         
@@ -221,7 +221,7 @@ var GeneSymbolValidator = (function($) {
 	
 	
 			if (allValid) {
-			    $("#main_submit").removeAttr("disabled")
+		        $("#main_submit").attr("disabled", false);
 	
 			    if (symbolResults.length > 0
 				    && !(symbolResults[0].name == "" && symbolResults[0].symbols.length == 0)) {
@@ -263,7 +263,7 @@ var GeneSymbolValidator = (function($) {
 		} catch (e) {
 		    $("#genestatus").html("");
 		    $("<small>").appendTo($("#genestatus")).html("Cannot validate gene symbols because of invalid OQL. Please click 'Submit' to see location of error.");
-		    $("#main_submit").removeAttr("disabled")
+	        $("#main_submit").attr("disabled", false);
 		}
     };
 
