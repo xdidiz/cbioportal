@@ -663,34 +663,42 @@ var CoExpView = (function() {
     };   //Closing coExpSubTabView
 
     function getProfileCallback(result, _geneticEntity, _geneticEntityType, initCoExpSubTabView) {
-        //Init Profile selector
-        var _profile_list = {};
-        _.each(_geneticEntity, function(_geneticEntity) {
-            _profile_list = _.extend(_profile_list, result[_geneticEntity]);
-        });
-        if (_geneticEntityType === "GENE") {
-        	//Create the drop-down menu if necessary
-	        ProfileSelector.init(_profile_list);
-	        if (profileList.length === 1) {
+    	if (_geneticEntityType === "ALL") {
+    		//Create the drop-down menu if necessary
+	        ProfileSelector.init(result);
+	        if (Object.keys(result).length === 1) {
 	            $("#coexp-profile-selector-dropdown").hide();
 	        }
-        } else { //Retrieve GSVA profile
-            //Select the profiles that are GSVA scores and discard the profiles with GSVA P-values
-            var _geneSetScoresProfileList = [];
-            $.each(_profile_list, function(i, obj) {
-                if (obj.DATATYPE === "GSVA-SCORE") {
-                	_geneSetScoresProfileList.push(obj);
-                }
-            });
-            if (_geneSetScoresProfileList.length === 1) { //Assumption: only one GSVA-score per study
-            	$.each(_geneSetScoresProfileList, function(i, obj) {
-            		geneSetProfile = obj.STABLE_ID;
-            	});
-            } else  if (_geneSetScoresProfileList.length === 0) {
-            	throw new Error("There are no profiles with GSVA-scores available for this study");
-            } else {
-            	throw new Error("This study contains more than one GSVA-scores profile");
-            }
+    	} else {
+	        //Init Profile selector
+	        var _profile_list = {};
+	        _.each(_geneticEntity, function(_geneticEntity) {
+	            _profile_list = _.extend(_profile_list, result[_geneticEntity]);
+	        });
+	        if (_geneticEntityType === "GENE") {
+	        	//Create the drop-down menu if necessary
+		        ProfileSelector.init(_profile_list);
+		        if (profileList.length === 1) {
+		            $("#coexp-profile-selector-dropdown").hide();
+		        }
+	        } else { //Retrieve GSVA profile
+	            //Select the profiles that are GSVA scores and discard the profiles with GSVA P-values
+	            var _geneSetScoresProfileList = [];
+	            $.each(_profile_list, function(i, obj) {
+	                if (obj.DATATYPE === "GSVA-SCORE") {
+	                	_geneSetScoresProfileList.push(obj);
+	                }
+	            });
+	            if (_geneSetScoresProfileList.length === 1) { //Assumption: only one GSVA-score per study
+	            	$.each(_geneSetScoresProfileList, function(i, obj) {
+	            		geneSetProfile = obj.STABLE_ID;
+	            	});
+	            } else  if (_geneSetScoresProfileList.length === 0) {
+	            	throw new Error("There are no profiles with GSVA-scores available for this study");
+	            } else {
+	            	throw new Error("This study contains more than one GSVA-scores profile");
+	            }
+	        }
         }
         
         if (initCoExpSubTabView) {
@@ -725,31 +733,30 @@ var CoExpView = (function() {
                     $.post("getGeneticProfile.json", paramsGetProfilesGenes, function(result){
                     	getProfileCallback(result, queryGenes, "GENE", true);
                     }, "json");
-            	if (queryGeneSets !== null) { //Retrieve gsva profile without initializing CoExpSubTabView 
-            		var paramsGetProfilesGeneSets = {
-                            cancer_study_id: studyId,
-                            case_set_id: caseSetId,
-                            case_ids_key: caseIdsKey,
-                            genetic_entity_list: queryGeneSets.join(" "),
-                            genetic_entity_type: "GENESET"
-                        };
-                        $.post("getGeneticProfile.json", paramsGetProfilesGeneSets, function(result){
-                        	getProfileCallback(result, queryGeneSets, "GENESET", false);
-                        }, "json");
-            	}
-            } else { //Only QueryGeneSets are available: retrieve gsva profile and initialize CoExpSubTabView. 
-            	//TODO: initialize genetic profiles to compare genes with the queried gene sets.
-            	var paramsGetProfilesOnlyGeneSets = {
+            } else { //We only have query gene sets, retrieve genetic profiles without query genes
+            	var paramsGetGeneticProfilesNoGenes = {
+                        cancer_study_id: studyId,
+                        //case_set_id: "",
+                        case_ids_key: caseIdsKey,
+                        //genetic_entity_list: "",
+                        genetic_entity_type: "GENESET"
+                    };
+                    $.post("getGeneticProfile.json", paramsGetGeneticProfilesNoGenes, function(result){
+                    	getProfileCallback(result, queryGeneSets, "ALL", false);
+                    }, "json");
+            }
+        	if (queryGeneSets !== null) { //Retrieve gsva profiles without initializing CoExpSubTabView 
+        		var paramsGetProfilesGeneSets = {
                         cancer_study_id: studyId,
                         case_set_id: caseSetId,
                         case_ids_key: caseIdsKey,
                         genetic_entity_list: queryGeneSets.join(" "),
                         genetic_entity_type: "GENESET"
                     };
-                    $.post("getGeneticProfile.json", paramsGetProfilesOnlyGeneSets, function(result){
+                    $.post("getGeneticProfile.json", paramsGetProfilesGeneSets, function(result){
                     	getProfileCallback(result, queryGeneSets, "GENESET", true);
                     }, "json");
-            }
+        	}
         },
         has_mutation_data: function() {
             return has_mutation_data;
