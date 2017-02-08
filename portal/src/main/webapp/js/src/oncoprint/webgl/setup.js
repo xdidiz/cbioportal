@@ -1169,7 +1169,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'addGenesetTracks': function (geneset_data_by_line) {
 		oncoprint.suppressRendering();
 		var gs_ids = [];
-		var track_params, i, source_profile_id, source_gene_symbols;
+		var track_params, i;
 		for (i = 0; i < geneset_data_by_line.length; i++) {
 		    track_params = {
 			'rule_set_params': {
@@ -1209,14 +1209,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'target_group': 30,
 			'removable': true,
 			'description': geneset_data_by_line[i].geneset_id,
+			'expansion_callback': State.expandTrack.bind(
+				State, geneset_data_by_line[i].geneset_id)
 		    };
-		    // TODO: replace the mocked gene info by API calls
-		    source_profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
-		    source_gene_symbols = ['VEGFA', 'BRCA1', 'TP53', 'KRAS', 'IGF1R', 'RB1', 'AR', 'NOTCH1', 'MYC'];
-		    if (source_profile_id !== null) {
-			track_params.expansion_callback = State.expandTrack.bind(
-				State, source_profile_id, source_gene_symbols);
-		    }
 		    var new_gs_id = oncoprint.addTracks([track_params])[0];
 		    gs_ids.push(new_gs_id);
 		    if (typeof State.geneset_tracks[0] !== 'undefined') {
@@ -1227,32 +1222,49 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return gs_ids;
 	    },
-	    'expandTrack': function(genetic_profile_id, gene_symbols, geneset_track_id) {
-		var i;
-		var group_index = null, track_ids_in_group = null, track_index = null;
+	    'expandTrack': function(geneset_id, geneset_track_id) {
+		var i, source_profile_id, source_genes;
+		// TODO: replace the mocked gene info by API calls using geneset_id
+		source_profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
+		source_genes = [
+		    {entrezGeneId: 0, hugoGeneSymbol: 'VEGFA', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'BRCA1', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'TP53', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'KRAS', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'IGF1R', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'RB1', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'AR', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
+		    {entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
+		];
+		// identify the track group the gene set track is in
+		var group_index = null, track_order_in_group = null, track_index = null;
 		var all_groups = oncoprint.model.getTrackGroups();
 		for (i = 0; i < all_groups.length; i++) {
 		    track_index = all_groups[i].indexOf(geneset_track_id);
 		    if (track_index !== -1) {
 			group_index = i;
-			track_ids_in_group = all_groups[i].slice();
+			track_order_in_group = all_groups[i].slice();
 			break;
 		    }
 		}
+		// add the gene tracks to the Oncoprint and the ordering
 		var symbol, subtrack_id, promise_list = [];
 		oncoprint.suppressRendering();
-		for (i = 0; i < gene_symbols.length; i++) {
-		    symbol = gene_symbols[i];
+		for (i = 0; i < source_genes.length; i++) {
+		    symbol = source_genes[i].hugoGeneSymbol;
 		    subtrack_id = this.addExpansionHeatmapTrack(
-			    genetic_profile_id, symbol, geneset_track_id, group_index);
-		    promise_list.push(populateHeatmapTrack(genetic_profile_id, symbol, subtrack_id));
+			    source_profile_id, symbol, geneset_track_id, group_index);
+		    promise_list.push(populateHeatmapTrack(source_profile_id, symbol, subtrack_id));
 		    // insert subtrack id after existing track index
-		    track_ids_in_group.splice(track_index + 1, 0, subtrack_id);
+		    track_order_in_group.splice(track_index + 1, 0, subtrack_id);
 		    track_index++;
 		}
+		// register a callback to set the order once all tracks
+		// are populated
 		return $.when.apply(null, promise_list)
 		.then(function() {
-		    oncoprint.setTrackGroupOrder(group_index, track_ids_in_group);
+		    oncoprint.setTrackGroupOrder(group_index, track_order_in_group);
 		    oncoprint.releaseRendering();
 		});
 	    },
