@@ -60,15 +60,20 @@ var CoExpView = (function() {
     //Sub tabs
     var Tabs = (function() {
 
-        function appendTabsContent() {
+        /**
+         * This function creates a sub-tab for each queried genetic entity.
+         * 
+         * @returns
+         */
+    	function appendTabsContent() {
         	//Add a sub-tab for every queried genetic entity
         	var geneIds = [];
-        	if (window.QuerySession.getQueryGenes() !== null) {
-        		geneIds = window.QuerySession.getQueryGenes();
+        	if (queryGenes !== null) {
+        		geneIds = queryGenes;
         	}
         	var genesetIds = [];
-        	if (window.QuerySession.getQueryGenesets() !== null) {
-        		genesetIds = window.QuerySession.getQueryGenesets();
+        	if (queryGeneSets !== null) {
+        		genesetIds = queryGeneSets;
         	}
             var geneEntityIds = geneIds.concat(genesetIds); 
             $.each(geneEntityIds, function(index, value) {
@@ -77,14 +82,19 @@ var CoExpView = (function() {
             });
         }
 
-        function appendLoadingImgs() {
+        /**
+         * This function appends a loading image and a message in the selected sub-tab.
+         * 
+         * @returns
+         */
+    	function appendLoadingImgs() {
         	var geneIds = [];
-        	if (window.QuerySession.getQueryGenes() !== null) {
-        		geneIds = window.QuerySession.getQueryGenes();
+        	if (queryGenes !== null) {
+        		geneIds = queryGenes;
         	}
         	var genesetIds = [];
-        	if (window.QuerySession.getQueryGenesets() !== null) {
-        		genesetIds = window.QuerySession.getQueryGenesets();
+        	if (queryGeneSets !== null) {
+        		genesetIds = queryGeneSets;
         	}
             var geneEntityIds = geneIds.concat(genesetIds); 
             $.each(geneEntityIds, function(index, value) {
@@ -96,6 +106,11 @@ var CoExpView = (function() {
             });
         }
 
+    	/**
+    	 * This function displays the sub-tabs created in the page.
+    	 * 
+    	 * @returns
+    	 */
         function generateTabs() {
             $("#coexp-tabs").tabs();
             $("#coexp-tabs").tabs('paging', {tabsPerPage: 10, follow: true, cycle: false});
@@ -103,22 +118,29 @@ var CoExpView = (function() {
             $(window).trigger("resize");
         }
 
+        /**
+         * This function initializes the sub-tab that has been clicked.
+         * 
+         * @returns
+         */
         function bindListenerToTabs() {
             $("#coexp-tabs").on("tabsactivate", function(event, ui) {
-                var _genetic_entity = ui.newTab.text();
-                var _genetic_entity_type = null;
-                if (window.QuerySession.getQueryGenes() !== null) {
-	                if ((window.QuerySession.getQueryGenes()).indexOf(_genetic_entity) !== -1) {
-	                	_genetic_entity_type = "GENE";
+            	//Get the genetic entity ID of the selected tab and retrieve its geneticEntityType
+                var _geneticEntityId = ui.newTab.text();
+                var _geneticEntityType = null;
+                if (queryGenes !== null) {
+	                if (queryGenes.indexOf(_geneticEntityId) !== -1) {
+	                	_geneticEntityType = "GENE";
 	                }
                 } 
-                if (window.QuerySession.getQueryGenesets() !== null) {
-	                if ((window.QuerySession.getQueryGenesets()).indexOf(_genetic_entity) !== -1) {
-	                	_genetic_entity_type = "GENESET";
+                if (queryGeneSets !== null) {
+	                if (queryGeneSets.indexOf(_geneticEntityId) !== -1) {
+	                	_geneticEntityType = "GENESET";
 	                }
                 }
+                //Initialize the sub-tab
                 var coExpSubTabView = new CoExpSubTabView();
-                coExpSubTabView.init(_genetic_entity, _genetic_entity_type);
+                coExpSubTabView.init(_geneticEntityId, _geneticEntityType);
             });
         }
 
@@ -323,9 +345,14 @@ var CoExpView = (function() {
                 });  
             }
 
+            /**
+             * Adds a button in the bottom of the table to download the results displayed in the table.
+             * 
+             * @returns
+             */
             function attachDownloadResultButton() {
                 //Append download result button at the bottom of the table
-                $("#" + Names.tableDivId).append("<button id='download_button' style='float:right;'>Download Results</button>");
+                $("#" + Names.tableDivId).append("<button id='download_button' style='float:right;'>Download Table Results</button>");
                 document.getElementById("download_button").onclick = function() {
 	            	//Function that creates the document to download the table in the data
 	            	var tableData=coExpTableInstance.fnGetData();
@@ -382,27 +409,29 @@ var CoExpView = (function() {
                 });
             }
             
+            /**
+             * This function adds the 'Gene' and 'Gene Set' checkboxes, and ensures that when these boxes are
+             * checked, they display the correct information.
+             * 
+             * @returns
+             */
             function attachGeneticEntityButtons() { 
 	        	//Create buttons to select genes and gene sets
             	if (geneSetsRetrieved) {
             		$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
 		        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='gene_checkbox'>Genes</label>" +
-		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='geneset_checkbox'>Gene sets</label>"
+		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='geneset_checkbox'>Gene Sets</label>"
 		        		);
             	} else {
 		        	$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
 		        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='gene_checkbox'>Genes</label>" +
-		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene sets</label>"
+		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene Sets</label>"
 		        		);
             	}
 	        	$("input#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
 		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
-				        		if (genesRetrieved){ //Add the genes into the coexpTable again if they are not there
-				        			if (geneArr.length >= 1) {
-			        					coExpTableInstance.fnAddData(geneArr);
-			        				} else {
-    		            				$("center").append("<div id='no_genes' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No genes with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
-    		            			}
+				        		if (genesRetrieved && geneArr.length >= 1){ //Add the genes into the coexpTable again if they are not there
+				        			coExpTableInstance.fnAddData(geneArr);
 		        				} else { //Genes not retrieved, so append an error message
 		        					$("center").append("<div id='no_genes' data-notify='container' class='col-xs-11 col-sm-3 alert alert-warning geneValidationNotification animated fadeInDown' role='alert' data-notify-position='top-right' style='display: inline-block; margin: 0px auto; position: fixed; transition: all 0.5s ease-in-out; z-index: 1031; top: 20px; right: 20px; animation-iteration-count: 1;'><button type='button' style='display: none' aria-hidden='true' class='close' data-notify='dismiss'>Ã—</button><span data-notify='icon'></span> <span data-notify='title'></span> <span data-notify='message'><span id='AD' class='close' data-notify='dismiss' data-hasqtip='35'>No genes with a correlation higher than 0.3 or lower than -0.3 were found</span></span></div>");
     		            			
@@ -423,14 +452,14 @@ var CoExpView = (function() {
 		        	    if ($("#geneset_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
 		        	    	if (geneSetsRetrieved === false) { //If it is the first time that the checkbox is checked, retrieve the data
         		            	var paramsGetCoExpData = {
-        		                        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+        		                        cancer_study_id: studyId,
         		                        genetic_entity: geneEntityId,
         		                        genetic_entity_profile_id: geneSetProfile,
         		                        correlated_entities_to_find: "GENESET",
         		                        correlated_entities_profile_id: geneSetProfile,
         		                        genetic_entity_type: geneEntityType, 
-        		                        case_set_id: window.QuerySession.getCaseSetId(),
-        		                        case_ids_key: window.QuerySession.getCaseIdsKey(),
+        		                        case_set_id: caseSetId,
+        		                        case_ids_key: caseIdsKey,
         		            	};
         		            	$.post(
         		            		"getCoExp.do", 
@@ -532,19 +561,31 @@ var CoExpView = (function() {
                 });
             }
 
+            /**
+             * This function initializes the tab (table, plot, etc.) if the call to retrieve correlated genes with the
+             * queried genetic entity returned results. If not (or the correlation is lower than the threshold), the
+             * function tries to retrieve correlated gene sets for the queried genetic entities. If there are correlated
+             * gene sets, the tab will be initialized, otherwise a message will be displayed in the tab.
+             * 
+             * @param _result Result of Json call
+             * @param correlatedEntitiesToFind Genetic entity type of the correlated entities desired to be found.
+             * @param geneticEntityId Name of the query genetic entity.
+             * @param _geneticEntityType Type of the query genetic entity.
+             * @returns
+             */
             function getCoExpDataCallBack(_result, correlatedEntitiesToFind, geneticEntityId, _geneticEntityType) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
                 if (_result.length <= 0) { //If there are no genes available, call the gene sets
                 	var paramsGetCoExpData = {
-	                        cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	                        cancer_study_id: studyId,
 	                        genetic_entity: geneticEntityId,
 	                        genetic_entity_profile_id: geneticEntityProfile,
 	                        correlated_entities_to_find: "GENESET",
 	                        correlated_entities_profile_id: geneSetProfile,
 	                        genetic_entity_type: _geneticEntityType, 
-	                        case_set_id: window.QuerySession.getCaseSetId(),
-	                        case_ids_key: window.QuerySession.getCaseIdsKey(),
+	                        case_set_id: caseSetId,
+	                        case_ids_key: caseIdsKey,
 	                   };
 	                   $.post(
 	                       "getCoExp.do", 
@@ -589,16 +630,16 @@ var CoExpView = (function() {
                     	geneticEntityProfile = geneSetProfile;
                     }
                     //Make the first call only with genes (we have always genes in our query)
-                    if (genesRetrieved === false || geneSetsRetrieved === false) {
+                    if (genesRetrieved === false && geneSetsRetrieved === false) {
 	                    var paramsGetCoExpData = {
-	                         cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
+	                         cancer_study_id: studyId,
 	                         genetic_entity: _geneticEntityId,
 	                         genetic_entity_profile_id: geneticEntityProfile,
 	                         correlated_entities_to_find: "GENE",
 	                         correlated_entities_profile_id: $("#coexp-profile-selector :selected").val(),
 	                         genetic_entity_type: _geneticEntityType, 
-	                         case_set_id: window.QuerySession.getCaseSetId(),
-	                         case_ids_key: window.QuerySession.getCaseIdsKey(),
+	                         case_set_id: caseSetId,
+	                         case_ids_key: caseIdsKey,
 	                    };
 	                    $.post(
 	                        "getCoExp.do", 
@@ -662,20 +703,31 @@ var CoExpView = (function() {
 
     };   //Closing coExpSubTabView
 
-    function getProfileCallback(result, _geneticEntity, _geneticEntityType, initCoExpSubTabView) {
-    	if (_geneticEntityType === "ALL") {
+    /**
+     * This function gets the profiles obtained by the Json call and it passes them to the Profile selector if they
+     * are expression profiles, or it sets the "geneSetProfile" variable if the profile is GSVA-SCORE. Also, it can
+     * initialize the coExpSubTabView if specified.
+     * 
+     * @param jsonResult The profiles obtained by the Json call
+     * @param queriedGeneticEntities String with the queried genetic entities separated by spaces
+     * @param _geneticEntityType Genetic entity type of the queried genetic entities
+     * @param initCoExpSubTabView Boolean specifying if coExpSubTabView should be initialized
+     * @returns
+     */
+    function getProfileCallback(jsonResult, queriedGeneticEntities, geneticEntityType, initCoExpSubTabView) {
+    	if (geneticEntityType === "ALL") {
     		//Create the drop-down menu if necessary
-	        ProfileSelector.init(result);
-	        if (Object.keys(result).length === 1) {
+	        ProfileSelector.init(jsonResult);
+	        if (Object.keys(jsonResult).length === 1) {
 	            $("#coexp-profile-selector-dropdown").hide();
 	        }
     	} else {
 	        //Init Profile selector
 	        var _profile_list = {};
-	        _.each(_geneticEntity, function(_geneticEntity) {
-	            _profile_list = _.extend(_profile_list, result[_geneticEntity]);
+	        _.each(queriedGeneticEntities, function(queriedGeneticEntities) {
+	            _profile_list = _.extend(_profile_list, jsonResult[queriedGeneticEntities]);
 	        });
-	        if (_geneticEntityType === "GENE") {
+	        if (geneticEntityType === "GENE") {
 	        	//Create the drop-down menu if necessary
 		        ProfileSelector.init(_profile_list);
 		        if (profileList.length === 1) {
@@ -703,25 +755,27 @@ var CoExpView = (function() {
         
         if (initCoExpSubTabView) {
 	        var coExpSubTabView = new CoExpSubTabView();
-	        coExpSubTabView.init(_geneticEntity[0], _geneticEntityType);
+	        coExpSubTabView.init(queriedGeneticEntities[0], geneticEntityType);
         }
     }
 
     return {
         init: function() {
-            //Init Tabs
-            Tabs.appendTabsContent();
-            Tabs.appendLoadingImgs();
-            Tabs.generateTabs();
-            Tabs.bindListenerToTabs();
-            //Get all the genetic profiles with data available
-            studyId = window.QuerySession.getCancerStudyIds()[0];
+        	//First, set the coexpView specific variables
+        	studyId = window.QuerySession.getCancerStudyIds()[0];
             caseSetId = window.QuerySession.getCaseSetId();
             caseIdsKey = window.QuerySession.getCaseIdsKey();
             queryGenes = window.QuerySession.getQueryGenes();
             queryGeneSets = window.QuerySession.getQueryGenesets();
             geneSetProfile = null;
             
+            //Init Tabs
+            Tabs.appendTabsContent();
+            Tabs.appendLoadingImgs();
+            Tabs.generateTabs();
+            Tabs.bindListenerToTabs();
+            
+            //Get all the genetic profiles with data available
             if (queryGenes !== null) { //Retrieve genetic profiles for the genes queried.
             	var paramsGetProfilesGenes = {
                         cancer_study_id: studyId,
