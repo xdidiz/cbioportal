@@ -166,7 +166,7 @@ var CoExpView = (function() {
                         profileList.push(obj);
                     }
                 } else if (obj.GENETIC_ALTERATION_TYPE === "MUTATION_EXTENDED") {
-                	if (window.QuerySession.getQueryGenes() !== null) {
+                	if (queryGenes !== null) {
                 		has_mutation_data = true;
                 	}
                 }
@@ -174,7 +174,7 @@ var CoExpView = (function() {
             //swap the rna seq profile to the top
             $.each(profileList, function(i, obj) {
                 if (obj.STABLE_ID.toLowerCase().indexOf("rna_seq") !== -1) {
-                    cbio.util.swapElement(profileList, i, 0);
+            		cbio.util.swapElement(profileList, i, 0);
                 }
             });
         }
@@ -194,12 +194,12 @@ var CoExpView = (function() {
         function bindListener() {
             $("#coexp-profile-selector").change(function() {
             	var geneIds = [];
-            	if (window.QuerySession.getQueryGenes() !== null) {
-            		geneIds = window.QuerySession.getQueryGenes();
+            	if (queryGenes !== null) {
+            		geneIds = queryGenes;
             	}
             	var genesetIds = [];
-            	if (window.QuerySession.getQueryGenesets() !== null) {
-            		genesetIds = window.QuerySession.getQueryGenesets();
+            	if (queryGeneSets !== null) {
+            		genesetIds = queryGeneSets;
             	}
                 var geneEntityIds = geneIds.concat(genesetIds);
                 
@@ -217,6 +217,11 @@ var CoExpView = (function() {
                     $("#" + Prefix.tableDivPrefix + cbio.util.safeProperty(value)).empty();
                     $("#" + Prefix.plotsPreFix + cbio.util.safeProperty(value)).empty();
                     $("#" + Prefix.loadingImgPrefix + cbio.util.safeProperty(value)).empty();
+                    
+                    //Empty gene and gene set arrays
+                    geneArr = []
+                    geneSetArr = []
+                    
                     //Add back loading imgs
                     $("#" + Prefix.loadingImgPrefix + cbio.util.safeProperty(value)).append(
                         "<table><tr><td><img style='padding:20px;' src='images/ajax-loader.gif' alt='loading' /></td>" +
@@ -226,9 +231,9 @@ var CoExpView = (function() {
                 //Re-draw the currently selected sub-tab view
                 var curTabIndex = $("#coexp-tabs").tabs("option", "active");
                 var _genetic_entity_type = null;
-                if ((window.QuerySession.getQueryGenes()).indexOf(geneEntityIds[curTabIndex]) !== -1) {
+                if (queryGenes.indexOf(geneEntityIds[curTabIndex]) !== -1) {
                 	_genetic_entity_type = "GENE";
-                } else if ((window.QuerySession.getQueryGenesets()).indexOf(geneEntityIds[curTabIndex]) !== -1) {
+                } else if (queryGeneSets.indexOf(geneEntityIds[curTabIndex]) !== -1) {
                 	_genetic_entity_type = "GENESET";
                 }
                 var coExpSubTabView = new CoExpSubTabView();
@@ -417,17 +422,10 @@ var CoExpView = (function() {
              */
             function attachGeneticEntityButtons() { 
 	        	//Create buttons to select genes and gene sets
-            	if (geneSetsRetrieved) {
-            		$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
-		        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='gene_checkbox'>Genes</label>" +
-		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='geneset_checkbox'>Gene Sets</label>"
-		        		);
-            	} else {
-		        	$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
-		        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='gene_checkbox'>Genes</label>" +
-		        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene Sets</label>"
-		        		);
-            	}
+        		$("#" + Names.tableDivId).find('.coexp-table-filter-pearson').append(
+	        			"<br><input type='checkbox' id='gene_checkbox"+cbio.util.safeProperty(geneEntityId)+"' checked><label for='gene_checkbox'>Genes</label>" +
+	        			"<input type='checkbox' id='geneset_checkbox"+cbio.util.safeProperty(geneEntityId)+"' ><label for='geneset_checkbox'>Gene Sets</label>"
+	        		);
 	        	$("input#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).change(function() {
 		        		if ($("#gene_checkbox"+cbio.util.safeProperty(geneEntityId)).prop('checked')) {
 				        		if (genesRetrieved && geneArr.length >= 1){ //Add the genes into the coexpTable again if they are not there
@@ -561,32 +559,6 @@ var CoExpView = (function() {
                 });
             }
 
-            /**
-             * This function initializes the tab (table, plot, etc.) if the call to retrieve correlated genes with the
-             * queried genetic entity returned results. If not (or the correlation is lower than the threshold), the
-             * function tries to retrieve correlated gene sets for the queried genetic entities. If there are correlated
-             * gene sets, the tab will be initialized, otherwise a message will be displayed in the tab.
-             * 
-             * @param _result Result of Json call
-             * @param correlatedEntitiesToFind Genetic entity type of the correlated entities desired to be found.
-             * @param geneticEntityId Name of the query genetic entity.
-             * @param _geneticEntityType Type of the query genetic entity.
-             * @returns
-             */
-            function getCoExpDataCallBack(_result, correlatedEntitiesToFind, geneticEntityId, _geneticEntityType) {
-                //Hide the loading img
-                $("#" + Names.loadingImgId).empty();
-          
-            	convertData(_result, correlatedEntitiesToFind);
-            	overWriteFilters(); 
-                configTable();
-                attachDownloadResultButton();
-                attachPearsonFilter();
-                attachGeneticEntityButtons();
-                attachRowListener();
-                initTable();
-            }
-
             return {
                 init: function(_geneticEntityId, _geneticEntityType) {
                     //Getting co-exp data (for currently selected gene/profile) from servlet
@@ -613,7 +585,16 @@ var CoExpView = (function() {
 	                        "getCoExp.do", 
 	                        paramsGetCoExpData, 
 	                        function(result) {
-	                            getCoExpDataCallBack(result, "GENE", _geneticEntityId, _geneticEntityType);
+	                        	//Hide the loading img
+	                            $("#" + Names.loadingImgId).empty();
+	                        	convertData(result, "GENE");
+	                        	overWriteFilters(); 
+	                            configTable();
+	                            attachDownloadResultButton();
+	                            attachPearsonFilter();
+	                            attachGeneticEntityButtons();
+	                            attachRowListener();
+	                            initTable();
 	                            genesRetrieved = true;
 	                       },
 	                       "json"
@@ -672,28 +653,28 @@ var CoExpView = (function() {
     };   //Closing coExpSubTabView
 
     /**
-     * This function gets the profiles obtained by the Json call and it passes them to the Profile selector if they
+     * This function gets the profiles obtained by the Jquery call and it passes them to the Profile selector if they
      * are expression profiles, or it sets the "geneSetProfile" variable if the profile is GSVA-SCORE. Also, it can
      * initialize the coExpSubTabView if specified.
      * 
-     * @param jsonResult The profiles obtained by the Json call
+     * @param jqueryResult The profiles obtained by the Jquery call
      * @param queriedGeneticEntities String with the queried genetic entities separated by spaces
      * @param _geneticEntityType Genetic entity type of the queried genetic entities
      * @param initCoExpSubTabView Boolean specifying if coExpSubTabView should be initialized
      * @returns
      */
-    function getProfileCallback(jsonResult, queriedGeneticEntities, geneticEntityType, initCoExpSubTabView) {
+    function getProfileCallback(jqueryResult, queriedGeneticEntities, geneticEntityType, initCoExpSubTabView) {
     	if (geneticEntityType === "ALL") {
     		//Create the drop-down menu if necessary
-	        ProfileSelector.init(jsonResult);
-	        if (Object.keys(jsonResult).length === 1) {
+	        ProfileSelector.init(jqueryResult);
+	        if (Object.keys(jqueryResult).length === 1) {
 	            $("#coexp-profile-selector-dropdown").hide();
 	        }
     	} else {
 	        //Init Profile selector
 	        var _profile_list = {};
 	        _.each(queriedGeneticEntities, function(queriedGeneticEntities) {
-	            _profile_list = _.extend(_profile_list, jsonResult[queriedGeneticEntities]);
+	            _profile_list = _.extend(_profile_list, jqueryResult[queriedGeneticEntities]);
 	        });
 	        if (geneticEntityType === "GENE") {
 	        	//Create the drop-down menu if necessary
