@@ -576,47 +576,15 @@ var CoExpView = (function() {
             function getCoExpDataCallBack(_result, correlatedEntitiesToFind, geneticEntityId, _geneticEntityType) {
                 //Hide the loading img
                 $("#" + Names.loadingImgId).empty();
-                if (_result.length <= 0) { //If there are no genes available, call the gene sets
-                	var paramsGetCoExpData = {
-	                        cancer_study_id: studyId,
-	                        genetic_entity: geneticEntityId,
-	                        genetic_entity_profile_id: geneticEntityProfile,
-	                        correlated_entities_to_find: "GENESET",
-	                        correlated_entities_profile_id: geneSetProfile,
-	                        genetic_entity_type: _geneticEntityType, 
-	                        case_set_id: caseSetId,
-	                        case_ids_key: caseIdsKey,
-	                   };
-	                   $.post(
-	                       "getCoExp.do", 
-	                       paramsGetCoExpData, 
-	                       function(result) {
-	                    	   geneSetsRetrieved = true;
-	                    	   if (_result.length <= 0) { 
-	                    		   $("#" + Names.tableDivId).append("There are no genes or gene sets paired with the queried genetic entity with a Pearson or Spearman score > 0.3 or < -0.3.");
-	                    	   } else {
-	                    		   convertData(result, "GENESET");
-	                    		   overWriteFilters(); 
-	                               configTable();
-	                               attachDownloadResultButton();
-	                               attachPearsonFilter();
-	                               attachGeneticEntityButtons();
-	                               attachRowListener();
-	                               initTable();
-	                    	   }
-	                      },
-	                      "json"
-	                   );
-                } else {
-                	convertData(_result, correlatedEntitiesToFind);
-                	overWriteFilters(); 
-                    configTable();
-                    attachDownloadResultButton();
-                    attachPearsonFilter();
-                    attachGeneticEntityButtons();
-                    attachRowListener();
-                    initTable();
-                }
+          
+            	convertData(_result, correlatedEntitiesToFind);
+            	overWriteFilters(); 
+                configTable();
+                attachDownloadResultButton();
+                attachPearsonFilter();
+                attachGeneticEntityButtons();
+                attachRowListener();
+                initTable();
             }
 
             return {
