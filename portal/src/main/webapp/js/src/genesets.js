@@ -227,24 +227,57 @@ var initialize_geneset_jstree = function (data) {
 	// Build the tree
 	$('#jstree_genesets').jstree({
 		"plugins": ['checkbox', 'search'],
-		"search": {'show_only_matches': true},
+		"search": {
+			'show_only_matches': true,
+			},
 		"core" : {
 			"data" : flatData,
 			"themes": {
 				"icons":false
 			} 
 		}
+	}).on('search.jstree before_open.jstree', function (e, data) {
+	    if(data.instance.settings.search.show_only_matches) {
+	        data.instance._data.search.dom.find('.jstree-node')
+	            .show().filter('.jstree-last').filter(function() { return this.nextSibling; }).removeClass('jstree-last')
+	            .end().end().end().find(".jstree-children").each(function () { $(this).children(".jstree-node:visible").eq(-1).addClass("jstree-last"); });
+	    }
 	});
 	
+
 	// Search function
 	var to = false;
 	$('#jstree_genesets_searchbox').keyup(function () {
 	    if(to) { clearTimeout(to); }
 	    to = setTimeout(function () {
 	    	var v = $('#jstree_genesets_searchbox').val();
+	        
+	    	// This does not work:
+//	        // Only add clear search button when something is in box 
+//			if ($("#jstree_search_input").val() !== "") {
+//				$("#jstree_genesets_empty_search").css("display", "none");
+//			}
+
 	    	$('#jstree_genesets').jstree(true).search(v);
 	    }, 250);
+	    
 	});
+	
+	
+
+	
+	// This does not work:
+	// When button is clicked, empty search
+//    $('#jstree_genesets_empty_search').click(function() { 
+//    	var v = "";
+//        $("#jstree_genesets_searchbox").val(v);
+//
+//    	$('#jstree_genesets').jstree(true).search(v);
+//		
+//		// Hide button
+//        $("#jstree_genesets_empty_search").css("display", "none");
+//    });
+    
 }	
 
 

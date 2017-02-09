@@ -199,7 +199,9 @@
 	    <div class="row step_header_first_line">
 	        <div class="input-group input-group-sm col-5">
 	            <input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search"/>
-	            <i id="step_header_first_line_empty_search" class="fa fa-times"></i>
+	            
+	            <!-- Button to reset search-->
+ 	            <!-- <i id="jstree_genesets_empty_search" class="fa fa-times"></i> -->
 	        </div>
 	    </div>
  
