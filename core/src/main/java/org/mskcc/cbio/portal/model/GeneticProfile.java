@@ -38,9 +38,6 @@ import java.util.Properties;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-
-
-
 /**
  * Class for genetic profile
  */
@@ -110,7 +107,6 @@ public class GeneticProfile {
    public int getGeneticProfileId() {
         return geneticProfileId;
     }
-
     public void setGeneticProfileId(int geneticProfileId) {
         this.geneticProfileId = geneticProfileId;
     }

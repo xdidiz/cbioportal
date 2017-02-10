@@ -36,7 +36,6 @@
 %>
 
 <div class="query_step_section">
-
     <span class="step_header">Select Genes:</span>
 
     <script language="javascript" type="text/javascript">
@@ -48,11 +47,9 @@
     }
     </script>
 
-    <% 
-    if (localTabIndex.equals(QueryBuilder.TAB_VISUALIZE)) {
-        out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='onco_query_lang_desc.jsp' onclick='return popitup('onco_query_lang_desc.jsp')'>Advanced: Onco Query Language (OQL)</a></span>");
-    } 
-    %>
+    <% if (localTabIndex.equals(QueryBuilder.TAB_VISUALIZE)) { %>
+        <% out.println("<span style='font-size:120%; color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='onco_query_lang_desc.jsp' onclick='return popitup('onco_query_lang_desc.jsp')'>Advanced: Onco Query Language (OQL)</a></span>"); %>
+    <% } %>
     
     <%
 	// Output step 4 form validation error
@@ -63,107 +60,17 @@
 	    customCaseListStyle = "block";
 	}
 	%>
-	
-    <script type="text/javascript" src="js/src/mutsig.js?<%=GlobalProperties.getAppVersion()%>"></script>
-    <div id="mutsig_dialog" title="Recurrently Mutated Genes" class='display' style="font-size: 11px; .ui-dialog {padding: 0em;};">
-        <img id='loader-img' src="images/ajax-loader.gif" alt='loading'/>
-        <table class="MutSig">
-            <thead>
-                <tr>
-                    <th>Gene Symbol</th>
-                    <th>Num Mutations</th>
-                    <th>Q-Value</th>
-                    <th>All<input class="checkall" type="checkbox" title="Select All Genes"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-		<div id="mutsig_dialog_footer" style="float: right;">
-					<button id="cancel_mutsig" title="Cancel">Cancel</button>
-					<button id="select_mutsig" class="tabs-button" title="Use these mutsig genes">Select</button>
-		</div>
-    </div>
-    
-    <script type="text/javascript" src="js/src/gistic.js?<%=GlobalProperties.getAppVersion()%>"></script>
-    <div id="gistic_dialog" title="Recurrent Copy Number Alterations (Gistic)" style="font-size:11px; text-align:left; .ui-dialog {padding:0em;};">
-        <div id='gistic_loading'><img id='loader-img' src="images/ajax-loader.gif" alt='loading'/></div>
-        <table id="gistic_table" class='display' style='border-spacing:12px;'></table>
-        <div id="gistic_dialog_footer">
-            <button style="float: right; display:none; margin-top:1.1em;" id="gistic_close" onclick="Gistic.UI.updateGenes(); Gistic.dialog_el.dialog('close');" class="tabs-button" title="Use these ROI genes">Select Genes</button>
-        </div>
-    </div>
-    
-    <script type='text/javascript'>
-    // set up modal dialog box for gistic table
-    $('#gistic_dialog').dialog( {autoOpen: false,
-            modal: true,
-            overflow: 'hidden',
-            minWidth: 800,
-            resizable: false,
-            height: 545,
-            // width: 'auto',
-            open: function() { 
-                // sets the scrollbar to the top of the table
-                $(this).scrollTop(0);
-                return;
-                // workaround to prevent auto focus
-                //$(this).add('input').blur();
-            },
-    });
-    </script>
-    
-    <style type='text/css'>
-        .gistic_gene {
-            padding: 3px;
-            border-radius:5px;
-            cursor:pointer;
-        }
-        .gistic_gene:hover {
-            padding: 1px;
-            border: 2px solid #1974b8;
-        }
-        .gistic_selected_gene {
-            #background:#DDD;
-            font-weight:bold;
-        }
-        .gistic_amp {
-            height: 1em;
-            background-color: red;
-        }
-        .gistic_del {
-            height: 1em;
-            background-color: blue;
-        }
-        #gistic_table_filter {
-            font-size: 12px;
-            font-weight: bold;
-            padding-bottom: 8px;
-        }
-        #gistic_msg_box {
-            line-height: 2.5em;
-            float: left;
-        }
-        #gistic_msg_box span {
-            font-size: 12px;
-            font-weight: bold;
-            padding: 1px;
-            border: 2px solid #1974b8;
-            border-radius:5px;
-        }
-    </style>
-    
 
     <script type="text/javascript" src="js/src/genesets.js?<%=GlobalProperties.getAppVersion()%>"></script>
     <div style='padding-top:10px;padding-bottom:5px;'>
         <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Gene Set"></select>
     </div>
-
+        
     <div style="padding-bottom:5px;margin-left:-3px;">
         <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select from Recurrently Mutated Genes (MutSig)</button>
         <button id="toggle_gistic_dialog" onclick="Gistic.UI.open_dialog(); return false;" style="font-size: 1em; display: none;">Select Genes from Recurrent CNAs (Gistic)</button>
     </div>
-	
+
     <script type="text/javascript">
         $(document).ready(function() {
             GeneSymbolValidator.initialize();
@@ -182,8 +89,8 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases'>
         out.print(geneListWithSemis);
     }
 %></textarea>
-	
-	<p id="genestatus"></p>
+
+<p id="genestatus"></p>
 	
 	<!-- // Gene set button that opens hierarchy popup -->	
 	<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
@@ -200,7 +107,7 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases'>
 	        <div class="input-group input-group-sm col-5">
 	            <input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search"/>
 	            
-	            <!-- Button to reset search-->
+	            <!-- Button to reset search (Work in progress) -->
  	            <!-- <i id="jstree_genesets_empty_search" class="fa fa-times"></i> -->
 	        </div>
 	    </div>

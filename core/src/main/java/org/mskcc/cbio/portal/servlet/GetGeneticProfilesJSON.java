@@ -36,7 +36,6 @@ import java.io.*;
 import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-
 import org.cbioportal.model.GeneticEntity.EntityType;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;

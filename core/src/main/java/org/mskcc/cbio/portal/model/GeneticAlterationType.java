@@ -51,4 +51,3 @@ public enum GeneticAlterationType {
     PROTEIN_ARRAY_PHOSPHORYLATION, 
     GENESET_SCORE;
 };
-

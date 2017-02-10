@@ -109,7 +109,7 @@ public class QueryBuilder extends HttpServlet {
 
     private static Log LOG = LogFactory.getLog(QueryBuilder.class);
 
-    public static final String CANCER_TYPES_MAP = "cancer_types_map";
+    public static final String CANCER_TYPES_MAP = "cancer_types_map"; 
 
     private ServletXssUtil servletXssUtil;
 

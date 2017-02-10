@@ -49,10 +49,11 @@
 var PROFILE_MUTATION = "PROFILE_MUTATION";
 var PROFILE_MUTATION_EXTENDED = "PROFILE_MUTATION_EXTENDED";
 var PROFILE_COPY_NUMBER_ALTERATION = "PROFILE_COPY_NUMBER_ALTERATION"
-var PROFILE_GSVA_SCORES = "PROFILE_GSVA_SCORES"
 var PROFILE_MRNA_EXPRESSION = "PROFILE_MRNA_EXPRESSION";
+var PROFILE_PROTEIN = "PROFILE_PROTEIN";
 var PROFILE_PROTEIN_EXPRESSION = "PROFILE_PROTEIN_EXPRESSION";
 var PROFILE_METHYLATION = "PROFILE_METHYLATION"
+var PROFILE_GSVA_SCORES = "PROFILE_GSVA_SCORES"
 
 var caseSetSelectionOverriddenByUser = false;
 var selectedStudiesStorageKey = "cbioportal_selected_studies";
@@ -231,7 +232,7 @@ function userClickedMainTab(tabAction) {
 //  is selected in Step 1
 function crossCancerStudySelected() {
      $('#step2').hide();
-     $('#step2cross').show();     
+     $('#step2cross').show();
      $('#step3').hide();
      $('#toggle_geneset_dialog').hide();
      $('#geneset_list').hide();
@@ -356,6 +357,7 @@ function getMapping() {
         else {
             def.resolve();
         }
+        
         return def;
     }
     if ($("#main_form").find("input[name=patient_case_select]:checked").val() === "patient") {
@@ -405,7 +407,7 @@ function chooseAction(evt) {
 			}
 			return false;
 		}
-	}
+    }
     var selected_studies = $("#jstree").jstree(true).get_selected_leaves();
     if (selected_studies.length === 0 && !window.changingTabs) {
             // select all by default
@@ -669,7 +671,8 @@ function updateCancerStudyInformation() {
     addGenomicProfiles(cancer_study.genomic_profiles, "METHYLATION_BINARY", PROFILE_METHYLATION, "DNA Methylation");
     //addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN, "Protein Level");
     addGenomicProfiles(cancer_study.genomic_profiles, "PROTEIN_LEVEL", PROFILE_PROTEIN_EXPRESSION, "Protein/phosphoprotein level");
-    	
+
+
     //  if no genomic profiles available, set message and disable submit button
     if ($("#genomic_profiles").html()==""){
         console.log("cancerStudySelected ( genomicProfilesUnavailable() )");

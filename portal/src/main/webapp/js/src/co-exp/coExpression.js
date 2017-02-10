@@ -40,7 +40,7 @@
  */
 
 var CoExpView = (function() {
-	
+
     //Pre settings for every sub tab instance
     var Prefix = {
             divPrefix: "coexp_",
