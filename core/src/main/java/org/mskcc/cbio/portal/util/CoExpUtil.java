@@ -38,11 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cbioportal.model.GeneticEntity.EntityType;
-import org.cbioportal.persistence.GenesetRepository;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
-import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
+import org.mskcc.cbio.portal.dao.DaoGeneset;
 import org.mskcc.cbio.portal.dao.DaoGeneticAlteration;
 import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
 import org.mskcc.cbio.portal.dao.DaoSample;
@@ -53,20 +51,8 @@ import org.mskcc.cbio.portal.model.GeneticAlterationType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.model.Sample;
 import org.mskcc.cbio.portal.model.SampleList;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-
-
-@Component
 public class CoExpUtil {
-
-	private static GenesetRepository genesetRepository;
-	
-	@Autowired
-	public CoExpUtil(GenesetRepository genesetRepository) {
-		CoExpUtil.genesetRepository = genesetRepository;
-	}
 
     public static ArrayList<String> getSampleIds(String sampleSetId, String sampleIdsKeys) {
 		try {
@@ -173,15 +159,4 @@ public class CoExpUtil {
 
         return map;
     }
-
-	public static int getEntityIdForGeneset(String entityStableId) {
-		// TODO temp method:
-		return CoExpUtil.genesetRepository.getGenesetByGenesetId(entityStableId).getEntityId();
-	}
-	
-	public static String getEntityStableIdForGenesetEntityId(Integer entityId) {
-		// TODO temp method:
-		return CoExpUtil.genesetRepository.getGenesetByGeneticEntityId(entityId).getEntityStableId();
-	}
-	
 }

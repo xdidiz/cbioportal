@@ -32,15 +32,29 @@
 
 package org.mskcc.cbio.portal.dao;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
-import org.mskcc.cbio.portal.model.*;
-import org.mskcc.cbio.portal.model.converter.MutationModelConverter;
-import org.mskcc.cbio.portal.persistence.MutationMapperLegacy;
-import org.mskcc.cbio.portal.repository.MutationRepositoryLegacy;
+import org.cbioportal.model.GenesetData;
 import org.cbioportal.model.GeneticData;
-import org.cbioportal.model.GeneticEntity.EntityType;
+import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.GeneticDataService;
+import org.cbioportal.service.exception.GeneticProfileNotFoundException;
+import org.mskcc.cbio.portal.model.CanonicalGene;
+import org.mskcc.cbio.portal.model.EntityType;
+import org.mskcc.cbio.portal.model.ExtendedMutation;
+import org.mskcc.cbio.portal.model.Gene;
+import org.mskcc.cbio.portal.model.GeneticAlterationType;
+import org.mskcc.cbio.portal.model.GeneticProfile;
+import org.mskcc.cbio.portal.model.ProteinArrayData;
+import org.mskcc.cbio.portal.model.ProteinArrayInfo;
+import org.mskcc.cbio.portal.model.converter.MutationModelConverter;
+import org.mskcc.cbio.portal.repository.MutationRepositoryLegacy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,13 +73,15 @@ public class GeneticAlterationUtil {
     private static MutationRepositoryLegacy mutationRepositoryLegacy;
     private static MutationModelConverter mutationModelConverter;
     private static GeneticDataService geneticDataService;
+    private static GenesetDataService genesetDataService;
 
     @Autowired
     public GeneticAlterationUtil(MutationRepositoryLegacy mutationRepositoryLegacy, MutationModelConverter mutationModelConverter,
-        		GeneticDataService geneticDataService) {
+        		GeneticDataService geneticDataService, GenesetDataService genesetDataService) {
         GeneticAlterationUtil.mutationRepositoryLegacy = mutationRepositoryLegacy;
         GeneticAlterationUtil.mutationModelConverter = mutationModelConverter;
         GeneticAlterationUtil.geneticDataService = geneticDataService;
+        GeneticAlterationUtil.genesetDataService = genesetDataService;
     }
 
     /**
@@ -143,31 +159,50 @@ public class GeneticAlterationUtil {
             GeneticProfile targetGeneticProfile) throws DaoException {
     	//TODO use if (targetGeneticProfile.getGeneticAlterationType() == GeneticAlterationType.MUTATION_EXTENDED) like
     	//in previous getGeneticAlterationDataRow method, but here using the new API (which is still to be implemented)
-    	
-		//use new API which supports geneset query:
-    	List<GeneticData> geneticDataItems = geneticDataService.fetchGeneticDataInGeneticProfile(
-    			targetGeneticProfile.getStableId(), 
-    			entityType, 
-    			Arrays.asList(geneticEntityStableId), 
-    			sampleIds, 
-    			"SUMMARY", null, null);
-    	
-    	//make temporary hashmap with sample and value:
-    	Map<String,String> samplesAndValue = new HashMap<String,String>();
-    	for (GeneticData geneticData : geneticDataItems) {
-    		samplesAndValue.put(geneticData.getSampleStableId(), geneticData.getValue());
+
+    	try {
+	    	//make temporary hashmap with sample and value:
+	    	Map<String,String> samplesAndValue = new HashMap<String,String>();
+	    	
+			//use new API which supports geneset query:
+	    	if (entityType.equals(EntityType.GENE)) {
+	    		int entrezId = Integer.parseInt(geneticEntityStableId);
+	    		List<GeneticData> geneticDataItems = geneticDataService.fetchGeneticData(
+	    			targetGeneticProfile.getStableId(), 
+	    			sampleIds, 
+	    			Arrays.asList(entrezId), 
+	    			"SUMMARY");
+	    	
+		    	for (GeneticData geneticData : geneticDataItems) {
+		    		samplesAndValue.put(geneticData.getSampleId(), geneticData.getValue());
+		    	}
+	    	} else if (entityType.equals(EntityType.GENESET)) {
+	    		String genesetId = geneticEntityStableId;
+	    		List<GenesetData> genesetDataItems = genesetDataService.fetchGenesetData(
+	    			targetGeneticProfile.getStableId(), 
+	    			sampleIds, 
+	    			Arrays.asList(genesetId));
+	    	
+		    	for (GenesetData genesetData : genesetDataItems) {
+		    		samplesAndValue.put(genesetData.getSampleId(), genesetData.getValue());
+		    	}
+	    	}
+	    	
+	    	//make final list of values:
+	    	ArrayList<String> values = new ArrayList<String>();
+	    	for (String sampleId : sampleIds) {
+	    		String value = samplesAndValue.get(sampleId);
+	    		if (value == null) {
+	    			values.add(NAN);
+	            } else {
+	            	values.add(value);
+	            }
+	    	}
+	    	return values;
+    	} catch (GeneticProfileNotFoundException gp) {
+    		//not expected:
+    		throw new DaoException("Genetic profile not found:" + targetGeneticProfile.getStableId());
     	}
-    	//make final list of values:
-    	ArrayList<String> values = new ArrayList<String>();
-    	for (String sampleId : sampleIds) {
-    		String value = samplesAndValue.get(sampleId);
-    		if (value == null) {
-    			values.add(NAN);
-            } else {
-            	values.add(value);
-            }
-    	}
-    	return values;
     }
     
     public static ArrayList<String> getBestCorrelatedProteinArrayDataRow(int cancerStudyId,

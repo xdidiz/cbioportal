@@ -45,20 +45,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import org.cbioportal.model.GeneticEntity.EntityType;
-import org.cbioportal.persistence.MutationRepository;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
+import org.mskcc.cbio.portal.dao.DaoGeneset;
 import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.CanonicalGene;
-import org.mskcc.cbio.portal.model.GeneticAlterationType;
+import org.mskcc.cbio.portal.model.EntityType;
 import org.mskcc.cbio.portal.model.GeneticProfile;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.CoExpUtil;
@@ -151,7 +149,11 @@ public class GetCoExpressionJSON extends HttpServlet {
         
         int queryGeneticEntityId;
         if (EntityType.GENESET.name().equals(queryGeneticEntityType)) {
-        	queryGeneticEntityId = CoExpUtil.getEntityIdForGeneset(queryGeneticEntity); //TODO use DaoGeneset (new one added by Angelica)
+        	try {
+        		queryGeneticEntityId = DaoGeneset.getGenesetByExternalId(queryGeneticEntity).getGeneticEntityId();
+        	} catch (DaoException e) {
+        		throw new IOException("Error while querying DB: " + e.getMessage());
+        	}
         } else if (EntityType.GENE.name().equals(queryGeneticEntityType)) {
         	queryGeneticEntityId = daoGeneOptimized.getGene(queryGeneticEntity).getGeneticEntityId();
         }
@@ -214,7 +216,7 @@ public class GetCoExpressionJSON extends HttpServlet {
                                         _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
                                     }
                                     else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
-                                    	String entityStableId = CoExpUtil.getEntityStableIdForGenesetEntityId(compared_gene_entity_id);
+                                    	String entityStableId = DaoGeneset.getGenesetByEntityId(compared_gene_entity_id).getExternalId();
                                         _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name                                        	
                                     }
                                     _scores.put("profileId", queryProfile.getStableId());
@@ -235,35 +237,6 @@ public class GetCoExpressionJSON extends HttpServlet {
         	 mapper.writeValue(out, new JSONObject());
         }
     }
-
-	private GeneticProfile getReferringGenesetProfile(String profileId) {
-		GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(profileId);
-    	List<GeneticProfile> list_of_profiles;
-		try {
-			list_of_profiles = DaoGeneticProfile.getGeneticProfilesForAlterationTypeAndReferringTo
-					(GeneticAlterationType.GENESET_SCORE, geneticProfile);
-		} catch (DaoException e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException(e.getMessage());
-		}
-		List<GeneticProfile> gsva_profiles = new ArrayList<GeneticProfile>();
-    	for (GeneticProfile gp : list_of_profiles) {
-    		if ((gp.getDatatype()).equals("GSVA-SCORE")) {
-    			gsva_profiles.add(gp);
-    		}
-    	}
-    	GeneticProfile queryProfile;
-		if (gsva_profiles.size() == 1) {
-    		queryProfile = gsva_profiles.get(0);
-    	} else if (gsva_profiles.size() > 1) {
-    		//Throw error: no GSVA data for this study
-    		throw new IllegalArgumentException("Only one GSVA scores file per study supported.");
-    	} else {
-    		//no score profile, so return null 
-    		queryProfile = null;
-    	}
-    	return queryProfile;
-	}
 }
 
 

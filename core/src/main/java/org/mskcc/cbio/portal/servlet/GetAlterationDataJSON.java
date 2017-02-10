@@ -37,7 +37,7 @@ import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.util.*;
 
 import org.codehaus.jackson.node.*;
-import org.cbioportal.model.GeneticEntity.EntityType;
+import org.mskcc.cbio.portal.model.EntityType;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 

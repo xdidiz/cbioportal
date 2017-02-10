@@ -50,7 +50,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import org.cbioportal.model.GeneticEntity.EntityType;
+import org.mskcc.cbio.portal.model.EntityType;
 import org.mskcc.cbio.portal.model.GeneticAlterationType;
 
 /**
