@@ -766,9 +766,11 @@ var OncoprintModel = (function () {
 	}
 	var i, index_in_group;
 	for (i in this.track_expansion_tracks) {
-	    index_in_group = this.track_expansion_tracks[i].indexOf(track_id);
-	    if (index_in_group !== -1) {
-		this.track_expansion_tracks[i].splice(index_in_group, 1);
+	    if (this.track_expansion_tracks.hasOwnProperty(i)) {
+		index_in_group = this.track_expansion_tracks[i].indexOf(track_id);
+		if (index_in_group !== -1) {
+		    this.track_expansion_tracks[i].splice(index_in_group, 1);
+		}
 	    }
 	}
 	this.track_tops.update();
