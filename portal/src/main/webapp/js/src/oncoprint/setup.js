@@ -1248,7 +1248,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'removable': true,
 			'description': track_geneset_id + ' gene set scores from ' + genetic_profile_id,
 			'removeCallback': makeRemoveGenesetTrackHandler(track_geneset_id),
-			'expansion_callback': this.expandTrack.bind(this, track_geneset_id)
+			'expansionInitCallback': this.setExpansionData.bind(this,
+				track_geneset_id),
 		    };
 		    new_track_id = oncoprint.addTracks([track_params])[0];
 		    track_ids.push(new_track_id);
@@ -1261,11 +1262,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return track_ids;
 	    },
-	    'expandTrack': function(geneset_id, geneset_track_id) {
-		var i, source_profile_id, source_genes;
+	    'setExpansionData': function (geneset_id, track_id) {
 		// TODO: replace the mocked gene info by API calls using geneset_id
-		source_profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
-		source_genes = [
+		var genes = [
 		    {entrezGeneId: 0, hugoGeneSymbol: 'VEGFA', correlation: 0.8},
 		    {entrezGeneId: 0, hugoGeneSymbol: 'BRCA1', correlation: 0.8},
 		    {entrezGeneId: 0, hugoGeneSymbol: 'TP53', correlation: 0.8},
@@ -1275,9 +1274,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    {entrezGeneId: 0, hugoGeneSymbol: 'AR', correlation: 0.8},
 		    {entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
 		    {entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
-		];
+                ];
+		var profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
+		oncoprint.model.setExpansionGeneData(track_id, genes);
+		oncoprint.model.setExpansionCallback(track_id, this.expandTrack.bind(this, profile_id));
+	    },
+	    'expandTrack': function (source_profile_id, geneset_track_id, source_genes) {
 		// identify the track group the gene set track is in
-		var group_index = null, track_order_in_group = null, track_index = null;
+		var i, group_index = null, track_order_in_group = null, track_index = null;
 		var all_groups = oncoprint.model.getTrackGroups();
 		for (i = 0; i < all_groups.length; i++) {
 		    track_index = all_groups[i].indexOf(geneset_track_id);
