@@ -294,9 +294,9 @@ function reviewCurrentSelections(){
     // similarly with RPPA
     toggleThresholdPanel($("." + PROFILE_PROTEIN_EXPRESSION+"[type=checkbox]"), PROFILE_PROTEIN_EXPRESSION, "#rppa_score_threshold");
     
-    // This function controls the toggling of GSVA check box.
-    // This deterimines if an GSVA box is drawn.
-    toggleGeneSets($("." + PROFILE_GSVA_SCORES+"[type=checkbox]"));
+    // TODO: Remove this (does nothing)
+    // This function makes sure the gene set toggle is a checkbox
+    //toggleGeneSets($("." + PROFILE_GSVA_SCORES+"[type=checkbox]"));
 
     // determine whether optional arguments section should be shown or hidden
  //   if ($("#optional_args > input").length >= 1){
@@ -619,15 +619,19 @@ function updateCaseListSmart() {
 function toggleGeneSets(profileClicked) {
 	
     if (profileClicked.prop('checked')){
+    	
+    	// 1. Header "Select Gene Sets:"
+    	// 2. Gene set button that opens hierarchy popup	
+    	// 3. Gene set box
+    	$('#select_gene_sets').show();
     	$('#toggle_geneset_dialog').show();
     	$('#geneset_list').show();
-    	$('#select_gene_sets').show();
     }
     // if checkbox is unselected, hide button and textbox
     else {
+    	$('#select_gene_sets').hide();
     	$('#toggle_geneset_dialog').hide();
     	$('#geneset_list').hide();
-    	$('#select_gene_sets').hide();
     }
 }  
 
@@ -1531,4 +1535,3 @@ function outputGenomicProfileOption (downloadTab, optionType, targetClass, id, n
         + description + "'></label></div>";
     return html;
 }
-

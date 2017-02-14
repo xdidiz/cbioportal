@@ -23,31 +23,41 @@
 // Sander Tan, Oleguer Plantalech and Pieter Lukasse, The Hyve
 // December 2016
 
-// what is the previous cancer study that has been selected?
-// this way we don't have to repeat queries
-var CANCER_STUDY_SELECTED = -1;
-
+// Save selected checkboxes
+var selectedBoxes;
 
 // initialize and bind for
 // geneset toggle button and geneset dialog box
 var initGenesetDialogue = function() {
-    "use strict";
+	"use strict";
+	
+	console.log("Setting up gene set popup event");
 
     // initialize geneset button
     // as hidden, and with JQuery UI style
     $('#toggle_geneset_dialog').hide();
     $('#toggle_geneset_dialog').button();
 
-    // set up modal dialog box for geneset table (step 3)
+    // set up popup for gene set hierarchy
     $('#geneset_dialog').dialog({autoOpen: false,
         resizable: false,
         modal: true,
         minHeight: 315,
-        minWidth: 636
-        });
+        minWidth: 636,
+        
+    	// destroy the tree so that it is renewed upon next dialog pop-up
+        close: function() {
+        	$('#jstree_genesets').jstree('destroy');
+        }
+    });
 
     // set listener for geneset select button
     $('#select_geneset').click(function() {
+    	
+    	// save selected checkboxes
+    	selectedBoxes = $('#jstree_genesets').jstree("get_selected", true);
+
+        // close dialog box
         $('#geneset_dialog').dialog('close');
     });
 
@@ -56,92 +66,38 @@ var initGenesetDialogue = function() {
 
         // close dialog box
         $('#geneset_dialog').dialog('close');
-
     });
-
-    // initialise tree
-    initialize_geneset_jstree();
     
-    // bind UI for geneset table -> gene list
+    // Update gene sets in query box
     $('#select_geneset').click(updateGenesetList);    
 };
 
-var initialize_geneset_jstree = function (data) {
-	var data = [
-	  		{
-			    "id": "Custom Gene sets",
-			    "genesets": [
-			 		 {"genesetId": "BCAT.100_UP.V1_DN", 
-			 		  "name": "BCAT.100_UP.V1_DN",
-			 		  "description": "description of UNITTEST_GENESET1",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.08,
-			 		  "nrGenes": 2
-			 		 }
-			 		],
-			   "parent": null,
-			  },
-			  {
-			    "id": "Different Gene sets from Random Institute",
-			    "genesets": [
-			 		 {"genesetId": "AKT_UP.V1_DN", 
-			 		  "name": "AKT_UP.V1_DN",
-					  "description": "description of UNITTEST_GENESET2",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.83,
-			 		  "nrGenes": 5
-			 		 },
-			 		 {"genesetId": "CYCLIN_D1_KE_.V1_UP", 
-			 		  "name": "CYCLIN_D1_KE_.V1_UP",
-					  "description": "description of UNITTEST_GENESET3",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": -0.548,
-			 		  "nrGenes": 180
-			 		 }
-					],
-			   "parent": null,
-			  },
-			  {
-			    "id": "Institutes Subcategory 1",
-			    "genesets": [
-			 		 {"genesetId": "HINATA_NFKB_MATRIX", 
-			 		  "name": "HINATA_NFKB_MATRIX",
-					  "description": "description of UNITTEST_GENESET4",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.82,
-			 		  "nrGenes": 6
-			 		 }
-					],
-			   "parent": "Different Gene sets from Random Institute"
-			  },
-			  {
-			    "id": "Institutes Subcategory 2",
-			    "genesets": [
-			 		 {"genesetId": "BCAT.100_UP.V1_DN", 
-			 		  "name": "BCAT.100_UP.V1_DN",
-					  "description": "description of UNITTEST_GENESET1",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.08,
-			 		  "nrGenes": 2
-			 		 },
-			 		 {"genesetId": "GLI1_UP.V1_UP", 
-			 		  "name": "GLI1_UP.V1_UP",
-					  "description": "description of UNITTEST_GENESET8",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.72,
-			 		  "nrGenes": 2000
-			 		 },
-			 		 {"genesetId": "GLI1_UP.V1_DN", 
-			 		  "name": "GLI1_UP.V1_DN",
-					  "description": "description of UNITTEST_GENESET10",
-					  "refLink": "http://www.broadinstitute.org/gsea/msigdb/cards/GLI1_UP.V1_DN",
-			 		  "representativeScore": 0.67,
-			 		  "nrGenes": 12
-			 		 }
-					],
-			   "parent": "Different Gene sets from Random Institute"
-			  }
-			];
+var loadingImage;
+
+// Inititalize gene set hierarchical tree
+var initializeGenesetJstree = function (genesetGeneticProfile, loadingImageElement) {
+	
+	console.log("Initializing hierarchical tree for gene set popup");
+	
+	loadingImage = loadingImageElement;
+	
+	// Construct URL
+	var hierarchyJSON = "api/genesets/hierarchy?geneticProfileId=" + genesetGeneticProfile;
+	
+	// Get genomic profile specific gene set hierarchy
+	$.getJSON(hierarchyJSON, hierarchyServiceCallback);
+	
+	// Show loading image
+	loadingImage.show();
+ }	
+
+
+// Callback when gene set hierarchical tree is retrieved
+var hierarchyServiceCallback = function(result_data) {
+	// Hide loading image
+	loadingImage.hide();
+	
+	var data = result_data;
 	
 	// Loop over JSON file to make it flat to input it in jsTree
 	var flatData = [];
@@ -151,11 +107,12 @@ var initialize_geneset_jstree = function (data) {
 	var leafId = 0;
 
 	for (var i = 0; i < data.length; i++ ) {		
-		// First read in the node
-		nodeId = data[i].id;
-		nodeName = data[i].id;
-		nodeParent = data[i].parent;
+		// Read the node
+		nodeId = data[i].nodeName;
+		nodeName = data[i].nodeName;
+		nodeParent = data[i].parentNode;
 		
+		// Convert node information to a flat format suitable for jstree
 		if (nodeParent == null) {
 			nodeParent = "#";
 		}
@@ -171,56 +128,62 @@ var initialize_geneset_jstree = function (data) {
 			}
 		});
 		
-		// Second read in the genesets in the node
-		for (var j = 0; j < data[i].genesets.length; j++ ) {
-			genesetId = leafId ++;
-			genesetName = data[i].genesets[j].genesetId;
-			genesetDescription = data[i].genesets[j].description;
-			genesetRepresentativeScore = data[i].genesets[j].representativeScore;
-			genesetReflink = data[i].genesets[j].reflink;
-			genesetNrGenes = data[i].genesets[j].nrGenes;
-
-			var genePlurality;
-			var genesetNameText;
+		// Check if node has any gene sets
+		if (_.has(data[i], 'genesets')) {
 			
-			// Decide if it tree description show geneset or genesets
-			if (genesetNrGenes == 1) {
-				genePlurality = 'gene';
-			} else if (genesetNrGenes > 1) {
-				genePlurality = 'genes';
-			} else {
-				genePlurality = '';
-				genesetNrGenes = '';
-			}
-			
-			// Add nr of genes to leaf
-			genesetNameText = genesetNrGenes + ' ' + genePlurality;
-			
-			// Add score to leaf
-			if (genesetRepresentativeScore != null) {
-				genesetNameText = genesetNameText + ', representative GSVA score = ' +  genesetRepresentativeScore;
-			}
-
-			// Build label and add styling
-			genesetNameText = genesetName + '<span style="font-weight:normal;font-style:italic;"> ' + genesetNameText + '</span>';
-			
-			flatData.push({
-				// Add compulsary characteristics
-				id : genesetId.toString(),
-				parent : nodeId,
-				text: genesetNameText, 
-				state : {
-					selected : false
-				},
-			
-				// Also add data which might be useful later
-				name: genesetName,
-				description : genesetDescription,
-				representativeScore : genesetRepresentativeScore,
-				reflink : genesetReflink,
-				geneset : true,
+			// Read the genesets in the node
+			for (var j = 0; j < data[i].genesets.length; j++ ) {
 				
-			});
+				// Convert gene set information to a flat format suitable for jstree
+				genesetId = leafId ++;
+				genesetName = data[i].genesets[j].genesetId;
+				genesetDescription = data[i].genesets[j].description;
+				genesetRepresentativeScore = data[i].genesets[j].representativeScore;
+				genesetReflink = data[i].genesets[j].reflink;
+				genesetNrGenes = data[i].genesets[j].nrGenes;
+	
+				var genePlurality;
+				var genesetNameText;
+				
+				// Decide if it tree description show geneset or genesets
+				if (genesetNrGenes == 1) {
+					genePlurality = 'gene';
+				} else if (genesetNrGenes > 1) {
+					genePlurality = 'genes';
+				} else {
+					genePlurality = '';
+					genesetNrGenes = '';
+				}
+				
+				// Add nr of genes to leaf
+				genesetNameText = genesetNrGenes + ' ' + genePlurality;
+				
+				// Add score to leaf
+				if (genesetRepresentativeScore != null) {
+					genesetNameText = genesetNameText + ', representative GSVA score = ' +  genesetRepresentativeScore;
+				}
+	
+				// Build label and add styling
+				genesetNameText = genesetName + '<span style="font-weight:normal;font-style:italic;"> ' + genesetNameText + '</span>';
+				
+				flatData.push({
+					// Add compulsary characteristics
+					id : genesetId.toString(),
+					parent : nodeId,
+					text: genesetNameText, 
+					state : {
+						selected : false
+					},
+				
+					// Also add data which might be useful later
+					name: genesetName,
+					description : genesetDescription,
+					representativeScore : genesetRepresentativeScore,
+					reflink : genesetReflink,
+					geneset : true,
+					
+				});
+			}
 		}
 	}
 
@@ -235,7 +198,7 @@ var initialize_geneset_jstree = function (data) {
 			"themes": {
 				"icons":false
 			} 
-		}
+		}		
 	}).on('search.jstree before_open.jstree', function (e, data) {
 	    if(data.instance.settings.search.show_only_matches) {
 	        data.instance._data.search.dom.find('.jstree-node')
@@ -244,7 +207,6 @@ var initialize_geneset_jstree = function (data) {
 	    }
 	});
 	
-
 	// Search function
 	var to = false;
 	$('#jstree_genesets_searchbox').keyup(function () {
@@ -263,10 +225,7 @@ var initialize_geneset_jstree = function (data) {
 	    
 	});
 	
-	
-
-	
-	// This does not work:
+	// This does not work yet:
 	// When button is clicked, empty search
 //    $('#jstree_genesets_empty_search').click(function() { 
 //    	var v = "";
@@ -276,43 +235,10 @@ var initialize_geneset_jstree = function (data) {
 //		
 //		// Hide button
 //        $("#jstree_genesets_empty_search").css("display", "none");
-//    });
-    
+//    });    
 }	
 
 
-// Displays the modal dialog for the geneset table
-var promptGenesetTable = function() {
-    "use strict";
-
-    // grab data to be sent to the server
-    var cancerStudyId = $('#select_single_study').val();
-
-    // open the dialog box
-    $('#geneset_dialog').dialog('open');
-
-    // this was the last cancer study selected,
-    // no need to redo the query
-    if (CANCER_STUDY_SELECTED === cancerStudyId) {
-        return;
-    }
-
-    // save the selected cancer study for later
-    CANCER_STUDY_SELECTED = cancerStudyId;
-
-    // prepare data to be sent to server
-    var data = {'selected_cancer_type': cancerStudyId };
-
-    // show everything but loader image
-    $('#geneset_dialog').children().show();
-    $('#geneset_dialog #loader-img').hide();
-
-    return;
-};
-
-
-// updates the gene_list based on what happens in the Geneset table.
-// geneset table (within geneset dialog box) -> gene list
 var updateGenesetList = function() {
     "use strict";
 
@@ -324,10 +250,14 @@ var updateGenesetList = function() {
     
     // Create list of objects with selected gene sets
     var selectedGenesets = [];
-	var selectedBoxes = $('#jstree_genesets').jstree("get_selected", true);
+
+	// After we get the selection, we can remove the tree object
+	$('#jstree_genesets').jstree('destroy');
+	
+	// Loop over the selected checkboxes
 	for (var i = 0; i < selectedBoxes.length; i++ ){
 		
-		// Check if selected box is not a node
+		// Check if selected checkbox is not a node
 		if (selectedBoxes[i].original.geneset) {
 			var boxName = selectedBoxes[i].original.name;
 			
@@ -338,7 +268,6 @@ var updateGenesetList = function() {
 		}
 	}
 	
-
     // if gene_list is currently empty put all the checked geneset genes into it.
     if (genesetList === "") {
         genesetList = [];
@@ -361,12 +290,15 @@ var updateGenesetList = function() {
             }
         });
     }
-
-    $('#geneset_list').val(genesetList);
-
-    // remove spaces in gene_list
+    
+    // remove spaces around gene_list
     genesetList = $.trim(genesetList);
-    genesetList = genesetList.replace(/\s{2,}/, "");            // delete 2 or more spaces in a row
+    
+    // replace 2 or more spaces in a row by 1 space
+    genesetList = genesetList.replace(/\s{1,}/, " ");
+    
+    // Update the gene set list in the query box
+    $('#geneset_list').val(genesetList);
 };
 
 

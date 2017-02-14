@@ -65,6 +65,37 @@
     <div style='padding-top:10px;padding-bottom:5px;'>
         <select id="select_gene_set" name="<%= QueryBuilder.GENE_SET_CHOICE %>" title="Select Gene Set"></select>
     </div>
+    
+    <script type="text/javascript">
+  	//Displays the popup for the geneset hierarchy
+    function popupGenesetHierarchy() {
+        "use strict";
+
+        // open the dialog box
+        $('#geneset_dialog').dialog('open');
+
+        // show everything but loader image
+        $('#geneset_dialog').children().show();
+        $('#geneset_dialog #loader-img').hide();
+
+    	// Retrieve cancer study
+        var cancerStudyId = $("#main_form").find("#select_single_study").val();
+        var cancer_study = window.metaDataJson.cancer_studies[cancerStudyId];
+        
+        var genesetGeneticProfile;
+        
+        // Find the genomic profile id of the gene set profile
+        for (var i = 0; i < cancer_study.genomic_profiles.length; i++) {
+        	if (cancer_study.genomic_profiles[i].alteration_type == "GENESET_SCORE") {
+        		genesetGeneticProfile = cancer_study.genomic_profiles[i].id;
+        	}
+        }
+        
+        initializeGenesetJstree(genesetGeneticProfile, $('#geneset_dialog #loader-img'));
+
+        return;
+    };
+    </script>
         
     <div style="padding-bottom:5px;margin-left:-3px;">
         <button id="toggle_mutsig_dialog" onclick="promptMutsigTable(); return false;" style="font-size: 1em;">Select from Recurrently Mutated Genes (MutSig)</button>
@@ -95,7 +126,7 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases'>
 	<!-- // Gene set button that opens hierarchy popup -->	
 	<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
 	<div style="padding-bottom:5px;margin-left:-3px;">
-	       <button id="toggle_geneset_dialog" onclick="promptGenesetTable(); return false;" style="font-size: 1em; display: none;">Gene Sets</button>
+	       <button id="toggle_geneset_dialog" onclick="popupGenesetHierarchy()" style="font-size: 1em; display: none;">Gene Sets</button>
 	</div>
 	
 	<!-- // Pop-up to select gene sets from hierarchy -->
