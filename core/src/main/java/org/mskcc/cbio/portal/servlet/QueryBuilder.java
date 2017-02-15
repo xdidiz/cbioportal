@@ -587,9 +587,9 @@ public class QueryBuilder extends HttpServlet {
                     // Check number of invalid genesets and write error message
         			if (invalidGenesets.size() > 0) {
         				if (invalidGenesets.size() == 1) {
-        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Geneset not found in database: " + invalidGenesets.get(0));
+        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Gene set not found in database: " + invalidGenesets.get(0));
         				} else {
-        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Genesets not found in database: " + String.join(", ", invalidGenesets));
+        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Gene sets not found in database: " + String.join(", ", invalidGenesets));
         				}
 	            		errorsExist = true;
         			}

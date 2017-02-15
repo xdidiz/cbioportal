@@ -294,9 +294,8 @@ function reviewCurrentSelections(){
     // similarly with RPPA
     toggleThresholdPanel($("." + PROFILE_PROTEIN_EXPRESSION+"[type=checkbox]"), PROFILE_PROTEIN_EXPRESSION, "#rppa_score_threshold");
     
-    // TODO: Remove this (does nothing)
-    // This function makes sure the gene set toggle is a checkbox
-    //toggleGeneSets($("." + PROFILE_GSVA_SCORES+"[type=checkbox]"));
+    // This function makes sure that when incorrect gene set is queried, the box is present on error page
+    toggleGeneSets($("." + PROFILE_GSVA_SCORES+"[type=checkbox]"));
 
     // determine whether optional arguments section should be shown or hidden
  //   if ($("#optional_args > input").length >= 1){
@@ -632,6 +631,7 @@ function toggleGeneSets(profileClicked) {
     	$('#select_gene_sets').hide();
     	$('#toggle_geneset_dialog').hide();
     	$('#geneset_list').hide();
+    	$('#geneset_list').val("");
     }
 }  
 

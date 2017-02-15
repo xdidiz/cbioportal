@@ -109,7 +109,7 @@
     </script>
 
 <textarea rows='5' cols='80' id='gene_list' placeholder="Enter Gene Symbols or Gene Aliases" required
-name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases'><%
+name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases' style="color:#333"><%
     if (localGeneList != null && localGeneList.length() > 0) {
 	    String geneListWithSemis =
 			    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneList);
@@ -154,7 +154,7 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases'>
     </div>
     
 	<textarea rows='5' cols='80' id='geneset_list' placeholder="Enter Gene Sets" required
-	name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none;'><%
+	name='<%= QueryBuilder.GENESET_LIST %>' title='Enter Gene Sets' style='display: none; color:#333'><%
 	    if (localGeneSetList != null && localGeneSetList.length() > 0) {
 		    String geneSetListWithSemis =
 				    org.mskcc.cbio.portal.oncoPrintSpecLanguage.Utilities.appendSemis(localGeneSetList);
