@@ -26,6 +26,9 @@
 // Save selected checkboxes
 var selectedBoxes;
 
+// Variable for loading image to show / hide
+var loadingImage;
+
 // initialize and bind for
 // geneset toggle button and geneset dialog box
 var initGenesetDialogue = function() {
@@ -42,8 +45,8 @@ var initGenesetDialogue = function() {
     $('#geneset_dialog').dialog({autoOpen: false,
         resizable: false,
         modal: true,
-        minHeight: 315,
-        minWidth: 636,
+        minHeight: 800,
+        minWidth: 800,
         
     	// destroy the tree so that it is renewed upon next dialog pop-up
         close: function() {
@@ -72,7 +75,6 @@ var initGenesetDialogue = function() {
     $('#select_geneset').click(updateGenesetList);    
 };
 
-var loadingImage;
 
 // Inititalize gene set hierarchical tree
 var initializeGenesetJstree = function (genesetGeneticProfile, loadingImageElement) {
@@ -139,7 +141,7 @@ var hierarchyServiceCallback = function(result_data) {
 				genesetName = data[i].genesets[j].genesetId;
 				genesetDescription = data[i].genesets[j].description;
 				genesetRepresentativeScore = data[i].genesets[j].representativeScore;
-				genesetReflink = data[i].genesets[j].reflink;
+				genesetRefLink = data[i].genesets[j].refLink;
 				genesetNrGenes = data[i].genesets[j].nrGenes;
 	
 				var genePlurality;
@@ -179,7 +181,7 @@ var hierarchyServiceCallback = function(result_data) {
 					name: genesetName,
 					description : genesetDescription,
 					representativeScore : genesetRepresentativeScore,
-					reflink : genesetReflink,
+					refLink : genesetRefLink,
 					geneset : true,
 					
 				});
@@ -198,7 +200,9 @@ var hierarchyServiceCallback = function(result_data) {
 			"themes": {
 				"icons":false
 			} 
-		}		
+		}
+			
+	// This keeps nodes open after searching for them
 	}).on('search.jstree before_open.jstree', function (e, data) {
 	    if(data.instance.settings.search.show_only_matches) {
 	        data.instance._data.search.dom.find('.jstree-node')
@@ -213,29 +217,17 @@ var hierarchyServiceCallback = function(result_data) {
 	    if(to) { clearTimeout(to); }
 	    to = setTimeout(function () {
 	    	var v = $('#jstree_genesets_searchbox').val();
-	        
-	    	// This does not work:
-//	        // Only add clear search button when something is in box 
-//			if ($("#jstree_search_input").val() !== "") {
-//				$("#jstree_genesets_empty_search").css("display", "none");
-//			}
-
-	    	$('#jstree_genesets').jstree(true).search(v);
+	    	
+	    	if (v == "") {
+	        	$('#jstree_genesets').jstree(true).show_all();
+	    	} else {
+		    	$('#jstree_genesets').jstree(true).search(v);
+	    	}
 	    }, 250);
 	    
 	});
 	
-	// This does not work yet:
-	// When button is clicked, empty search
-//    $('#jstree_genesets_empty_search').click(function() { 
-//    	var v = "";
-//        $("#jstree_genesets_searchbox").val(v);
-//
-//    	$('#jstree_genesets').jstree(true).search(v);
-//		
-//		// Hide button
-//        $("#jstree_genesets_empty_search").css("display", "none");
-//    });    
+
 }	
 
 
@@ -244,9 +236,6 @@ var updateGenesetList = function() {
 
     // push all the genes in the gene_list onto a list
     var genesetList = $('#geneset_list').val();
-
-    // placeholder gene sets, necessary until the real selection method is implemented
-    //var selectedGenesets = ["MORF_ATRX", "MORF_ATOX1"];
     
     // Create list of objects with selected gene sets
     var selectedGenesets = [];

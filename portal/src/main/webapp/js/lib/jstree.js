@@ -2799,6 +2799,35 @@
 			this.trigger('disable_node', { 'node' : obj });
 		},
 		/**
+		 * This is ported from jstree 3.3.3 to fix a bug when previous
+		 * search resulted in no hits for gene set hierarchy popup
+		 * 
+		 * shows all nodes
+		 * @name show_all()
+		 * @trigger show_all.jstree
+		 */
+		show_all : function (skip_redraw) {
+			var i, m = this._model.data, ids = [];
+			for(i in m) {
+				if(m.hasOwnProperty(i) && i !== $.jstree.root && m[i].state.hidden) {
+					m[i].state.hidden = false;
+					ids.push(i);
+				}
+			}
+			this._model.force_full_redraw = true;
+			if(!skip_redraw) {
+				this.redraw();
+			}
+			/**
+			 * triggered when all nodes are shown
+			 * @event
+			 * @name show_all.jstree
+			 * @param {Array} nodes the IDs of all shown nodes
+			 */
+			this.trigger('show_all', { 'nodes' : ids });
+			return ids;
+		},		
+		/**
 		 * called when a node is selected by the user. Used internally.
 		 * @private
 		 * @name activate_node(obj, e)
@@ -2936,7 +2965,13 @@
 				});
 				$linkOutIcon.click(function(e) {
 					e.preventDefault();
-					window.open('study?id='+node.id);
+					
+					// If ref link is specified, open this instead of default study summary
+					if (node.original.refLink) {
+						window.open(node.original.refLink);
+					} else { 
+						window.open('study?id='+node.id);
+					}
 				});
 			} else {
 				if (this.node_has_descendant_branches(node.id)) {
