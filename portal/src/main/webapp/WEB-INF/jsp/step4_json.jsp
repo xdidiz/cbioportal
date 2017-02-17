@@ -129,24 +129,50 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases' 
 	       <button id="toggle_geneset_dialog" onclick="popupGenesetHierarchy()" style="font-size: 1em; display: none;">Gene Sets</button>
 	</div>
 	
-	<!-- // Pop-up to select gene sets from hierarchy -->
+	<!-- Pop-up to select gene sets from hierarchy -->
     <div id="geneset_dialog" title="Select Gene Sets" class='display' align="left" style="font-size: 11px; .ui-dialog {padding: 0em;};">
         <img id='loader-img' src="images/ajax-loader.gif" alt='loading'/>
     	
- 		<!-- // Search box in popup -->
+ 		<!-- Filtering settings in popup -->
 	    <div class="row step_header_first_line">
-	        <div class="input-group input-group-sm col-5">
-	            <input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search"/>
-	            
-	            <!-- Button to reset search (Work in progress) -->
- 	            <!-- <i id="jstree_genesets_empty_search" class="fa fa-times"></i> -->
+	        <div class="input-group input-group-sm col-5" >
+	        	<form>
+  	    			<table style="width:100%">
+				<tbody><tr>
+				<td style="padding-right:15px;" >
+  					<label for="jstree_genesets_searchbox">Search hierarchy</label>
+				        <!-- Search box -->
+					<input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search" style="height:20px">
+  				</td>
+		    		<td style="padding-right:15px;">
+			    		<!-- GSVA score threshold box -->
+  					<label for="gsva_score_threshold_box">GSVA score</label>
+					<input type="text" id="gsva_score_threshold_box" class="form-control" placeholder="0.5" title="GSVA score threshold" onchange="" size="4" style="height:20px">
+				</td>
+	  	    		<td style="padding-right:15px;">
+			    		<!-- GSVA p-value threshold box -->
+					<label for="gsva_pvalue_threshold_box">p-value</label>
+					<input type="text" id="gsva_pvalue_threshold_box" class="form-control" placeholder="0.5" title="GSVA p-value threshold" onchange="" size="4" style="height:20px">
+				</td>
+			  	<td>
+  					<label for="select_gsva_quantile">Percentile for score calculation</label>
+  					<select id="select_gsva_quantile" class="form-control" title="Select GSVA percentile for representative score calculation" style="height:20px">
+			                   <option value="50">50%</option>
+					   <option value="75" selected="true">75%</option>
+					   <option value="100">100%</option>
+			                </select>
+				</td>
+			</tr>
+			</tbody>  	    			
+			</table>
+		</form>				            
 	        </div>
 	    </div>
  
-  		<!-- // Create hierarchical tree in popup -->
-		<div id="jstree_genesets"  style="max-height:250px; overflow-y: scroll"></div>
+  		<!-- Create hierarchical tree in popup -->
+		<div id="jstree_genesets"  style="max-height:800px; overflow-y: scroll"></div>
 		
-		<!-- // Select and cancel buttons on bottem of popup -->		
+		<!-- Select and cancel buttons on bottem of popup -->		
 		<div id="geneset_dialog_footer" style="float: right;">
 					<button id="cancel_geneset" title="Cancel">Cancel</button>
 					<button id="select_geneset" class="tabs-button" title="Use these gene sets">Select</button>
