@@ -59,6 +59,8 @@ var initGenesetDialogue = function() {
     	
     	// save selected checkboxes
     	selectedBoxes = $('#jstree_genesets').jstree("get_selected", true);
+        // Update gene sets in query box
+    	updateGenesetList();
 
         // close dialog box
         $('#geneset_dialog').dialog('close');
@@ -70,9 +72,6 @@ var initGenesetDialogue = function() {
         // close dialog box
         $('#geneset_dialog').dialog('close');
     });
-    
-    // Update gene sets in query box
-    $('#select_geneset').click(updateGenesetList);    
 };
 
 

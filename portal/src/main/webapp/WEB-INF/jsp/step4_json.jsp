@@ -126,7 +126,7 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases' 
 	<!-- // Gene set button that opens hierarchy popup -->	
 	<span class="step_header" id="select_gene_sets">Select Gene Sets:</span>
 	<div style="padding-bottom:5px;margin-left:-3px;">
-	       <button id="toggle_geneset_dialog" onclick="popupGenesetHierarchy()" style="font-size: 1em; display: none;">Gene Sets</button>
+	       <button type="button" id="toggle_geneset_dialog" onclick="popupGenesetHierarchy(); return false;" style="font-size: 1em; ">Gene Sets</button>
 	</div>
 	
 	<!-- Pop-up to select gene sets from hierarchy -->
