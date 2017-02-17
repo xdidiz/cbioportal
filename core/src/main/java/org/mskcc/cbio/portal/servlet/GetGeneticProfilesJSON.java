@@ -36,7 +36,6 @@ import java.io.*;
 import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
-import org.mskcc.cbio.portal.model.EntityType;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.mskcc.cbio.portal.dao.*;
@@ -121,16 +120,29 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
             JSONObject result = new JSONObject();
             ArrayList<GeneticProfile> list =
                     DaoGeneticProfile.getAllGeneticProfiles(cancerStudyId);
-            if ((sampleSetId == null && geneticEntityIdListStr == null) || (geneticEntityIdListStr == null && geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()))) {
-            	for (GeneticProfile geneticProfile : list) {
-            		if (geneticProfile.getDatatype().equals("GSVA-SCORE")) {
-            			try {
-            				list = DaoGeneticProfile.getGeneticProfilesReferredBy(geneticProfile);
-            			} catch (DaoException e) {
-                            System.out.println("DaoException Caught:" + e.getMessage());
-            			}
-            		}
-            	}
+            if (geneticEntityType != null && geneticEntityIdListStr == null) {
+                if (geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name())) {
+                    for (GeneticProfile geneticProfile : list) {
+                        if (geneticProfile.getDatatype().equals("GSVA-SCORE")) {
+                            try {
+                                list = DaoGeneticProfile.getGeneticProfilesReferredBy(geneticProfile);
+                            } catch (DaoException e) {
+                                System.out.println("DaoException Caught:" + e.getMessage());
+                            }
+                        }
+                    }
+                } else if (geneticEntityType.equalsIgnoreCase(EntityType.GENE.name())) {
+                    ArrayList<GeneticProfile> currentList = new ArrayList<GeneticProfile>();
+                    for (GeneticProfile geneticProfile : list) {
+                        if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.MRNA_EXPRESSION)) {
+                            try {
+                                currentList.addAll(DaoGeneticProfile.getGeneticProfilesReferringTo(geneticProfile));
+                            } catch (DaoException e) {
+                                System.out.println("DaoException Caught:" + e.getMessage());
+                            }
+                        }
+                    } list = currentList;
+                }
             }
 
             if (list.size() > 0) {
@@ -170,31 +182,30 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
                         }
 
                         for (String geneticEntityId: geneticEntityIdList) {
-                            
                             JSONObject tmpResult = new JSONObject();
                             for (GeneticProfile geneticProfile : list) {
-                            	ArrayList<String> tmpProfileDataArr = null;
-                            	if (geneticEntityType.equalsIgnoreCase(EntityType.GENE.name()) && GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) { 
-                            		//Get gene
+                                ArrayList<String> tmpProfileDataArr = null;
+                                if (geneticEntityType.equalsIgnoreCase(EntityType.GENE.name()) && GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) {
+                                    //Get gene
                                     DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
                                     CanonicalGene gene = daoGene.getGene(geneticEntityId);
                                     String entrezId = gene.getEntrezGeneId() + "";
                                     
                                     // TODO - Remove internalSampleIds and replace them for sampleIdList once getGeneticDataRow handles mutations
                                     List<Integer> internalSampleIds = InternalIdUtil.getInternalNonNormalSampleIds(cancerStudyId, sampleIdList);
-
-                            		tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
-                            				gene, 
-                            				internalSampleIds, 
-                            				geneticProfile);
-                            	} else if (geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()) && !GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) {
-                            		//use new API which supports geneset query:
-                                	tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
-                            				geneticEntityId, 
-                            				sampleIdList, 
-                            				EntityType.GENESET, 
-                            				geneticProfile);
-                            	}
+                                    
+                                    tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
+                                            gene, 
+                                            internalSampleIds,
+                                            geneticProfile);
+                                } else if (geneticEntityType.equalsIgnoreCase(EntityType.GENESET.name()) && !GeneticProfile.geneBasedTypes.contains(geneticProfile.getGeneticAlterationType())) {
+                                    //use new API which supports geneset query:
+                                    tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                                            geneticEntityId,
+                                            sampleIdList,
+                                            EntityType.GENESET,
+                                            geneticProfile);
+                                }
                             	
                                 if (isDataAvailable(tmpProfileDataArr)) {
                                     JSONObject tmpProfileObj = new JSONObject();
@@ -242,5 +253,6 @@ public class GetGeneticProfilesJSON extends HttpServlet  {
         }
         return false;
     }
+
 }
     
