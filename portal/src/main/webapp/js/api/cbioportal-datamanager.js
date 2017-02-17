@@ -1045,10 +1045,9 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	var deferred_case_ids = sample_or_patient === "sample" ? sample_ids : this.getPatientIds();
 	geneset_ids = geneset_ids || [];
 	sample_or_patient = sample_or_patient || "sample";
-	$.when(window.cbioportal_client.getGeneticDataBySample({
+	$.when(window.cbioportal_client.getGenesetDataBySample({
 		"genetic_profile_id": [genetic_profile_id],
-		"genetic_entity_type": ["GENESET"],
-		"genetic_entity_ids": geneset_ids,
+		"geneset_ids": geneset_ids,
 		// TODO: use sample_list_id if applicable, for better performance
 		"sample_ids": sample_ids
 	    }),
@@ -1081,7 +1080,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	    // fill profile_data properties with scores
 	    var sample_id, sample_score;
 	    for (i = 0; i < profile_data.length; i++) {
-		geneset_id = profile_data[i].geneticEntityId;
+		geneset_id = profile_data[i].genesetId;
 		sample_id = profile_data[i].sampleId;
 		sample_score = parseFloat(profile_data[i].value);
 		case_id = (sample_or_patient === "sample" ? sample_id : sample_to_patient_map[sample_id]);
