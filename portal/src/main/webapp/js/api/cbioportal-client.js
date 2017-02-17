@@ -48,20 +48,20 @@ window.cbioportal_client = (function() {
 		//new API
 		var newApiFunctionNameToEndpointProperties = {
 			//expected args: genetic_profile_id, genetic_entity_type, sample_ids, sample_list_id, genetic_entity_ids
-			'GeneticData': {
+			'GenesetData': {
 				endpoint: function (args) {
-					return 'api/genetic-profiles/' + args['genetic_profile_id'] +
-					'/fetch?geneticEntityType=' + args['genetic_entity_type'] +
-					'&projection=SUMMARY';
+					return 'api/genetic-profiles/' +
+					args.genetic_profile_id +
+					'/geneset-data/fetch';
 				},
 				args: function (args) {
-					var result = new Object();
+					var result = {};
 					if (args.sample_ids) {
 						result.sampleIds = args.sample_ids;
 					} else if (args.sample_list_id) {
 						result.sampleListId = args.sample_list_id;
 					}
-					result.geneticEntityIds = args.genetic_entity_ids;
+					result.genesetIds = args.geneset_ids;
 					return result;
 				}
 			}
@@ -510,24 +510,24 @@ window.cbioportal_client = (function() {
 		//enforceRequiredArguments = function(fnPtr, list_of_arg_combinations)
 		//makeHierIndexService = function(arg_names, indexing_attrs, service_fn_name)
 		
-		//parameters: genetic_profile_id, genetic_entity_type, sample_ids, sample_list_id, genetic_entity_ids
-		getGeneticDataBySample: enforceRequiredArguments(
+		//parameters: genetic_profile_id, sample_ids, sample_list_id, geneset_ids
+		getGenesetDataBySample: enforceRequiredArguments(
 				makeHierIndexService(
-						['genetic_profile_id', 'genetic_entity_type', 'genetic_entity_ids', 'sample_ids'],
-						['geneticProfileId', 'geneticEntityType', 'geneticEntityId', 'sampleId'],
-						'getGeneticData'),
+						['genetic_profile_id', 'geneset_ids', 'sample_ids'],
+						['geneticProfileId', 'genesetId', 'sampleId'],
+						'getGenesetData'),
 				[
-					['genetic_profile_id','genetic_entity_type','genetic_entity_ids'],
-					['genetic_profile_id','genetic_entity_type','genetic_entity_ids','sample_ids']
+					['genetic_profile_id', 'geneset_ids'],
+					['genetic_profile_id', 'geneset_ids', 'sample_ids']
 				]),
-		getGeneticDataBySampleList: enforceRequiredArguments(
+		getGenesetDataBySampleList: enforceRequiredArguments(
 				makeHierIndexService(
-						['genetic_profile_id', 'genetic_entity_type', 'genetic_entity_ids', 'sample_list_id'],
-						['geneticProfileId', 'geneticEntityType', 'geneticEntityId', 'sampleId'],
-						'getGeneticData'),
+						['genetic_profile_id', 'geneset_ids', 'sample_list_id'],
+						['geneticProfileId', 'genesetId', 'sampleId'],
+						'getGenesetData'),
 				[
-					['genetic_profile_id','genetic_entity_type','genetic_entity_ids'],
-					['genetic_profile_id','genetic_entity_type','genetic_entity_ids','sample_list_id']
+					['genetic_profile_id', 'geneset_ids'],
+					['genetic_profile_id', 'geneset_ids', 'sample_list_id']
 				]),
 
 		getSampleClinicalAttributes: enforceRequiredArguments(function(args) {
