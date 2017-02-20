@@ -5968,7 +5968,7 @@ var OncoprintTrackOptionsView = (function () {
 	}
 	if (model.isTrackExpanded(track_id)) {
 	    $dropdown.append($makeDropdownOption(
-		    'Hide genes',
+		    'Remove genes',
 		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
