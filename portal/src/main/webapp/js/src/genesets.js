@@ -72,6 +72,29 @@ var initGenesetDialogue = function() {
         // close dialog box
         $('#geneset_dialog').dialog('close');
     });
+    
+    // set listener for filter button
+    $('#filter_hierarchy').click(function() {
+
+    	var pvalThreshold = $('#gsva_pvalue_threshold_box').val();
+    	var scoreThreshold = $('#gsva_score_threshold_box').val();
+    	var percentile = $('#select_gsva_percentile').val();
+    	
+    	//defaults: 
+    	pvalThreshold = (pvalThreshold == '' ? 0.05 : pvalThreshold);
+    	scoreThreshold = (scoreThreshold == '' ? 0.4 : scoreThreshold);
+    	
+    	console.log("Filtering hierarchy data for: p-value < " + pvalThreshold + ", score > " + scoreThreshold + ", percentile = " + percentile);
+    	
+    	//call the webservice:
+    	//TODO
+    	
+    	
+    	//webservice callback: render the tree again with webservice response:
+    	//TODO
+    });
+
+
 };
 
 

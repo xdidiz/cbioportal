@@ -136,30 +136,33 @@ name='<%= QueryBuilder.GENE_LIST %>' title='Enter Gene Symbols or Gene Aliases' 
  		<!-- Filtering settings in popup -->
 	    <div class="row step_header_first_line">
 	        <div class="input-group input-group-sm col-5" >
- 	    	<table style="width:100%">
+	        
+		<label for="jstree_genesets_searchbox">Search hierarchy</label>
+		<!-- Search box -->
+		<input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search" style="height:20px;padding-right: 8px;margin-bottom: 4px;">        
+	        
+ 	    	<table id="filterOptionsTable" style="width:100%; background: #eeeeee;">
 			<tbody><tr>
-			<td style="padding-right:15px;" >
- 					<label for="jstree_genesets_searchbox">Search hierarchy</label>
-			        <!-- Search box -->
-				<input type="text" id="jstree_genesets_searchbox" class="form-control" placeholder="Search..." title="Search" style="height:20px">
- 				</td>
 	    		<td style="padding-right:15px;">
 		    		<!-- GSVA score threshold box -->
  					<label for="gsva_score_threshold_box">GSVA score</label>
-				<input type="text" id="gsva_score_threshold_box" class="form-control" placeholder="0.5" title="GSVA score threshold" onchange="" size="4" style="height:20px">
+				<input type="text" id="gsva_score_threshold_box" class="form-control" placeholder="0.4" title="GSVA score threshold" onchange="" size="4" style="height:20px">
 			</td>
   	    		<td style="padding-right:15px;">
 		    		<!-- GSVA p-value threshold box -->
 				<label for="gsva_pvalue_threshold_box">p-value</label>
-				<input type="text" id="gsva_pvalue_threshold_box" class="form-control" placeholder="0.5" title="GSVA p-value threshold" onchange="" size="4" style="height:20px">
+				<input type="text" id="gsva_pvalue_threshold_box" class="form-control" placeholder="0.05" title="GSVA p-value threshold" onchange="" size="4" style="height:20px">
 			</td>
 		  	<td>
- 					<label for="select_gsva_quantile">Percentile for score calculation</label>
- 					<select id="select_gsva_quantile" class="form-control" title="Select GSVA percentile for representative score calculation" style="height:20px">
+ 				<label for="select_gsva_percentile">Percentile for score calculation</label><br>
+ 				<select id="select_gsva_percentile" class="form-control" title="Select GSVA percentile for representative score calculation" style="height:20px; width: 150px">
 		                   <option value="50">50%</option>
 				   <option value="75" selected="true">75%</option>
 				   <option value="100">100%</option>
 		                </select>
+			</td>
+			<td>
+				 <button id="filter_hierarchy" style="margin-top: 20px;height:28px">Filter</button>
 			</td>
 		</tr>
 		</tbody>  	    			
