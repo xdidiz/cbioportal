@@ -1022,8 +1022,9 @@ var OncoprintModel = (function () {
 		this.track_expansion_tracks[track_id].length > 0;
     }
     
-    OncoprintModel.prototype.getExpansionTrackIds = function (track_id) {
-	return this.track_expansion_tracks[track_id] || [];
+    OncoprintModel.prototype.isExpansion = function (expansion_track_id, set_track_id) {
+	return this.track_expansion_tracks.hasOwnProperty(set_track_id) &&
+	    this.track_expansion_tracks[set_track_id].indexOf(expansion_track_id) !== -1;
     }
     
     OncoprintModel.prototype.expandTrack = function (track_id, maxGenes) {
