@@ -1015,6 +1015,10 @@ var OncoprintModel = (function () {
 		this.track_expansion_tracks[track_id].length > 0;
     }
     
+    OncoprintModel.prototype.getExpansionTrackIds = function (track_id) {
+	return this.track_expansion_tracks[track_id] || [];
+    }
+    
     OncoprintModel.prototype.expandTrack = function (track_id, maxGenes) {
 	maxGenes = maxGenes || 5;
 	// pop off the first `maxGenes` genes, up to the end of the array

@@ -1270,6 +1270,16 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			break;
 		    }
 		}
+		// find the index of the track after which to insert new track;
+		// this is the bottom-most expansion track if any are below the
+		// gene set track itself
+		var expansion_track_ids = oncoprint.model.getExpansionTrackIds(geneset_track_id);
+		for (i = track_order_in_group.length - 1; i > track_index; i--) {
+		    if (expansion_track_ids.indexOf(track_order_in_group[i]) !== -1) {
+			track_index = i;
+			break;
+		    }
+		}
 		// add the gene tracks to the Oncoprint and the ordering
 		var symbol, subtrack_id, promise_list = [];
 		oncoprint.suppressRendering();
