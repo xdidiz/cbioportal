@@ -1273,9 +1273,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		// find the index of the track after which to insert new track;
 		// this is the bottom-most expansion track if any are below the
 		// gene set track itself
-		var expansion_track_ids = oncoprint.model.getExpansionTrackIds(geneset_track_id);
 		for (i = track_order_in_group.length - 1; i > track_index; i--) {
-		    if (expansion_track_ids.indexOf(track_order_in_group[i]) !== -1) {
+		    if (oncoprint.model.isExpansion(
+			    track_order_in_group[i], geneset_track_id)) {
 			track_index = i;
 			break;
 		    }
