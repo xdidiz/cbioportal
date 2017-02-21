@@ -907,12 +907,14 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 		var interim_datum = interim_data[gene][case_id];
 		if (interim_datum.profile_data === null) {
 		    // set the initial value for this sample or patient
-		    interim_datum.profile_data = parseFloat(receive_datum.profile_data);
+		    // TODO: only calculate the log10 if not z-scores
+		    interim_datum.profile_data = Math.log(parseFloat(receive_datum.profile_data)) / Math.log(10);
 		} else if (sample_or_patient === "sample") {
 		    // this would be a programming error (unexpected output from getGeneticProfileDataBySample)
 		    throw new Error("Unexpectedly received multiple heatmap profile data for one sample");
 		} else {
 		    // aggregate samples for this patient by selecting the highest absolute (Z-)score
+		    // TODO: aggregate without assuming 0-centring if not z-scores
 		    if (Math.abs(parseFloat(receive_datum.profile_data)) >
 			    Math.abs(interim_datum.profile_data)) {
 			interim_datum.profile_data = parseFloat(receive_datum.profile_data);

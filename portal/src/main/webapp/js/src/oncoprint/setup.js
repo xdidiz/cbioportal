@@ -859,15 +859,6 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    return done.promise();
 	};
 	
-	var HEATMAP_RULE_SET_PARAMS = {
-		'type': 'gradient',
-		'legend_label': "Expression heatmap",
-		'value_key': 'profile_data',
-		'value_range': [-3, 3],
-		'colors': [[0,0,255,1],[0,0,0,1],[255,0,0,1]],
-		'value_stop_points': [-3,0,3],
-		'null_color': 'rgba(224,224,224,1)'
-	};
 	var useExistingHeatmapRuleSet = (function() {
 	    var previous_hmtrack_ids = [];
 	    return function(track_id) {
@@ -1136,7 +1127,15 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
                     };
 		}
 		var track_params = {
-		    'rule_set_params': HEATMAP_RULE_SET_PARAMS,
+		    'rule_set_params': {
+			'type': 'gradient',
+			'legend_label': "Expression z-scores",
+			'value_key': 'profile_data',
+			'value_range': [-3, 3],
+			'colors': [[0,0,255,1],[0,0,0,1],[255,0,0,1]],
+			'value_stop_points': [-3,0,3],
+			'null_color': 'rgba(224,224,224,1)'
+		    },
 		    'has_column_spacing': false,
 		    'track_padding': 0,
 		    'label': gene,
@@ -1157,7 +1156,27 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, group_track_id, group_track_group) {
 		oncoprint.suppressRendering();
 		var track_params = {
-		    'rule_set_params': HEATMAP_RULE_SET_PARAMS,
+		    'rule_set_params': {
+			'type': 'gradient',
+			'legend_label': "Expression values",
+			'value_key': 'profile_data',
+			'value_range': [0, 5],
+			// TODO: add attribution for the YlOrRd Colorbrewer scheme
+			'colors': [
+			    [255,255,204],
+			    [255,237,160],
+			    [254,217,118],
+			    [254,178,76],
+			    [253,141,60],
+			    [252,78,42],
+			    [227,26,28],
+			    [189,0,38],
+			    [128,0,38]
+			],
+			'value_stop_points': [0, 0.75, 1.5, 2.25, 3,
+			    3.75, 4.5, 5.25, 6],
+			'null_color': 'rgba(224,224,224,1)'
+		    },
 		    'has_column_spacing': false,
 		    'track_padding': 0,
 		    'label': gene,
@@ -1169,6 +1188,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    //'track_group_header': genetic_profile_id
 		};
 		var track_id = oncoprint.addTracks([track_params])[0];
+		// TODO: do not use the existing heatmap ruleset if not z-scores
 		useExistingHeatmapRuleSet(track_id);
 		oncoprint.releaseRendering();
 		return track_id;
@@ -1254,7 +1274,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    {entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
 		    {entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
                 ];
-		var profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
+		var profile_id = "brca_tcga_rna_seq_v2_mrna";
 		oncoprint.model.setExpansionGeneData(track_id, genes);
 		oncoprint.model.setExpansionCallback(track_id, this.expandTrack.bind(this, profile_id));
 	    },
