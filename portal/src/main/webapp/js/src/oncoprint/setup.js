@@ -1265,21 +1265,20 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'setExpansionData': function (geneset_id, track_id) {
 		// TODO: replace the mocked gene info by API calls using geneset_id
 		var genes = [
-		    {entrezGeneId: 0, hugoGeneSymbol: 'VEGFA', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'BRCA1', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'TP53', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'KRAS', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'IGF1R', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'RB1', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'AR', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
-		    {entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'VEGFA', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'BRCA1', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'TP53', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'KRAS', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'IGF1R', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'RB1', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'AR', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
+		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
                 ];
-		var profile_id = "brca_tcga_rna_seq_v2_mrna_median_Zscores";
 		oncoprint.model.setExpansionGeneData(track_id, genes);
-		oncoprint.model.setExpansionCallback(track_id, this.expandTrack.bind(this, profile_id));
+		oncoprint.model.setExpansionCallback(track_id, this.expandTrack.bind(this));
 	    },
-	    'expandTrack': function (source_profile_id, geneset_track_id, source_genes) {
+	    'expandTrack': function (geneset_track_id, source_genes) {
 		// identify the track group the gene set track is in
 		var i, group_index = null, track_order_in_group = null, track_index = null;
 		var all_groups = oncoprint.model.getTrackGroups();
@@ -1302,13 +1301,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    }
 		}
 		// add the gene tracks to the Oncoprint and the ordering
-		var symbol, subtrack_id, promise_list = [];
+		var symbol, profile_id, subtrack_id, promise_list = [];
 		oncoprint.suppressRendering();
 		for (i = 0; i < source_genes.length; i++) {
 		    symbol = source_genes[i].hugoGeneSymbol;
+		    profile_id = source_genes[i].zScoreGeneticProfileId;
 		    subtrack_id = this.addExpansionHeatmapTrack(
-			    source_profile_id, symbol, geneset_track_id, group_index);
-		    promise_list.push(populateHeatmapTrack(source_profile_id, symbol, subtrack_id));
+			    profile_id, symbol, geneset_track_id, group_index);
+		    promise_list.push(populateHeatmapTrack(profile_id, symbol, subtrack_id));
 		    // insert subtrack id after existing track index
 		    track_order_in_group.splice(track_index + 1, 0, subtrack_id);
 		    track_index++;
