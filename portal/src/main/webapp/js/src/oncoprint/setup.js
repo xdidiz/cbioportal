@@ -859,6 +859,13 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    return done.promise();
 	};
 	
+	var makeRemoveGenesetTrackHandler = function(geneset_id) {
+	    return function(track_id) {
+		delete State.geneset_to_track_id[geneset_id];
+		URL.update();
+	    };
+	};
+	
 	var makeRemoveHeatmapHandler = function(genetic_profile_id, gene) {
 	    return function(track_id) {
 		var track_group = State.heatmap_track_groups[genetic_profile_id];
@@ -953,7 +960,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'first_genetic_alteration_track': null,
 	    'genetic_alteration_tracks': {}, // oql line -> track_id
 	    'heatmap_track_groups': {}, // genetic_profile_id -> {genetic_profile_id, track_group_id, gene_to_track_id}
+	    'GENESET_HEATMAP_TRACK_GROUP_INDEX': 30,
 	    'geneset_tracks': {},  // index of queried gene set -> track_id
+	    'geneset_to_track_id': {}, // geneset_id -> track_id
 	    'clinical_tracks': {}, // track_id -> attr
 	    
 	    'used_clinical_attributes': [],
@@ -1198,8 +1207,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'has_column_spacing': false,
 			'track_padding': 0,
 			'label': geneset_data_by_line[i].geneset_id,
-			'target_group': 10,
+			'target_group': this.GENESET_HEATMAP_TRACK_GROUP_INDEX,
 			'removable': true,
+			'removeCallback': makeRemoveGenesetTrackHandler(geneset_data_by_line[i].geneset_id),
 			'description': geneset_data_by_line[i].geneset_id,
 		    };
 		    var new_gs_id = oncoprint.addTracks([track_params])[0];
@@ -1208,6 +1218,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			oncoprint.shareRuleSet(State.geneset_tracks[0], new_gs_id);
 		    }
 		    State.geneset_tracks[i] = new_gs_id;
+		    State.geneset_to_track_id[geneset_data_by_line[i].geneset_id] = new_gs_id;
 		}
 		oncoprint.releaseRendering();
 		return gs_ids;
@@ -1835,7 +1846,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		profiles = utils.deepCopyObject(profiles);
 		// Sort, mRNA first
 		profiles.sort(function(a,b) {
-		    var order = {'MRNA_EXPRESSION':0, 'PROTEIN_LEVEL':1};
+		    var order = {'MRNA_EXPRESSION':0, 'PROTEIN_LEVEL':1, 'GENESET_SCORE': 2};
 		    return order[a.genetic_alteration_type] - order[b.genetic_alteration_type];
 		});
 		// Add profile dropdown options
@@ -1864,7 +1875,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		profile_to_select = profile_to_select || profiles[0];
 		for (var i = 0; i < profiles.length; i++) {
 		    (function (profile) {
-			var $option = $("<option>").attr({"value": profile.id, "title": profile.description}).text(profile.name);
+			var $option = $("<option>").attr({"value": profile.id, "title": profile.description, "genetic_alteration_type": profile.genetic_alteration_type}).text(profile.name);
 			if (profile_to_select && profile_to_select === profile.id) {
 			    $option.prop("selected", true);
 			}
@@ -1914,11 +1925,18 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}
 		};
 		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk').change(function (evt) {
-			var genetic_profile_id = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles').val();
+		    // cluster heatmap for selected profile:
+		    var selected_profile = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles').find(":selected");
+			var genetic_profile_id = selected_profile.attr("value");
+			var genetic_alteration_type = selected_profile.attr("genetic_alteration_type");
 			if (genetic_profile_id) {
-				// cluster heatmap for selected profile:
-				var grp = State.heatmap_track_groups[genetic_profile_id];
-				var heatmap_track_group_id = grp.track_group_id;
+			    var heatmap_track_group_id = State.GENESET_HEATMAP_TRACK_GROUP_INDEX;
+			    //if the profile is not GENESET, then get the track_group_id from State.heatmap_track_groups:
+			    var grp;
+				if (genetic_alteration_type != "GENESET_SCORE") {
+			        grp = State.heatmap_track_groups[genetic_profile_id];
+			        heatmap_track_group_id = grp.track_group_id;
+			    }
 				//when checkbox selected:
 				if (this.checked) {
 					//sort according to order found in the clustering results:
@@ -1927,10 +1945,18 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 					var trackIdsInOriginalOrder = oncoprint.model.getTrackGroups()[heatmap_track_group_id];
 					State.trackIdsInOriginalOrder[heatmap_track_group_id] = trackIdsInOriginalOrder;
 					//get heatmap data:
-					var heatmap_data_deferred = State.using_sample_data ? getSampleHeatmapData(grp.genetic_profile_id, Object.keys(grp.gene_to_track_id)) : QuerySession.getPatientHeatmapData(grp.genetic_profile_id, Object.keys(grp.gene_to_track_id));
+					var heatmap_data_deferred;
+					var track_ui_map_to_use;
+					if (genetic_alteration_type == "GENESET_SCORE") {
+					    heatmap_data_deferred = State.using_sample_data ? getSampleGsvaData() : QuerySession.getPatientGsvaData();
+					    track_ui_map_to_use = State.geneset_to_track_id;
+					} else {
+					    heatmap_data_deferred = State.using_sample_data ? getSampleHeatmapData(genetic_profile_id, Object.keys(grp.gene_to_track_id)) : QuerySession.getPatientHeatmapData(grp.genetic_profile_id, Object.keys(grp.gene_to_track_id));
+					    track_ui_map_to_use = grp.gene_to_track_id;
+					}
 					var case_ids_deferred =  State.using_sample_data ? QuerySession.getSampleIds() : QuerySession.getPatientIds();
 					//process data, call clustering:
-					$.when(grp.gene_to_track_id, heatmap_data_deferred, case_ids_deferred).then(
+					$.when(track_ui_map_to_use, heatmap_data_deferred, case_ids_deferred).then(
 							function (track_uid_map, heatmap_data, case_ids) {
 								$.when(QuerySession.getClusteringOrder(track_uid_map, heatmap_data, case_ids)).then(
 										function (clusteringResult) {
@@ -1981,6 +2007,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 
 		var updateButtons = function () {
 		    var add_genes_btn = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #add_genes_btn');
+		    var remove_heatmaps_btn = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #remove_heatmaps_btn');
 		    var input = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #add_genes_input')
 		    var dropdown = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles');
 		    var clusteringChk = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk');
@@ -1989,11 +2016,24 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    //if there is a genetic profile selected:
 		    if (dropdown.val()) {
 		    	var genetic_profile_id = dropdown.val();
-		    	//and if there are heatmap tracks, then enable clustering option:
-		    	if (State.heatmap_track_groups[genetic_profile_id]) {
-		    		clusteringChk.prop("disabled", false);
-		    	} else {
-		    		clusteringChk.prop("disabled", true);
+				var genetic_alteration_type = dropdown.find(":selected").attr("genetic_alteration_type");
+				//if genetic_alteration_type is "GENESET_SCORE", then enable clustering and hide other options:
+				if (genetic_alteration_type == "GENESET_SCORE") {
+				    clusteringChk.prop("disabled", false);
+				    input.hide();
+				    add_genes_btn.hide();
+				    remove_heatmaps_btn.hide();
+				}
+				//else if there are heatmap tracks, then enable clustering option:
+				else {
+				    input.show();
+				    add_genes_btn.show();
+				    remove_heatmaps_btn.show();
+				    if (State.heatmap_track_groups[genetic_profile_id]) {
+			    		clusteringChk.prop("disabled", false);
+	       		    } else {
+	       		    	clusteringChk.prop("disabled", true);
+	       		    }
 		    	}
 		    }
 		    else {
