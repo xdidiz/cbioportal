@@ -1882,15 +1882,13 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    evt.preventDefault();
 		    evt.stopPropagation();
 
-		    // remove all heatmaps
-		    var gp_ids = Object.keys(State.heatmap_track_groups);
+		    // remove heatmap for selected profile:
+		    var genetic_profile_id = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles').val();
 		    var tracks_to_remove = [];
-		    for (var i = 0; i < gp_ids.length; i++) {
-			var track_ids = Object.keys(State.heatmap_track_groups[gp_ids[i]].gene_to_track_id).map(function (gene) {
-			    return State.heatmap_track_groups[gp_ids[i]].gene_to_track_id[gene];
-			});
-			tracks_to_remove = tracks_to_remove.concat(track_ids);
-		    }
+		    var track_ids = Object.keys(State.heatmap_track_groups[genetic_profile_id].gene_to_track_id).map(function (gene) {
+			return State.heatmap_track_groups[genetic_profile_id].gene_to_track_id[gene];
+		    });
+		    tracks_to_remove = tracks_to_remove.concat(track_ids);
 		    oncoprint.removeTracks(tracks_to_remove);
 		    
 		    //uncheck clustering option:
