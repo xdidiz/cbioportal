@@ -979,6 +979,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'sorted_by_mutation_type': true,
 	    
 	    'trackIdsInOriginalOrder': {},
+	    'clustered_by_profile_id': null,
 	    
 	    'patient_order_loaded': new $.Deferred(),
 	    'patient_order': [],
@@ -1941,6 +1942,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    }
 				//when checkbox selected:
 				if (this.checked) {
+					State.clustered_by_profile_id = genetic_profile_id;
 					//sort according to order found in the clustering results:
 					State.sorting_by_given_order = true;
 					//store original order before clustering:
@@ -1980,6 +1982,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 							    }, 200);
 							});
 			    } else {
+			    	State.clustered_by_profile_id = null;
 					//restore original order
 					LoadingBar.update(0.9, "green");
 					updateSortOption("data");
@@ -2021,6 +2024,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    //if there is a genetic profile selected:
 		    if (dropdown.val()) {
 		    	var genetic_profile_id = dropdown.val();
+		    	//if this is the profile where clustering was done last, then make sure checkbox is set, and unchecked otherwise:
+	    		clusteringChk.prop("checked", (genetic_profile_id == State.clustered_by_profile_id));
 				var genetic_alteration_type = dropdown.find(":selected").attr("genetic_alteration_type");
 				//if genetic_alteration_type is "GENESET_SCORE", then enable clustering and hide other options:
 				if (genetic_alteration_type == "GENESET_SCORE") {
@@ -2640,8 +2645,6 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 	    'altered_ids': [],
 	    'unaltered_ids': [],
 	    'ids':[],
-	    
-	    'trackIdsInOriginalOrder': {},
 	    
 	    'addGeneticTracks': function (genes) {
 		genes = [].concat(genes);
