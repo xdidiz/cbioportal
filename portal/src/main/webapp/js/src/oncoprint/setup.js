@@ -1906,6 +1906,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    var clusteringChk = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk');
 		    clusteringChk.prop("checked", false);
 		    clusteringChk.prop("disabled", "disabled");
+		    var clusteringLbl = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk_lbl');
+		    clusteringLbl.css("cursor", "not-allowed");
 		    //unset clustering state object that stores, a.o., which trackGroups should be reset in resetHeatmapTracks:
 		    State.trackIdsInOriginalOrder = {};
 		    //restore sort to "data" sorting:
@@ -2001,6 +2003,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			    //re-enable clustering checkbox, if disabled:
 			    var clusteringChk = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk');
 			    clusteringChk.removeAttr("disabled");
+			    var clusteringLbl = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk_lbl');
+			    clusteringLbl.css("cursor", "pointer");
 			}
 		    }
 		});
@@ -2011,6 +2015,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    var input = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #add_genes_input')
 		    var dropdown = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles');
 		    var clusteringChk = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk');
+		    var clusteringLbl = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk_lbl');
 
 		    add_genes_btn.prop("disabled", (!dropdown.val()) || (input.val().length === 0));
 		    //if there is a genetic profile selected:
@@ -2020,6 +2025,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				//if genetic_alteration_type is "GENESET_SCORE", then enable clustering and hide other options:
 				if (genetic_alteration_type == "GENESET_SCORE") {
 				    clusteringChk.prop("disabled", false);
+				    clusteringLbl.css("cursor", "pointer");
 				    input.hide();
 				    add_genes_btn.hide();
 				    remove_heatmaps_btn.hide();
@@ -2031,13 +2037,16 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 				    remove_heatmaps_btn.show();
 				    if (State.heatmap_track_groups[genetic_profile_id]) {
 			    		clusteringChk.prop("disabled", false);
+			    		clusteringLbl.css("cursor", "pointer");
 	       		    } else {
 	       		    	clusteringChk.prop("disabled", true);
+	       		    	clusteringLbl.css("cursor", "not-allowed");
 	       		    }
 		    	}
 		    }
 		    else {
 		    	clusteringChk.prop("disabled", true);
+		    	clusteringLbl.css("cursor", "not-allowed");
 		    }
 		};
 		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu').click(updateButtons);
