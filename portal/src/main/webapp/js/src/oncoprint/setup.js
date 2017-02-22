@@ -1948,7 +1948,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 					var heatmap_data_deferred;
 					var track_ui_map_to_use;
 					if (genetic_alteration_type == "GENESET_SCORE") {
-					    heatmap_data_deferred = State.using_sample_data ? getSampleGsvaData() : QuerySession.getPatientGsvaData();
+					    heatmap_data_deferred = State.using_sample_data ? QuerySession.getSampleGsvaData() : QuerySession.getPatientGsvaData();
 					    track_ui_map_to_use = State.geneset_to_track_id;
 					} else {
 					    heatmap_data_deferred = State.using_sample_data ? getSampleHeatmapData(genetic_profile_id, Object.keys(grp.gene_to_track_id)) : QuerySession.getPatientHeatmapData(grp.genetic_profile_id, Object.keys(grp.gene_to_track_id));
