@@ -550,7 +550,7 @@ window.cbioportal_client = (function() {
 		getGenesetCorrelationsBySample: enforceRequiredArguments(
 				makeHierIndexService(
 						['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_ids'],
-						['geneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
+						['expressionGeneticProfileId', 'zScoreGeneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
 						'getGenesetCorrelations'),
 				[
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id'],
@@ -559,7 +559,7 @@ window.cbioportal_client = (function() {
 		getGenesetCorrelationsBySampleList: enforceRequiredArguments(
 				makeHierIndexService(
 						['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_list_id'],
-						['geneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
+						['expressionGeneticProfileId', 'zScoreGeneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
 						'getGenesetCorrelations'),
 				[
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id'],
