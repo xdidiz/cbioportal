@@ -2011,6 +2011,18 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			}
 		    }
 		});
+		
+		var heatmapProfileChange = function () {
+		    var dropdown = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles');
+		    var clusteringChk = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #cluster_heatmap_chk');
+		    //if there is a genetic profile selected:
+		    if (dropdown.val()) {
+		    	var genetic_profile_id = dropdown.val();
+		    	//if this is the profile where clustering was done last, then make sure checkbox is set, and unchecked otherwise:
+	    		clusteringChk.prop("checked", (genetic_profile_id == State.clustered_by_profile_id));
+		    }
+		    updateButtons();
+		};
 
 		var updateButtons = function () {
 		    var add_genes_btn = $(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #add_genes_btn');
@@ -2024,8 +2036,6 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    //if there is a genetic profile selected:
 		    if (dropdown.val()) {
 		    	var genetic_profile_id = dropdown.val();
-		    	//if this is the profile where clustering was done last, then make sure checkbox is set, and unchecked otherwise:
-	    		clusteringChk.prop("checked", (genetic_profile_id == State.clustered_by_profile_id));
 				var genetic_alteration_type = dropdown.find(":selected").attr("genetic_alteration_type");
 				//if genetic_alteration_type is "GENESET_SCORE", then enable clustering and hide other options:
 				if (genetic_alteration_type == "GENESET_SCORE") {
@@ -2055,7 +2065,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    }
 		};
 		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu').click(updateButtons);
-		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles').change(updateButtons);
+		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #oncoprint_diagram_heatmap_profiles').change(heatmapProfileChange);
 		$(toolbar_selector + ' #oncoprint_diagram_heatmap_menu #add_genes_input').on('input', updateButtons);
 		updateButtons();
 	    });
