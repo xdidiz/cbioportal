@@ -1263,20 +1263,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		return track_ids;
 	    },
 	    'setExpansionData': function (geneset_id, track_id) {
-		// TODO: replace the mocked gene info by API calls using geneset_id
-		var genes = [
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'VEGFA', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'BRCA1', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'TP53', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'KRAS', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'IGF1R', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'RB1', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'AR', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'NOTCH1', correlation: 0.8},
-		    {zScoreGeneticProfileId: "brca_tcga_rna_seq_v2_mrna_median_Zscores", expressionProfileId: 'brca_tcga_rna_seq_v2_mrna', entrezGeneId: 0, hugoGeneSymbol: 'MYC', correlation: 0.8}
-                ];
-		oncoprint.model.setExpansionGeneData(track_id, genes);
-		oncoprint.model.setExpansionCallback(track_id, this.expandTrack.bind(this));
+		var self = this;
+		return QuerySession.getGenesetGeneCorrelations(geneset_id)
+		.then(function (genes) {
+		    oncoprint.model.setExpansionGeneData(track_id, genes);
+		    oncoprint.model.setExpansionCallback(track_id, self.expandTrack.bind(self));
+		});
 	    },
 	    'expandTrack': function (geneset_track_id, source_genes) {
 		// identify the track group the gene set track is in
