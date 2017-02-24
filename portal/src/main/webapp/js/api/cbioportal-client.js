@@ -72,14 +72,14 @@ window.cbioportal_client = (function() {
 						'/expression-correlation/fetch?geneticProfileId=' +
 						args.genetic_profile_id +
 						'&correlationThreshold=' +
-						args.correlation_threshold;
+						args.correlation_threshold +
+						(args.sample_list_id ?
+							'&sampleListId=' + args.sample_list_id : '');
 				},
 				args: function (args) {
-					var result = {};
-					if (args.sample_ids) {
-						result.sampleIds = args.sample_ids;
-					} else if (args.sample_list_id) {
-						result.sampleListId = args.sample_list_id;
+					var result = [];
+					if (!args.sample_list_id) {
+						result = args.sample_ids;
 					}
 					return result;
 				}
@@ -548,19 +548,13 @@ window.cbioportal_client = (function() {
 					['genetic_profile_id', 'geneset_ids', 'sample_list_id']
 				]),
 		getGenesetCorrelationsBySample: enforceRequiredArguments(
-				makeHierIndexService(
-						['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_ids'],
-						['expressionGeneticProfileId', 'zScoreGeneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
-						'getGenesetCorrelations'),
+				raw_service.getGenesetCorrelations,
 				[
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id'],
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_ids'],
 				]),
 		getGenesetCorrelationsBySampleList: enforceRequiredArguments(
-				makeHierIndexService(
-						['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_list_id'],
-						['expressionGeneticProfileId', 'zScoreGeneticProfileId', 'entrezGeneId', 'hugoGeneSymbol', 'correlationValue'],
-						'getGenesetCorrelations'),
+				raw_service.getGenesetCorrelations,
 				[
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id'],
 					['genetic_profile_id', 'correlation_threshold', 'geneset_id', 'sample_list_id'],
