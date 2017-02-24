@@ -4003,7 +4003,16 @@ var OncoprintModel = (function () {
     }
     
     OncoprintModel.prototype.initExpansion = function (track_id) {
-	this.track_expansion_init_callback[track_id](track_id);
+	var done_promise;
+	if (this.isTrackExpanded(track_id)) {
+	    // return promise that is already resolved
+	    done_promise = $.when();
+	} else {
+	    // return a promise that resolves after the callback returns,
+	    // and the returned promise resolves
+	    done_promise = $.when(this.track_expansion_init_callback[track_id](track_id));
+	}
+	return done_promise;
     }
     
     OncoprintModel.prototype.setExpansionGeneData = function (track_id, geneDataArray) {
@@ -5965,10 +5974,10 @@ var OncoprintTrackOptionsView = (function () {
 		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
-			if (!model.isTrackExpanded(track_id)) {
-			    model.initExpansion(track_id);
-			}
-			model.expandTrack(track_id);
+			model.initExpansion(track_id)
+			.then(function () {
+			    model.expandTrack(track_id);
+			});
 		    }));
 	}
 	if (model.isTrackExpanded(track_id)) {
