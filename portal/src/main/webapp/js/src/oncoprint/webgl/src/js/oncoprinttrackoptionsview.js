@@ -199,10 +199,10 @@ var OncoprintTrackOptionsView = (function () {
 		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
-			model.initExpansion(track_id)
-			.then(function () {
-			    model.expandTrack(track_id);
-			});
+			// close the menu to discourage clicking again, as it
+			// may take a moment to finish expanding
+			renderAllOptions(view, model)
+			model.expandTrack(track_id);
 		    }));
 	}
 	if (model.isTrackExpanded(track_id)) {

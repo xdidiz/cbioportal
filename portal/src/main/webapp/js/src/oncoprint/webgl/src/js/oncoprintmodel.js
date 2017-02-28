@@ -1005,18 +1005,26 @@ var OncoprintModel = (function () {
 		 this.track_expansion_genes[track_id].length > 0);
     }
     
-    OncoprintModel.prototype.initExpansion = function (track_id) {
-	var done_promise;
-	if (this.isTrackExpanded(track_id)) {
-	    // return promise that is already resolved
-	    done_promise = $.when();
-	} else {
-	    // return a promise that resolves after the callback returns,
-	    // and the returned promise resolves
-	    done_promise = $.when(this.track_expansion_init_callback[track_id](track_id));
-	}
-	return done_promise;
-    }
+    OncoprintModel.prototype.expandTrack = (function () {
+	var completion_promises = {};
+	return function (track_id) {
+	    // if a promise chain was not already started for this track,
+	    if (!completion_promises.hasOwnProperty(track_id)) {
+		// make a promise that resolves after the callback returns,
+		// or in case it returns a promise, after that resolves
+		completion_promises[track_id] = $.when(this.track_expansion_init_callback[track_id](track_id));
+	    }
+	    // expand after any previous steps resolve, resolving when done
+	    var self = this;
+	    completion_promises[track_id] = completion_promises[track_id].then(function () {
+		var maxGenes = 5;
+		// pop off the first `maxGenes` genes, up to the end of the array
+		var genes = self.track_expansion_genes[track_id].splice(0, maxGenes);
+		return self.track_expansion_callback[track_id](track_id, genes);
+	    });
+	    return completion_promises[track_id];
+	};
+    })();
     
     OncoprintModel.prototype.setExpansionGeneData = function (track_id, geneDataArray) {
 	this.track_expansion_genes[track_id] = geneDataArray;
@@ -1034,13 +1042,6 @@ var OncoprintModel = (function () {
     OncoprintModel.prototype.isExpansion = function (expansion_track_id, set_track_id) {
 	return this.track_expansion_tracks.hasOwnProperty(set_track_id) &&
 	    this.track_expansion_tracks[set_track_id].indexOf(expansion_track_id) !== -1;
-    }
-    
-    OncoprintModel.prototype.expandTrack = function (track_id, maxGenes) {
-	maxGenes = maxGenes || 5;
-	// pop off the first `maxGenes` genes, up to the end of the array
-	var genes = this.track_expansion_genes[track_id].splice(0, maxGenes);
-	return this.track_expansion_callback[track_id](track_id, genes);
     }
     
     OncoprintModel.prototype.getRuleSet = function (track_id) {
