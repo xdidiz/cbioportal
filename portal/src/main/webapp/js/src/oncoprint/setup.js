@@ -1172,13 +1172,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		oncoprint.releaseRendering();
 		return track_id;
 	    },
-	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, group_track_id, group_track_group) {
+	    'addExpansionHeatmapTrack': function (genetic_profile_id, gene, correlation, group_track_id, group_track_group) {
 		oncoprint.suppressRendering();
 		var track_params = {
 		    'rule_set_params': HEATMAP_RULE_SET_PARAMS,
 		    'has_column_spacing': false,
 		    'track_padding': 0,
 		    'label': gene,
+		    'track_info': Number(correlation).toFixed(2),
 		    'target_group': group_track_group,
 		    'expansion_of': group_track_id,
 		    'removable': true,
@@ -1293,13 +1294,14 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		    }
 		}
 		// add the gene tracks to the Oncoprint and the ordering
-		var symbol, profile_id, subtrack_id, promise_list = [];
+		var symbol, correlation, profile_id, subtrack_id, promise_list = [];
 		oncoprint.suppressRendering();
 		for (i = 0; i < source_genes.length; i++) {
 		    symbol = source_genes[i].hugoGeneSymbol;
 		    profile_id = source_genes[i].zScoreGeneticProfileId;
+		    correlation = source_genes[i].correlationValue;
 		    subtrack_id = this.addExpansionHeatmapTrack(
-			    profile_id, symbol, geneset_track_id, group_index);
+			    profile_id, symbol, correlation, geneset_track_id, group_index);
 		    promise_list.push(populateHeatmapTrack(profile_id, symbol, subtrack_id));
 		    // insert subtrack id after existing track index
 		    track_order_in_group.splice(track_index + 1, 0, subtrack_id);
