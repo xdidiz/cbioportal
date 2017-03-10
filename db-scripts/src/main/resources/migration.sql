@@ -298,7 +298,7 @@ CREATE TABLE `geneset_gene` (
 );
 
 -- --------------------------------------------------------
-CREATE TABLE `geneset_hierarchy` (
+CREATE TABLE `geneset_hierarchy_node` (
   `NODE_ID` BIGINT(20) NOT NULL auto_increment,
   `NODE_NAME` VARCHAR(200) NOT NULL,
   `PARENT_ID` BIGINT NULL DEFAULT NULL,
@@ -311,7 +311,7 @@ CREATE TABLE `geneset_hierarchy_leaf` (
   `NODE_ID` BIGINT NOT NULL,
   `GENESET_ID` INT NOT NULL,
   PRIMARY KEY (`NODE_ID`, `GENESET_ID`),
-  FOREIGN KEY (`NODE_ID`) REFERENCES `geneset_hierarchy` (`NODE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`NODE_ID`) REFERENCES `geneset_hierarchy_node` (`NODE_ID`) ON DELETE CASCADE,
   FOREIGN KEY (`GENESET_ID`) REFERENCES `geneset` (`ID`) ON DELETE CASCADE
 );
 
