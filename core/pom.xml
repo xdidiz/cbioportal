@@ -318,6 +318,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.16</version>
         <configuration>
+           <argLine>@{argLine}</argLine>
           <forkMode>always</forkMode>
           <filtering>true</filtering>
           <systemProperties>
@@ -447,6 +448,7 @@
             <version>${jacoco-maven-plugin.version}</version>
             <executions>
                 <execution>
+                <phase>process-test-classes</phase>
                     <goals><goal>prepare-agent</goal></goals>
                 </execution>
                 <execution>
