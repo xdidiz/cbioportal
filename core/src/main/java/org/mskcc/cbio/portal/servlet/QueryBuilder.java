@@ -635,7 +635,12 @@ public class QueryBuilder extends HttpServlet {
                             "Please select some gene sets.");
                     errorsExist = true;
                 }
-            }
+                if (GSVAProfileSelected != null && geneticProfileIdSet.size() == 1 && geneList != "") {
+                    httpServletRequest.setAttribute(STEP2_ERROR_MSG,
+                            "You entered some genes to query. Please select a profile to query for these genes.");
+                    errorsExist = true;
+                }
+             }
         } 
 
         return errorsExist;
