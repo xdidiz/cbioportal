@@ -153,14 +153,14 @@ var CoexpPlots = function() {
         return function(result) {
             CoexpPlotsProxy.init(_alteration_data_result, _geneX, _geneY, _pearson, _spearman);
             var coexpPlotsView = new CoexpPlotsView();
-            coexpPlotsView.init(_divName, _geneX, _geneY, CoexpPlotsProxy.getData(), CoexpPlotsProxy.getDataAttr());
+            coexpPlotsView.init(_divName, _geneX, _geneY, CoexpPlotsProxy.getData(), CoexpPlotsProxy.getDataAttr(), entityXIsGeneset, entityYIsGeneset);
         };
     }
     
     function pseudo_callback(_alteration_data_result, _divName, _geneX, _geneY, _pearson, _spearman) {
         CoexpPlotsProxy.init(_alteration_data_result, _geneX, _geneY, _pearson, _spearman);
         var coexpPlotsView = new CoexpPlotsView();
-        coexpPlotsView.init(_divName, _geneX, _geneY, CoexpPlotsProxy.getData(), CoexpPlotsProxy.getDataAttr());
+        coexpPlotsView.init(_divName, _geneX, _geneY, CoexpPlotsProxy.getData(), CoexpPlotsProxy.getDataAttr(), entityXIsGeneset, entityYIsGeneset);
     }
 
     return {

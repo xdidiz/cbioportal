@@ -451,6 +451,9 @@ var ScatterPlots = function() {
         //separate long legends into two lines
         var _legends = [];
         $.each(legends, function(index, obj) {
+            if (obj.text == undefined) {
+                return //No legend to draw (gene sets)
+            }
             var firstWord = obj.text.substr(0, obj.text.indexOf(" "));
             var secondWord = obj.text.substr(obj.text.indexOf(" "), obj.text.length);
             if (firstWord.length <= 9) {

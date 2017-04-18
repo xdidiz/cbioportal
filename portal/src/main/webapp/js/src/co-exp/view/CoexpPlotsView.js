@@ -95,7 +95,7 @@ var CoexpPlotsView = function() {
             gene_y_mutate_stroke: "#F7819F",
             gene_both_mutate_fill: "#FF0000",
             gene_both_mutate_stroke: "#B40404"
-        };  
+        };
         //construct axis titles
         plotsOpts.text.xTitle = geneX + ", " + dataAttr.profile1_name;
         plotsOpts.text.yTitle = geneY + ", " + dataAttr.profile2_name;
@@ -142,7 +142,13 @@ var CoexpPlotsView = function() {
         _tmp_obj["size"] = plotsOpts.style.size;
         _tmp_obj["shape"] = plotsOpts.style.shape;
         _tmp_obj["stroke_width"] = plotsOpts.style.stroke_width;
-        _tmp_obj["text"] = plotsOpts.text.legends.non_mut;
+        if (entityXIsGeneset && !entityYIsGeneset) {
+            _tmp_obj["text"] = plotsOpts.text.legends.gene_y_not_mutated.replace("gene_y", geneY);
+        } else if (!entityXIsGeneset && entityYIsGeneset) {
+            _tmp_obj["text"] = plotsOpts.text.legends.gene_x_not_mutated.replace("gene_x", geneX);
+        } else if (!entityXIsGeneset && !entityYIsGeneset){
+            _tmp_obj["text"] = plotsOpts.text.legends.non_mut;
+        }
         plotsOpts.legends.push(_tmp_obj);
         //Update Mutated Cases' Styles
         $.each(dataArr, function(index, obj) {
@@ -161,8 +167,13 @@ var CoexpPlotsView = function() {
                     obj.fill = plotsOpts.style.mutations.gene_y_mutate_fill;
                 } 
             } else {
-                obj.stroke = plotsOpts.style.stroke;
-                obj.fill = plotsOpts.style.fill;
+                if (entityXIsGeneset && entityYIsGeneset) {
+                    obj.stroke = plotsOpts.style.geneset_stroke;
+                    obj.fill = plotsOpts.style.geneset_fill;
+                } else {
+                    obj.stroke = plotsOpts.style.stroke;
+                    obj.fill = plotsOpts.style.fill;
+                }
             }
         });
 
