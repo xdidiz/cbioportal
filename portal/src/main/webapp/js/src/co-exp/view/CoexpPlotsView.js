@@ -204,13 +204,18 @@ var CoexpPlotsView = function() {
         //Init Plots
         var coexpPlots = new ScatterPlots();
         coexpPlots.init(plotsOpts, dataArr, dataAttr, false, true);
+        append_show_mutations = true;
+        if (entityXIsGeneset && entityYIsGeneset) {
+            append_show_mutations = false;
+        }
         PlotsHeader.init(
-            plotsOpts.names, 
-            plotsOpts.text.title, 
-            plotsOpts.text.fileName, 
-            settings.enable_log_scale,
-            coexpPlots.loadSvg
-        );
+                plotsOpts.names, 
+                plotsOpts.text.title, 
+                plotsOpts.text.fileName, 
+                settings.enable_log_scale,
+                coexpPlots.loadSvg,
+                append_show_mutations
+            );
         //Bind event listeners
         $("#" + plotsOpts.names.show_mutations).change(function() {
             coexpPlots.updateMutations(
