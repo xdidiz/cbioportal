@@ -258,6 +258,11 @@ var CoExpView = (function() {
             coExpTableInstance = "";
 
         var CoExpTable = function() {
+            function shortenString(data, maxChar) {
+                return data.length > maxChar ? "<span title=" + data +">" + data.substr( 0, maxChar
+                        ) +'...' + "</span>" :
+                data;
+            }
 
             function configTable() {
                 //Draw out the markdown of the datatable
@@ -285,7 +290,10 @@ var CoExpView = (function() {
                         {
                             "bSearchable": true,
                             "aTargets": [ 0 ],
-                            "sWidth": "56%"
+                            "sWidth": "56%",
+                            render: function ( data, type, row ) {
+                                return shortenString(data, 24);
+                            }
                         },
                         {
                             "sType": 'coexp-absolute-value',
