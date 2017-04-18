@@ -269,7 +269,7 @@ var ScatterPlots = function() {
             elem.axisTitleGroup.append("svg:image")
                 .attr("xlink:href", "images/help.png")
                 .attr("class", "plots-title-x-help")
-                .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 + _xTitle.length / 2 * 8)
+                .attr("x", canvas.xLeft + (canvas.xRight - canvas.xLeft) / 2 + _xTitle.length / 2 * 9)
                 .attr("y", canvas.yBottom + 48)
                 .attr("width", "16")
                 .attr("height", "16");
@@ -365,7 +365,7 @@ var ScatterPlots = function() {
                 .attr("xlink:href", "images/help.png")
                 .attr("class", "plots-title-y-help")
                 .attr("x", canvas.xLeft - 72)
-                .attr("y", canvas.yBottom - (canvas.yBottom - canvas.yTop) / 2 - _yTitle.length / 2 * 8 - 20)
+                .attr("y", canvas.yBottom - (canvas.yBottom - canvas.yTop) / 2 - _yTitle.length / 2 * 9 - 20)
                 .attr("width", "16")
                 .attr("height", "16");
             elem.svg.select(".plots-title-y-help").each(
