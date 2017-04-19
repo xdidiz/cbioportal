@@ -195,7 +195,7 @@ var OncoprintTrackOptionsView = (function () {
 	}
 	if (model.isTrackExpandable(track_id)) {
 	    $dropdown.append($makeDropdownOption(
-		    (model.isTrackExpanded(track_id) ? 'More' : 'Show') + ' genes',
+		    model.getExpandButtonText(track_id),
 		    'normal',
 		    function (evt) {
 			evt.stopPropagation();
@@ -207,7 +207,7 @@ var OncoprintTrackOptionsView = (function () {
 	}
 	if (model.isTrackExpanded(track_id)) {
 	    $dropdown.append($makeDropdownOption(
-		    'Remove genes',
+		    'Remove expansion',
 		    'normal',
 		    function (evt) {
 			evt.stopPropagation();

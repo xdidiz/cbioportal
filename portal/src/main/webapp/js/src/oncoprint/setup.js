@@ -1395,7 +1395,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'target_group': this.GENESET_HEATMAP_TRACK_GROUP_INDEX,
 			'description': track_geneset_id + ' gene set scores from ' + genetic_profile_id,
 			'removeCallback': makeRemoveGenesetTrackHandler(track_geneset_id),
-			'expandCallback': makeGenesetExpandHandler(track_geneset_id)
+			'expandCallback': makeGenesetExpandHandler(track_geneset_id),
+			'expandButtonTextCallback': function (is_expanded) {
+			    return (is_expanded ? 'More' : 'Show') + ' genes';
+			}
 		    };
 		    new_track_id = oncoprint.addTracks([track_params])[0];
 		    track_ids.push(new_track_id);
