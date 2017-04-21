@@ -3893,6 +3893,7 @@ var OncoprintModel = (function () {
 	delete this.track_has_column_spacing[track_id];
 	delete this.track_expandable[track_id];
 	delete this.track_expand_callback[track_id];
+	delete this.track_expand_button_fn[track_id];
 	delete this.track_expansion_tracks[track_id];
 
 	var containing_track_group = _getContainingTrackGroup(this, track_id, true);
