@@ -147,7 +147,7 @@ var OncoprintModel = (function () {
 	this.track_has_column_spacing = {}; // track id -> boolean
 	this.track_expandable = {}; // track id -> boolean
 	this.track_expand_callback = {}; // track id -> function that adds expansion tracks for its track if set
-	this.track_expand_button_callback = {}; // track id -> function from boolean to string if customized
+	this.track_expand_button_fn = {}; // track id -> function from boolean to string if customized
 	this.track_expansion_tracks = {}; // track id -> array of track ids if applicable
 	
 	// Rule Set Properties
@@ -679,7 +679,7 @@ var OncoprintModel = (function () {
 		    params.removable, params.removeCallback, params.label, params.description, params.track_info,
 		    params.sortCmpFn, params.sort_direction_changeable, params.init_sort_direction,
 		    params.data, params.rule_set, params.track_label_color, params.expansion_of,
-		    params.expandCallback, params.expandButtonTextCallback);
+		    params.expandCallback, params.expandButtonTextFn);
 	}
 	this.track_tops.update();
     }
@@ -690,7 +690,7 @@ var OncoprintModel = (function () {
 	    removable, removeCallback, label, description, track_info,
 	    sortCmpFn, sort_direction_changeable, init_sort_direction,
 	    data, rule_set, track_label_color, expansion_of, expandCallback,
-	    expandButtonTextCallback) {
+	    expandButtonTextFn) {
 	model.track_label[track_id] = ifndef(label, "Label");
 	model.track_label_color[track_id] = ifndef(track_label_color, "black");
 	model.track_description[track_id] = ifndef(description, "");
@@ -717,8 +717,8 @@ var OncoprintModel = (function () {
 	    model.track_expand_callback[track_id] = expandCallback;
 	    model.track_expandable[track_id] = true;
 	}
-	if (typeof expandButtonTextCallback !== 'undefined') {
-	    model.track_expand_button_callback[track_id] = expandButtonTextCallback;
+	if (typeof expandButtonTextFn !== 'undefined') {
+	    model.track_expand_button_fn[track_id] = expandButtonTextFn;
 	}
 	
 	model.track_sort_cmp_fn[track_id] = ifndef(sortCmpFn, function () {
@@ -1078,7 +1078,7 @@ var OncoprintModel = (function () {
     OncoprintModel.prototype.getExpandButtonText = function (track_id) {
 	var self = this;
 	var getExpandButtonFunction = function (track_id) {
-	    return (self.track_expand_button_callback[track_id] ||
+	    return (self.track_expand_button_fn[track_id] ||
 		    function (is_expanded) {
 			return is_expanded ? 'Expand more' : 'Expand';
 		    });

@@ -1396,7 +1396,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'description': track_geneset_id + ' gene set scores from ' + genetic_profile_id,
 			'removeCallback': makeRemoveGenesetTrackHandler(track_geneset_id),
 			'expandCallback': makeGenesetExpandHandler(track_geneset_id),
-			'expandButtonTextCallback': function (is_expanded) {
+			'expandButtonTextFn': function (is_expanded) {
 			    return (is_expanded ? 'More' : 'Show') + ' genes';
 			}
 		    };
