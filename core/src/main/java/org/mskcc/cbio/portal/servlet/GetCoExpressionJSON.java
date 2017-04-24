@@ -159,7 +159,7 @@ public class GetCoExpressionJSON extends HttpServlet {
         	
         if (queryProfile != null) {
             try {
-                Map<Integer, double[]> map = CoExpUtil.getExpressionMap(queryProfile.getGeneticProfileId(), caseSetId, caseIdsKey);
+                Map<Integer, double[]> map = CoExpUtil.getExpressionMap(queryProfile.getGeneticProfileId(), caseSetId, caseIdsKey, null);
                 int mapSize = map.size();
                 List<Integer> genetic_entities = new ArrayList<Integer>(map.keySet());
                 //expression of the query item. All other expression lists in the map are compared to this: 
@@ -203,10 +203,12 @@ public class GetCoExpressionJSON extends HttpServlet {
                                     if ((EntityType.GENE.name().equals(correlated_entities_to_find))) {
                                         CanonicalGene comparedGene = daoGeneOptimized.getGeneByEntityId(compared_gene_entity_id);
                                         _scores.put("gene", comparedGene.getHugoGeneSymbolAllCaps());
+                                        _scores.put("cytoband", comparedGene.getCytoband());
                                     }
                                     else if ((EntityType.GENESET.name().equals(correlated_entities_to_find))) {
                                         String entityStableId = DaoGeneset.getGenesetByEntityId(compared_gene_entity_id).getExternalId();
-                                        _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name                                        	
+                                        _scores.put("gene", entityStableId);//TODO change "gene" to a more generic name
+                                        _scores.put("cytoband", "-");
                                     }
                                     _scores.put("profileId", queryProfile.getStableId());
                                     _scores.put("pearson", pearson);

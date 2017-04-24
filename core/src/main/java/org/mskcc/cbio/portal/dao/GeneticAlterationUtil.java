@@ -33,6 +33,8 @@
 package org.mskcc.cbio.portal.dao;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.mskcc.cbio.portal.repository.MutationRepositoryLegacy;
 import org.mskcc.cbio.portal.model.*;
@@ -133,7 +135,7 @@ public class GeneticAlterationUtil {
      * Uses the new API.
      * 
      * @param geneticEntityStableId: gene stable id (entrezId), or geneset stable id 
-     * @param sampleIds: list of samples. This method will return the list of values in the same order.
+     * @param targetSampleIds: list of samples. This method will return the list of values in the same order.
      * @param entityType: GENE or GENESET for example
      * @param targetGeneticProfile: stable id of genetic profile
      * 
@@ -143,7 +145,7 @@ public class GeneticAlterationUtil {
      * @throws DaoException
      */
     public static ArrayList<String> getGeneticDataRow(String geneticEntityStableId,
-            List<String> sampleIds, EntityType entityType,
+            List<String> targetSampleIds, EntityType entityType,
             GeneticProfile targetGeneticProfile) throws DaoException {
     	//TODO use if (targetGeneticProfile.getGeneticAlterationType() == GeneticAlterationType.MUTATION_EXTENDED) like
     	//in previous getGeneticAlterationDataRow method, but here using the new API (which is still to be implemented)
@@ -153,32 +155,32 @@ public class GeneticAlterationUtil {
 	    	Map<String,String> samplesAndValue = new HashMap<String,String>();
 	    	
 			//use new API which supports geneset query:
+	    	List<GeneticData> dataItems = null;
 	    	if (entityType.equals(EntityType.GENE)) {
 	    		int entrezId = Integer.parseInt(geneticEntityStableId);
-	    		List<GeneGeneticData> geneticDataItems = geneticDataService.fetchGeneticData(
+	    		dataItems = geneticDataService.fetchGeneticData(
 	    			targetGeneticProfile.getStableId(), 
-	    			sampleIds, 
+	    			targetSampleIds, 
 	    			Arrays.asList(entrezId), 
-	    			"SUMMARY");
-	    	
-		    	for (GeneticData geneticData : geneticDataItems) {
-		    		samplesAndValue.put(geneticData.getSampleId(), geneticData.getValue());
-		    	}
+	    			"SUMMARY").
+	    		            //cast items in list to the super type GeneticData:
+	    		            stream().map(p -> (GeneticData) p).collect(Collectors.toList());
 	    	} else if (entityType.equals(EntityType.GENESET)) {
 	    		String genesetId = geneticEntityStableId;
-	    		List<GenesetGeneticData> genesetDataItems = genesetDataService.fetchGenesetData(
+	    		dataItems = genesetDataService.fetchGenesetData(
 	    			targetGeneticProfile.getStableId(), 
-	    			sampleIds, 
-	    			Arrays.asList(genesetId));
-	    	
-		    	for (GenesetGeneticData genesetData : genesetDataItems) {
-		    		samplesAndValue.put(genesetData.getSampleId(), genesetData.getValue());
-		    	}
+	    			targetSampleIds, 
+	    			Arrays.asList(genesetId)).
+                                    //cast items in list to the super type GeneticData:
+                                    stream().map(p -> (GeneticData) p).collect(Collectors.toList());
 	    	}
+	    	for (GeneticData geneticData : dataItems) {
+                    samplesAndValue.put(geneticData.getSampleId(), geneticData.getValue());
+                }
 	    	
 	    	//make final list of values:
 	    	ArrayList<String> values = new ArrayList<String>();
-	    	for (String sampleId : sampleIds) {
+	    	for (String sampleId : targetSampleIds) {
 	    		String value = samplesAndValue.get(sampleId);
 	    		if (value == null) {
 	    			values.add(NAN);
@@ -339,3 +341,4 @@ public class GeneticAlterationUtil {
         }
     }
 }
+

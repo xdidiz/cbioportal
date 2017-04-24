@@ -96,10 +96,10 @@ public class GetAlterationDataJSON extends HttpServlet {
         String sampleSetId = httpServletRequest.getParameter("case_set_id");
         String patientIdsKey = httpServletRequest.getParameter("case_ids_key");
         
-        String entity1 = httpServletRequest.getParameter("entity1");
-        String entity1ProfileId = httpServletRequest.getParameter("entity1_profile");
-        String entity2 = httpServletRequest.getParameter("entity2");
-        String entity2ProfileId = httpServletRequest.getParameter("entity2_profile");
+        String entityX = httpServletRequest.getParameter("entity_x");
+        String entityXProfileId = httpServletRequest.getParameter("entity_x_profile");
+        String entityY = httpServletRequest.getParameter("entity_y");
+        String entityYProfileId = httpServletRequest.getParameter("entity_y_profile");
         
         CancerStudy cancerStudy = null;
 
@@ -113,8 +113,8 @@ public class GetAlterationDataJSON extends HttpServlet {
 			} else {
 				return;
 			}
-            GeneticProfile entity1Profile = DaoGeneticProfile.getGeneticProfileByStableId(entity1ProfileId);
-            GeneticProfile entity2Profile = DaoGeneticProfile.getGeneticProfileByStableId(entity2ProfileId);
+            GeneticProfile entityXProfile = DaoGeneticProfile.getGeneticProfileByStableId(entityXProfileId);
+            GeneticProfile entityYProfile = DaoGeneticProfile.getGeneticProfileByStableId(entityYProfileId);
 
             List<String> stableSampleIds = CoExpUtil.getSampleIds(sampleSetId, patientIdsKey);
 
@@ -122,16 +122,16 @@ public class GetAlterationDataJSON extends HttpServlet {
             JsonNodeFactory factory = JsonNodeFactory.instance;
             JsonNode _result = mapper.createObjectNode();
 
-            ArrayNode _sampleValues = getSampleValuesNodeForEntity(entity1Profile, entity1, stableSampleIds, mapper, factory);
-            ((ObjectNode)_result).put(entity1, _sampleValues);
-            _sampleValues = getSampleValuesNodeForEntity(entity2Profile, entity2, stableSampleIds, mapper, factory);
-            ((ObjectNode)_result).put(entity2, _sampleValues);
+            ArrayNode _sampleValues = getSampleValuesNodeForEntity(entityXProfile, entityX, stableSampleIds, mapper, factory);
+            ((ObjectNode)_result).put(entityX, _sampleValues);
+            _sampleValues = getSampleValuesNodeForEntity(entityYProfile, entityY, stableSampleIds, mapper, factory);
+            ((ObjectNode)_result).put(entityY, _sampleValues);
             
             //duplicated names in output
-            ((ObjectNode)_result).put("profile1_name", entity1Profile.getProfileName());
-            ((ObjectNode)_result).put("profile1_description", entity1Profile.getProfileDescription());
-            ((ObjectNode)_result).put("profile2_name", entity2Profile.getProfileName());
-            ((ObjectNode)_result).put("profile2_description", entity2Profile.getProfileDescription());
+            ((ObjectNode)_result).put("entity_x_profile_name", entityXProfile.getProfileName());
+            ((ObjectNode)_result).put("entity_x_profile_description", entityXProfile.getProfileDescription());
+            ((ObjectNode)_result).put("entity_y_profile_name", entityYProfile.getProfileName());
+            ((ObjectNode)_result).put("entity_y_profile_description", entityYProfile.getProfileDescription());
 
             httpServletResponse.setContentType("application/json");
             PrintWriter out = httpServletResponse.getWriter();

@@ -97,10 +97,10 @@ var CoexpPlotsView = function() {
             gene_both_mutate_stroke: "#B40404"
         };
         //construct axis titles
-        plotsOpts.text.xTitle = geneX + ", " + dataAttr.profile1_name;
-        plotsOpts.text.yTitle = geneY + ", " + dataAttr.profile2_name;
-        plotsOpts.text.xTitleHelp = dataAttr.profile1_description;
-        plotsOpts.text.yTitleHelp = dataAttr.profile2_description;
+        plotsOpts.text.xTitle = geneX + ", " + dataAttr.entity_x_profile_name;
+        plotsOpts.text.yTitle = geneY + ", " + dataAttr.entity_y_profile_name;
+        plotsOpts.text.xTitleHelp = dataAttr.entity_x_profile_description;
+        plotsOpts.text.yTitleHelp = dataAttr.entity_y_profile_description;
         //construct legend items
         plotsOpts.legends.length = 0;
         if (dataAttr.mut_x) {
@@ -180,10 +180,10 @@ var CoexpPlotsView = function() {
     }
 
     function configHeaderSettings() {
-        plotsOpts.text.title = geneX + ", " + dataAttr.profile1_name + " vs. " + geneY + ", " + dataAttr.profile2_name + "  ";
+        plotsOpts.text.title = geneX + ", " + dataAttr.entity_x_profile_name + " vs. " + geneY + ", " + dataAttr.entity_y_profile_name + "  ";
         plotsOpts.text.fileName = "co_expression_result-" + geneX + "-" + geneY;
         //determine if turn on log scale if both are RNA Seq 
-        if (dataAttr.profile1_name.indexOf("RNA Seq") !== -1 && dataAttr.profile2_name.indexOf("RNA Seq") !== -1) {
+        if (dataAttr.entity_x_profile_name.indexOf("RNA Seq") !== -1 && dataAttr.entity_y_profile_name.indexOf("RNA Seq") !== -1) {
             settings.enable_log_scale = true;
         }
         //TODO - apply log scale on whatever axis is representing RNA Seq?

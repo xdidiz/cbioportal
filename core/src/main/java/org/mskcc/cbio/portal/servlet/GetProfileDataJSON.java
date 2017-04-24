@@ -112,7 +112,13 @@ public class GetProfileDataJSON extends HttpServlet  {
         }
 
         String[] geneticEntityIdList = rawGeneticEntityIdList.split("\\s+");
-        String[] geneticProfileIds = httpServletRequest.getParameter("genetic_profile_id").split("\\s+");
+        String geneticProfileId = httpServletRequest.getParameter("genetic_profile_id"); 
+        //only one genetic profile id expected:
+        String [] geneticProfileIds = geneticProfileId.split("\\s+");
+        if (geneticProfileIds.length > 1) {
+            throw new IllegalArgumentException ("Only one genetic profile id is expected");
+        };
+        
         String forceDownload = httpServletRequest.getParameter("force_download");
         String format = httpServletRequest.getParameter("format");
         String fileName = httpServletRequest.getParameter("file_name");
@@ -169,38 +175,30 @@ public class GetProfileDataJSON extends HttpServlet  {
                     tmpObjMap.put(stableSampleId, tmp);
                 }
 
-                //Get raw data (plain text) for each profile
-                for (String geneticProfileId: geneticProfileIds) {
-                    try {
-                    	ArrayList<String> tmpProfileDataArr;
-                    	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
-                    	if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
-                    		//use new API which supports geneset query:
-                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
-                    				geneticEntityId, 
-                    				stableSampleIds, 
-                    				EntityType.GENESET, 
-                    				geneticProfile);
-                    	} else {
-                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
-	                                gene,
-	                                internalSampleIds,
-	                                geneticProfile);
-                    	}
-                        //Mapping sample Id and profile data
-                        HashMap<String,String> tmpResultMap =
-                                new HashMap<String,String>();  //<"sample_id", "profile_data">
-                        for (int i = 0; i < stableSampleIds.size(); i++) {
-                            tmpResultMap.put(stableSampleIds.get(i), tmpProfileDataArr.get(i));
-                        }
-
-                        for (String stableSampleId : stableSampleIds) {
-                            ((ObjectNode)(tmpObjMap.get(stableSampleId))).put(geneticProfileId, tmpResultMap.get(stableSampleId));
-                        }
-                    } catch(NullPointerException e) {
-                        //TODO: handle empty dataset
-                        continue;
-                    }
+                //Get raw data (plain text) for the profile
+                ArrayList<String> tmpProfileDataArr;
+                GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+                if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
+                //use new API which supports geneset query:
+                tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                        geneticEntityId,
+                        stableSampleIds,
+                        EntityType.GENESET,
+                        geneticProfile);
+                } else {
+                    tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
+                            gene,
+                            internalSampleIds,
+                            geneticProfile);
+                }
+                //Mapping sample Id and profile data
+                HashMap<String,String> tmpResultMap =
+                        new HashMap<String,String>();  //<"sample_id", "profile_data">
+                for (int i = 0; i < stableSampleIds.size(); i++) {
+                    tmpResultMap.put(stableSampleIds.get(i), tmpProfileDataArr.get(i));
+                }
+                for (String stableSampleId : stableSampleIds) {
+                    ((ObjectNode)(tmpObjMap.get(stableSampleId))).put(geneticProfileId, tmpResultMap.get(stableSampleId));
                 }
 
                 for (String stableSampleId : stableSampleIds) {
@@ -222,10 +220,7 @@ public class GetProfileDataJSON extends HttpServlet  {
         } else {
         	//tabular format response:
         	//validate:
-        	if (geneticProfileIds.length != 1) {
-        		throw new IllegalArgumentException("1 and only 1 profile at a time expected for download action");
-        	}
-        	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileIds[0]);
+        	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
             String result_str = "";
             if (format.equals("tab")) {
                 String sampleId_str = (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE) ? 
@@ -252,7 +247,7 @@ public class GetProfileDataJSON extends HttpServlet  {
                     Iterator<String> sampleIds_val = dataObj.getFieldNames();
                     while (sampleIds_val.hasNext()) {
                         String sampleId = sampleIds_val.next();
-                        String _val = dataObj.get(sampleId).get(geneticProfileIds[0]).toString();
+                        String _val = dataObj.get(sampleId).get(geneticProfileId).toString();
                         _val = _val.replaceAll("\"", "");
                         val_str +=  _val + "\t";                        
                     }
@@ -289,7 +284,7 @@ public class GetProfileDataJSON extends HttpServlet  {
                     String sampleId = sampleIds.next();
                     val_str += sampleId + "\t";
                     for (String geneticEntityId : geneticEntityIdList) {
-                       String _val = result.get(geneticEntityId).get(sampleId).get(geneticProfileIds[0]).toString();
+                       String _val = result.get(geneticEntityId).get(sampleId).get(geneticProfileId).toString();
                         _val = _val.replaceAll("\"", "");
                         val_str += _val + "\t";
                     }

@@ -310,7 +310,7 @@ public class DaoGeneset {
 		ResultSet rs = null;
 		try {
 				con = JdbcUtil.getDbConnection(DaoGeneset.class);
-				pstmt = con.prepareStatement("SELECT * FROM geneset");
+				pstmt = con.prepareStatement("SELECT EXTERNAL_ID FROM geneset");
 				rs = pstmt.executeQuery();
 				
 				ArrayList<String> externalIds = new ArrayList<String>();

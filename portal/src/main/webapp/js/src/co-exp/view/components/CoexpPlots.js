@@ -52,12 +52,12 @@ var CoexpPlots = function() {
     function getAlterationData(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id) {
         var paramsGetAlterationData = {
             cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-            entity1: entityX, 
-            entity2: entityY,
+            entity_x: entityX, 
+            entity_y: entityY,
             case_set_id: window.QuerySession.getCaseSetId(),
             case_ids_key: window.QuerySession.getCaseIdsKey(),
-            entity1_profile: profile1Id,
-            entity2_profile: profile2Id
+            entity_x_profile: profile1Id,
+            entity_y_profile: profile2Id
         };
         //Check if the comparison contains gene sets
         entityXIsGeneset = false;

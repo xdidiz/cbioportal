@@ -48,10 +48,10 @@ var CoexpPlotsProxy = (function() {
             max_x: "",
             min_y: "",
             max_y: "",
-            profile1_name: "",
-            profile1_description: "",
-            profile2_name: "",
-            profile2_description: "",
+            entity_x_profile_name: "",
+            entity_x_profile_description: "",
+            entity_y_profile_name: "",
+            entity_y_profile_description: "",
             mut_x : false, //have case(s) mutated in only gene x
             mut_y : false,  //have case(s) mutated in only gene y
             mut_both: false, //have case(s) mutated in both genes
@@ -174,10 +174,10 @@ var CoexpPlotsProxy = (function() {
     }
 
     function setProfileDetails(_result) {
-        attr.profile1_description = _result["profile1_description"]; 
-        attr.profile1_name = _result["profile1_name"];
-        attr.profile2_description = _result["profile2_description"]; 
-        attr.profile2_name = _result["profile2_name"];
+        attr.entity_x_profile_description = _result["entity_x_profile_description"]; 
+        attr.entity_x_profile_name = _result["entity_x_profile_name"];
+        attr.entity_y_profile_description = _result["entity_y_profile_description"]; 
+        attr.entity_y_profile_name = _result["entity_y_profile_name"];
     }
 
     function getMutationMaps() {

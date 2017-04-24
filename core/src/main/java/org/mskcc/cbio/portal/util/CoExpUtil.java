@@ -88,11 +88,6 @@ public class CoExpUtil {
 		}
     }
 	
-	public static Map<Integer,double[]> getExpressionMap(int profileId, String sampleSetId, String sampleIdsKeys) throws DaoException {
-		return getExpressionMap(profileId, sampleSetId, sampleIdsKeys, null);
-	}
-	
-	
 	public static double[] getExpressionList(int profileId, String sampleSetId, String sampleIdsKeys, Integer entityId) throws DaoException {
 		
         List<Integer> entityIds = Arrays.asList(entityId);
