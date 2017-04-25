@@ -145,9 +145,9 @@ var OncoprintModel = (function () {
 	this.track_active_rules = {}; // from track id to active rule map (map with rule ids as keys)
 	this.track_info = {};
 	this.track_has_column_spacing = {}; // track id -> boolean
-	this.track_expandable = {}; // track id -> boolean
+	this.track_expansion_enabled = {}; // track id -> boolean or undefined
 	this.track_expand_callback = {}; // track id -> function that adds expansion tracks for its track if set
-	this.track_expand_button_fn = {}; // track id -> function from boolean to string if customized
+	this.track_expand_button_getter = {}; // track id -> function from boolean to string if customized
 	this.track_expansion_tracks = {}; // track id -> array of track ids if applicable
 	
 	// Rule Set Properties
@@ -679,7 +679,7 @@ var OncoprintModel = (function () {
 		    params.removable, params.removeCallback, params.label, params.description, params.track_info,
 		    params.sortCmpFn, params.sort_direction_changeable, params.init_sort_direction,
 		    params.data, params.rule_set, params.track_label_color, params.expansion_of,
-		    params.expandCallback, params.expandButtonTextFn);
+		    params.expandCallback, params.expandButtonTextGetter);
 	}
 	this.track_tops.update();
     }
@@ -690,7 +690,7 @@ var OncoprintModel = (function () {
 	    removable, removeCallback, label, description, track_info,
 	    sortCmpFn, sort_direction_changeable, init_sort_direction,
 	    data, rule_set, track_label_color, expansion_of, expandCallback,
-	    expandButtonTextFn) {
+	    expandButtonTextGetter) {
 	model.track_label[track_id] = ifndef(label, "Label");
 	model.track_label_color[track_id] = ifndef(track_label_color, "black");
 	model.track_description[track_id] = ifndef(description, "");
@@ -715,10 +715,10 @@ var OncoprintModel = (function () {
 	}
 	if (typeof expandCallback !== 'undefined') {
 	    model.track_expand_callback[track_id] = expandCallback;
-	    model.track_expandable[track_id] = true;
+	    model.track_expansion_enabled[track_id] = true;
 	}
-	if (typeof expandButtonTextFn !== 'undefined') {
-	    model.track_expand_button_fn[track_id] = expandButtonTextFn;
+	if (typeof expandButtonTextGetter !== 'undefined') {
+	    model.track_expand_button_getter[track_id] = expandButtonTextGetter;
 	}
 	
 	model.track_sort_cmp_fn[track_id] = ifndef(sortCmpFn, function () {
@@ -810,9 +810,9 @@ var OncoprintModel = (function () {
 	delete this.track_sort_direction[track_id];
 	delete this.track_info[track_id];
 	delete this.track_has_column_spacing[track_id];
-	delete this.track_expandable[track_id];
+	delete this.track_expansion_enabled[track_id];
 	delete this.track_expand_callback[track_id];
-	delete this.track_expand_button_fn[track_id];
+	delete this.track_expand_button_getter[track_id];
 	delete this.track_expansion_tracks[track_id];
 
 	var containing_track_group = _getContainingTrackGroup(this, track_id, true);
@@ -1053,7 +1053,7 @@ var OncoprintModel = (function () {
     
     OncoprintModel.prototype.isTrackExpandable = function (track_id) {
 	// return true if the flag is defined and true
-	return Boolean(this.track_expandable[track_id]);
+	return Boolean(this.track_expansion_enabled[track_id]);
     }
     
     OncoprintModel.prototype.expandTrack = function (track_id) {
@@ -1061,14 +1061,14 @@ var OncoprintModel = (function () {
     }
     
     OncoprintModel.prototype.disableTrackExpansion = function (track_id) {
-	this.track_expandable[track_id] = false;
+	this.track_expansion_enabled[track_id] = false;
     }
 
     OncoprintModel.prototype.enableTrackExpansion = function (track_id) {
 	if (!this.track_expand_callback.hasOwnProperty(track_id)) {
 	    throw new Error("Track '" + track_id +"' has no expandCallback");
 	}
-	this.track_expandable[track_id] = true;
+	this.track_expansion_enabled[track_id] = true;
     }
     
     OncoprintModel.prototype.isTrackExpanded = function (track_id) {
@@ -1079,7 +1079,7 @@ var OncoprintModel = (function () {
     OncoprintModel.prototype.getExpandButtonText = function (track_id) {
 	var self = this;
 	var getExpandButtonFunction = function (track_id) {
-	    return (self.track_expand_button_fn[track_id] ||
+	    return (self.track_expand_button_getter[track_id] ||
 		    function (is_expanded) {
 			return is_expanded ? 'Expand more' : 'Expand';
 		    });
